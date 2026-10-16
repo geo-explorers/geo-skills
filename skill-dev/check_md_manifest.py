@@ -21,9 +21,6 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "MD-FILES.md"
-# Listed by pattern, not one line per file: the migration working notes in audit/
-# and audit-2/ (temporary; remove this pattern when those folders are deleted).
-PATTERN_COVERED = re.compile(r"^audit(-2)?/.+\.md$")
 
 
 def tracked_md() -> list[str]:
@@ -48,7 +45,7 @@ def main() -> int:
     text = MANIFEST.read_text(encoding="utf-8")
     files = tracked_md()
 
-    missing = [f for f in files if f not in text and not PATTERN_COVERED.match(f)]
+    missing = [f for f in files if f not in text]
     # every `path/to/file.md` in a table cell should still exist
     # `<id>` style placeholders describe a pattern, not a real path
     listed = {m for m in re.findall(r"`([^`\s]+\.md)`", text) if "/" in m and "<" not in m}

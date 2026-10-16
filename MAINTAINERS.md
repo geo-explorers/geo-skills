@@ -16,7 +16,7 @@ Every tracked file sits in exactly one bucket. The rule for each bucket:
 | **B · Shared code** | Outside a skill folder, and at least one skill calls it or points to it, or it maintains such a file. Stays for now. | 14 |
 | **C · Library tooling** | Needed to build, check or install the library itself. Stays. | 21 |
 | **D · Removed at cut-over** | Neither a skill nor called by one. Removed in migration step 6. | 49 |
-| **E · Temporary** | Migration working notes. Removed when the migration is finished. | 62 |
+| **E · Temporary** | Migration working notes. Removed when the migration finished, 15 October 2026. | 62 |
 
 The migration plan names three buckets: skill, shared code, neither. Bucket C is added here because files such as `package.json` and `skill-dev/` are none of the three. Bucket E is separate from D because it leaves later.
 
@@ -102,14 +102,14 @@ No skill runs any of these files. One skill, geo-orchestrate, names `03_merge_du
 
 **Done in the same step 6 pull request.** `MD-FILES.md` moved to the repository root, and its path changed in `skill-dev/check_md_manifest.py` and `.github/workflows/verify-skills.yml`. `CLAUDE.md`, `README.md` and `skill-dev/README.md` now point to `geo-agents` instead of the removed folders, and the README no longer documents the numbered scripts.
 
-### E · Temporary — removed when the migration is finished (62 files)
+### E · Temporary — removed when the migration finished (62 files)
 
 | Path | Files |
 |---|---|
 | `audit/` | 46 |
 | `audit-2/` | 16 |
 
-Working notes from the 9 and 11 October audit sessions. They are the source of the migration plan and stay until the last step is done.
+Working notes from the 9 and 11 October audit sessions. They were the source of the migration plan and were removed on 15 October 2026, once the migration was finished. Git history keeps them.
 
 ## Changing a skill
 

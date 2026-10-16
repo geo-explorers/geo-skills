@@ -1,14 +1,14 @@
 ---
 name: geo-publish
-description: Publish entities and relations to the Geo knowledge graph via the GRC-20 SDK. Runs mandatory safeguards (ontology/correct-type check via ontology-advisor + semantic-duplicate check + schema check + type-required check + two-phase dry-run/confirm) before any write. Use when creating, updating, or deleting entities and relations. Triggers on "publish", "create entity", "add person", "add to geo", "add to my space", "submit proposal", "create relation", "update entity", "delete entity".
+description: Publish entities and relations to the Geo knowledge graph via the GRC-20 SDK. Runs mandatory safeguards (ontology/correct-type check via ontology-advisor + semantic-duplicate check + schema check + type-required check + two-phase dry-run/confirm) before any write. Use when creating or updating entities and relations; entity deletes, merges and clean-ups go to geo-clean. Triggers on "publish", "create entity", "add person", "add to geo", "add to my space", "submit proposal", "create relation", "update entity".
 metadata:
   author: geobrowser
-  version: 0.11.0
+  version: 0.12.0
 ---
 
 # Geo Knowledge Graph — Publishing
 
-Create, update, and delete entities and relations in Geo using `@geoprotocol/geo-sdk`. Portable (works in any local-execution agent: Claude Code, Codex CLI/Desktop, Claude cowork). **Browser-only assistants cannot publish** — they have no local runtime; send them to `geo-query` for reads.
+Create and update entities and relations in Geo using `@geoprotocol/geo-sdk`. **Deleting an entity, merging, or any bulk removal goes through `geo-clean`**, which runs an orphan check and a human confirmation first. Portable (works in any local-execution agent: Claude Code, Codex CLI/Desktop, Claude cowork). **Browser-only assistants cannot publish** — they have no local runtime; send them to `geo-query` for reads.
 
 Every write passes mandatory safeguards FIRST: an **ontology / correct-type check** (consult `ontology-advisor` for the *right* type + expected properties), **semantic-duplicate check**, **schema check**, **type-required check**, and **two-phase dry-run → explicit confirm**. These are not optional.
 
@@ -54,7 +54,7 @@ Only if a publish has *actually failed* with that error: ask the user to add one
    - On `stop`: leave the script on disk, change nothing on Geo.
    - Never auto-publish on `go`.
    - **Never re-open environment/setup questions at the `go` or `publish` gate** — not the private key, not `.env`, not the SDK. Those belong to Prerequisites, are checked once, and a blocked/unreadable check is not evidence of a problem. On `publish`, run it: the script's own error is the authoritative answer. (Real failure mode: the agent reached the gate and announced "you don't have a private key set up" on a machine where it *was* set up, because the `.env` check had been refused by the permission classifier.)
-5. **Never delete without explicit consent.** A delete or unset requires the user to type `publish` after seeing exactly what will be removed (entity name, backlink count, orphan count).
+5. **Removals happen only inside an update; entity deletes go to geo-clean.** This skill may remove values or relations as part of an update (`unset`, `deleteRelation`), and only after the user types `publish` having seen exactly what will be removed. Deleting an entity, merging, or any bulk removal is out of scope: stop and route to **geo-clean**.
 6. **Publishing from a dataset: the script READS THE DATA FILE AT RUNTIME — never transcribe rows into the script as constants.** See [Bulk / dataset publishing](#bulk--dataset-publishing--data-goes-in-the-file-not-the-script). Baking rows into the script blows the token budget and times out on large datasets, and risks the model fabricating values (especially URLs) as it copies.
 7. **Properties on a relation go on the relation ENTITY id, NEVER the relation id.** A relation has two different IDs. Knowledge (values/name/types) written to the relation's own `id` is silently lost — the write "succeeds" and shows in the proposal, but renders nowhere. See [Relations — entity id vs relation id](#relations--entity-id-vs-relation-id-critical). This is not optional; getting it wrong mis-published ~1000 rows in production.
 8. **EVERY value's `type` must match the property's declared `dataTypeName` — check all of them against the mapping table, not just dates.** The discovery query already returns `dataTypeName` per property, so this is a zero-extra-queries table lookup (see [Data-type mapping](#data-type-mapping-datatypename--sdk-value-type)). ANY mismatch publishes but silently doesn't render (datetime-as-date is just the classic case). Mismatches → Gate 2.
@@ -146,10 +146,15 @@ GraphQL against `https://api-testnet.geobrowser.io/graphql` (no auth). Delegate 
 ```
 Property IDs from `values.nodes[].property.id`; **the property's declared type from `values.nodes[].property.dataTypeName`** (e.g. `Text`, `Time`/datetime, `Number`) — match your SDK value `type` to it (Gate 2). Relation type IDs from `relations.nodes[].type.id`. Each relation exposes **both `id` (the edge) and `entityId` (the relation entity, where its properties live)** — target `entityId` for relation values (Gate 3). **Don't guess IDs.** (`values`/`relations` are connections — the `nodes{}` wrapper is required.)
 
-**Duplicate candidates** (name-only, all types, all spaces):
+**Duplicate candidates** (name-only, all types, all spaces) — one query, the name passed as a variable (`{"name": "<name>"}`) so quotes in it are safe:
 ```graphql
-{ entities(first:20, filter:{ name:{ includesInsensitive:"<name>" } }) { id name types { type { name } } } }
+query Dupes($name: String!) {
+  exact: entities(first:100, filter:{ name:{ isInsensitive:$name } }) { id name types { id name } spaceIds }
+  exactCount: entitiesConnection(filter:{ name:{ isInsensitive:$name } }) { totalCount }
+  similar: entities(first:20, filter:{ name:{ includesInsensitive:$name } }) { id name types { id name } }
+}
 ```
+List **every** `exact` hit in the Duplicate candidates table, and say so if `exactCount` is over 100. Space, Proposal and block-type hits (e.g. Data block) are not duplicates. `similar` is only a sample — mostly claims that mention the name — so scan it for variants of the name, but never use it in place of `exact`: its first 20 hits for "Bitcoin" contain none of the 11 exact matches.
 
 **Current state** (updates only — by entity ID): same shape as schema query, fetch the target entity.
 
@@ -188,7 +193,7 @@ The dry-run is the **human gate**. An editor must be able to spot a mistake in ~
 | Gate | Result | Detail |
 |---|---|---|
 | 0 ontology/type | ✅ PASS | x.com link → Tweet (not Post) |
-| 1 duplicate | ✅ PASS | 0 hits for "{name}", all types/spaces |
+| 1 duplicate | ✅ PASS | 0 exact hits for "{name}" (`exactCount` 0), all types/spaces |
 | 2 schema/data-type | ✅ PASS | 5/5 values match declared types |
 | 3 relation-target | ✅ PASS | no values on relation ids |
 | 4 type-required | ✅ PASS | 1/1 created entities typed |
@@ -378,7 +383,7 @@ Every dataTypeName in the live API, mapped to the SDK value `type` (zero extra q
 | *(null / unknown)* | — | flag it (Gate 2); inspect a live instance, don't guess |
 - URLs publish as `type: 'text'` even for URL-renderable properties (SDK rejects `type: 'url'`).
 - **Collect ALL ops into one array, publish ONCE.** Never publish in a loop.
-- Relations: set `toSpace` if the target is in a different space. Use deterministic IDs (`from.slice(0,16)+to.slice(0,16)`) for relation entities so reruns are idempotent.
+- Relations: set `toSpace` if the target is in a different space. For reruns to be idempotent, pin both ids with the typed scheme from geo-claim-grouping (its hard rule 6): edge `id` = `typeId.slice(0,8) + from.slice(0,12) + to.slice(0,12)`, relation `entityId` = `typeId.slice(0,8) + to.slice(0,12) + from.slice(0,12)`. The type prefix keeps two relation types between the same pair apart; the old untyped scheme (`from16+to16`) gave them the same relation entity, so their values landed on one entity. It is retired, but never regenerate ids for relations already published, and finish an in-flight campaign with the scheme it started with — a rerun under new ids creates a second relation.
 
 ## Publishing page blocks (text, media, data, tabs)
 
@@ -528,7 +533,7 @@ After publishing, poll the indexer (`tooling/scripts/wait-for-index.sh <id>`) be
 
 ### SDK gotchas (block/publish scripts)
 
-- **`Graph.deleteEntity` is async AND requires `spaceId`** — unique among op builders (`await Graph.deleteEntity({ id, spaceId })`). Every other builder is sync and space-less.
+- **`Graph.deleteEntity` is async AND requires `spaceId`** — unique among op builders (`await Graph.deleteEntity({ id, spaceId })`). Every other builder is sync and space-less. Entity deletes belong to geo-clean, not this skill.
 - **`TextBlock.make` / `DataBlock.make` return `Op[]` only** — no created id. Generate the id yourself first (`import { Id } from '@geoprotocol/geo-sdk'`… or build the block via `createEntity`) when you need to reference the block (views/columns/idempotency).
 - `createImage` / `Ipfs.uploadImage` are async (network I/O); the rest of `Graph.*` are sync.
 
@@ -549,7 +554,7 @@ When the editor **pastes a URL instead of giving entity fields** ("publish this 
    ```
    Jobs take ~60–120 s; the helper polls automatically. It throws on `failed`/timeout.
 3. **Inspect `r.errors` even on success** (stage failures don't always fail the job) and show the editor `r.preview` (headline, summary, sources, topics, entities, coverUrl) — this is the review surface.
-4. **Run Gate 1 (semantic-duplicate)** on `r.name` via `geo-query` — same as any publish. (The worker also has its own on-chain dedup and rejects repeat URLs with "Curate rejected…" in `r.errors`; re-inject a repeat only with `gates: { bypassExactDedup: true }`.) Emit the Gates block and wait for **`go`**, then **`publish`** as usual.
+4. **Run Gate 1 (semantic-duplicate)** on `r.name` with the Duplicate candidates query above — same as any publish. (The worker also has its own on-chain dedup and rejects repeat URLs with "Curate rejected…" in `r.errors`; re-inject a repeat only with `gates: { bypassExactDedup: true }`.) Emit the Gates block and wait for **`go`**, then **`publish`** as usual.
 5. **Publish** the decoded ops to the editor's space — routes personal-vs-DAO and applies the circuit-breaker automatically:
    ```ts
    const tx = await publishOps(r.ops, r.name, /* publish-space-id or omit → DEMO_SPACE_ID */);
@@ -561,11 +566,12 @@ Run on **Node, not Bun** (`node --env-file=.env scripts/<file>.ts`) — Bun's fe
 
 - Print or store private keys.
 - Auto-publish on `go` (publish needs a second explicit `publish`).
-- Delete/unset without explicit `publish` after showing the impact.
+- Delete entities, merge, or bulk-remove — that is geo-clean.
+- Remove values or relations without explicit `publish` after showing them.
 - Skip Discovery / Gates / Plan to "save time".
 - Publish from a browser-only assistant (no local runtime).
 
 ## More
 
-- `geo-query` — discovery/reads. `geo-orchestrate` — multi-step intent → this skill.
+- `geo-query` — discovery/reads. `geo-clean` — entity deletes, merges, clean-up. `geo-orchestrate` — multi-step intent → this skill.
 - Schema spec: `knowledge-graph-ontology.md`. SDK: `@geoprotocol/geo-sdk`.

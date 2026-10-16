@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .claude/*
 !.claude/settings.json
 .DS_Store

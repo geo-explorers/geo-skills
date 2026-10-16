@@ -3,7 +3,7 @@ name: geo-query
 description: Query the Geo knowledge graph via GraphQL. Use when looking up entities, searching by type, exploring relations, discovering schemas, or inspecting entity properties. Triggers on "look up", "find entity", "query geo", "search the graph", "what type is", "show me relations", "get entity".
 metadata:
   author: geobrowser
-  version: "0.2.9"
+  version: "0.2.10"
 ---
 
 # Geo Knowledge Graph — Querying
@@ -172,6 +172,13 @@ Verified live (Bitcoin `2f8238b2…`): 6 Topic edges = three spaces with one eac
 ```
 **Which SPACE_ID?** Use the one the user named (a canonical id — see [Canonical spaces](#canonical-spaces-name--id--scope-with-these-never-fuzzy-resolve-a-canonical-space)). If the user did **not** specify a space, default to the **Root** space (`a19c345ab9866679b001d7d2138d88a1`) — the canonical home — rather than dumping every space's copy. Only read unscoped when the goal is explicitly the cross-space picture (e.g. the duplicate-hunt above).
 
+**`name` and `description` merge too.** An entity can have a different Name or Description in each space, and the top-level `name`/`description` fields return only one of them (verified: `7e0594b2…` is "ABC News Australia — review feedback" in one space and "… — missing credibility argument" in the other; `name` returns the second). For one space's own Name and Description, read them as scoped values:
+```graphql
+{ entity(id: "ENTITY_ID") {
+    values(filter: { spaceId: { is: "SPACE_ID" }, propertyId: { in: ["a126ca530c8e48d5b88882c734c38935", "9b1f76ff9711404c861e59dc3fa7d037"] } }) {
+      nodes { propertyId text } } } }   # a126ca53… = Name, 9b1f76ff… = Description
+```
+
 ### Search entities by type (optionally by space)
 
 ```graphql
@@ -294,9 +301,9 @@ A **News story** carries **two** times, and they answer different questions. Con
 | Field | What it records | Use it for |
 | --- | --- | --- |
 | **`Publish datetime`** property (`94e43fe8faf241009eb887ab4f999723`, a `date` value) | when the **source outlet** originally published the article — the real-world dateline | "when did the news happen", ordering stories by article date |
-| entity **`createdAt`** | when the story was **added to Geo** (indexed into the space) | **"published/added recently", "new stories in the last N hours", freshness monitoring** |
+| entity **`createdAt`** | when the story was **added to Geo** (indexed into the space), returned as a Unix-seconds string | **"published/added recently", "new stories in the last N hours", freshness monitoring** |
 
-When an editor asks *"how many news stories were **published** in {space} in the last N hours"*, they almost always mean **added to Geo** → filter on **`createdAt`**, **not** the `Publish datetime` property. The ingestion pipeline bulk-adds stories hours after their source dateline, so the two routinely differ by many hours — an article with an Aug-11 dateline can enter Geo on Aug-12. If the intent is genuinely ambiguous, report both or ask which one they mean.
+When an editor asks *"how many news stories were **published** in {space} in the last N hours"*, they almost always mean **added to Geo** → filter on **`createdAt`**, **not** the `Publish datetime` property. The ingestion pipeline bulk-adds stories hours after their source dateline, so the two routinely differ by many hours — an article with an Aug-11 dateline can enter Geo on Aug-12. If the intent is genuinely ambiguous, report both or ask which one they mean. **Filter `createdAt` with Unix-seconds strings, not ISO timestamps**: a live Crypto-space query on 2026-09-29 returned 0 with an ISO cutoff and 95 with the equivalent epoch cutoff. An ISO cutoff raises no error; it just returns 0.
 
 Count News stories added to a space within a window (per space):
 
@@ -305,7 +312,7 @@ Count News stories added to a space within a window (per space):
   entitiesConnection(
     typeId: "e550fe517e904b2c8fffdf13408f5634"   # News story
     spaceId: "<SPACE_ID>"
-    filter: { createdAt: { greaterThanOrEqualTo: "2026-08-12T01:25:00Z" } }
+    filter: { createdAt: { greaterThanOrEqualTo: "1786497900" } } # 2026-08-12T01:25:00Z in Unix seconds
     first: 0                                       # totalCount only — cheap
   ) { totalCount }
 }
@@ -329,7 +336,7 @@ The `filter` arg accepts `EntityFilter` for field-level conditions:
 Common `EntityFilter` fields:
 
 - `id` — `UUIDFilter` (uses `is` / `isNot` / `in`; NOT `equalTo`).
-- `name`, `description`, `createdAt`, `updatedAt` — `StringFilter` (`startsWithInsensitive`, `includesInsensitive`; exact match is `is` / `isInsensitive` — there is **no `equalTo`**; `greaterThan`/`lessThan` work for keyset paging on `createdAt`).
+- `name`, `description`, `createdAt`, `updatedAt` — `StringFilter` (`startsWithInsensitive`, `includesInsensitive`; exact match is `is` / `isInsensitive` — there is **no `equalTo`**; `greaterThan`/`lessThan` work for keyset paging on `createdAt`, which is a Unix-seconds string).
 - `spaceIds`, `typeIds` — `UUIDListFilter` (`anyEqualTo`).
 - `relations`, `backlinks` — `EntityToManyRelationFilter` (`some`, `none`, `every`).
 - `values` — `EntityToManyValueFilter`.
@@ -403,15 +410,17 @@ Use this when the user gives a `geobrowser.io/space/<SPACE_ID>/<ENTITY_ID>` URL 
 
 1. **Parse the URL** → `…/space/<SPACE_ID>/<ENTITY_ID>`. The second hex segment is the entity id.
 2. **Fetch the submission entity** (single-entity query above), asking for `position` on each relation. In its `relations`, find entries whose `type.name` is `Blocks` / `Data block` / `Has block` / similar — each `toEntity.id` is a block. If the relation type isn't obvious, inspect each `toEntity` until you find the ones whose own type is `Data block`. Don't guess — schemas drift; confirm by inspection.
-   **Block order = the `position` field on the Blocks relation** (fractional-index strings like `a02U4` < `a0ker` < `a1AeO`, lexicographic). Let the server narrow AND order — nested `relations` accept `filter` + `orderBy`:
+   **Block order = the `position` field on the Blocks relation** (fractional-index strings like `a02U4` < `a0ker` < `a1AeO`). Let the server narrow AND order — nested `relations` accept `filter` + `orderBy`:
    ```graphql
    { entity(id: "PAGE_ID") { relations(filter: { typeId: { is: "beaba5cba67741a8b35377030613fc70" } }, orderBy: POSITION_ASC, first: 100) { nodes { id entityId position toEntity { id name } } } } }
    ```
-   Verified against the live UI: `POSITION_ASC` order reproduces the page's table order exactly. Report blocks in that order — natural response order is NOT sorted (verified live).
+   `POSITION_ASC` sorts **case-insensitively** (the API's collation): on page `cd93a634…` it returns `aA1Bg, aaBja, aB0MB`, while plain ASCII order puts every uppercase position first. Report blocks in API order — natural response order is NOT sorted (verified live) — but if a page's positions mix upper and lower case, say so: whether the Geo site follows the API order there is not verified.
 3. **Decode each block's config — and its KIND** (`Data source type` relation). A **query block**
    stores its query as a `Filter` **value** and its row order as a `Sort` **value** —
    `{"sort_by":"<property-id>","sort_direction":…}` (verified live: a timeline block = Publish date,
    descending). A **collection block** instead holds its rows as `Collection item` relations.
+   A table's **columns** are `Properties` relations (`01412f8381894ab1836565c7fd358cc1`) on the
+   **Blocks relation's entity** (`entityId` in the query above), not on the block itself.
 4. **Re-run each filter, paginate FULLY, keep the block's OWN row order** — query block: `entities(...)`
    with `orderBy` per its `Sort` value, paginating on the sort property (`greaterThan`/`lessThan`);
    collection block: its `Collection item` relations with `orderBy: POSITION_ASC` (null positions last).
@@ -583,10 +592,10 @@ No Node/Bun? `curl -s --compressed <endpoint> -H 'Content-Type: application/json
 8. **Relation `id` ≠ `entityId`** — `id` is the edge (for deletion); `entityId` is the relation-as-entity (for relation properties).
 9. **Never N+1.** One server-side filter beats a per-row loop by ~300× (469ms vs 131s measured) — see the Performance section before writing any loop.
 10. **No cache — only indexer lag.** Reads are always the latest indexed state; a fresh publish appears in seconds. Don't add cache-busting; just re-query after ~30s.
-11. **Page/table order = relation `position`** (lexicographic sort / `orderBy: POSITION_ASC`), not response order. **Rows INSIDE a table are different:** query-block rows follow the block's `Sort` value (sort_by property + direction); collection-block rows follow `Collection item` positions — never `createdAt`.
+11. **Page/table order = relation `position`** (`orderBy: POSITION_ASC`, which sorts case-insensitively — see "Review a submission"), not response order. **Rows INSIDE a table are different:** query-block rows follow the block's `Sort` value (sort_by property + direction); collection-block rows follow `Collection item` positions — never `createdAt`.
 12. **`entity(id:)` never nulls** — nonexistent IDs return an empty stub; test existence via `spaceIds`/`types`, never by null-check.
 13. **Repeated entries in `types` ≠ duplicate types.** Multi-space entities carry one Types edge per space — group by relation `spaceId`; only same-space repeats are real duplicates (see "Multi-space entities").
-14. **"Published" = entity `createdAt` (added to Geo), NOT the `Publish datetime` property (source dateline).** For "how many published in the last N hours" questions, filter entity `createdAt`; the `Publish datetime` property is the outlet's original dateline and runs hours earlier — mixing them up answered "0" when the true count was 13. See "'Published' is two different timestamps."
+14. **"Published" = entity `createdAt` (added to Geo), NOT the `Publish datetime` property (source dateline).** For "how many published in the last N hours" questions, filter entity `createdAt` with a Unix-seconds cutoff; the `Publish datetime` property is the outlet's original dateline and runs hours earlier — mixing them up answered "0" when the true count was 13. See "'Published' is two different timestamps."
 15. **Never pair a big root page with unfiltered nested relations.** `entitiesConnection(first: 1000){ nodes { relations(first: 1000) } }` is multiplicative and OOM-kills the API (real incident: 5 pod restarts). When nesting per-node relations, keep the **root page ≤ 100** and **filter nested relations by `typeId`**. `first: 1000` is a hard cap, not a default. See "Memory blow-up".
 16. **Scope canonical spaces by the hardcoded ID** ([Canonical spaces](#canonical-spaces-name--id--scope-with-these-never-fuzzy-resolve-a-canonical-space) table) — **never** fuzzy-resolve a canonical space name live; `space(name:)`/`search()` has silently matched the wrong space (`World affairs → AI`), scoping the whole query wrong.
 17. **Reading a multi-space entity? Scope `values`/`relations` by `spaceId`.** Unscoped, they merge every space's copy (inflated, mixed). Pass `values(filter:{spaceId:{is:"…"}})` / `relations(filter:{spaceId:{is:"…"}})` for the space the user named; default to **Root** (`a19c345a…`) if none given. Only read unscoped for a deliberate cross-space view. See "Reading a multi-space entity".

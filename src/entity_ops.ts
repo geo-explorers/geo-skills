@@ -53,6 +53,13 @@ async function publishOrBatch(
   }
 }
 
+/** Writers preview by default: they publish only with `dryRun: false` or an `opsBatch`. */
+function notePreview(fn: string, options: { dryRun?: boolean; opsBatch?: OpsBatch }): void {
+  if (options.dryRun === undefined && !options.opsBatch) {
+    console.log(`  ${fn}: preview only — pass dryRun: false or an opsBatch to publish.`);
+  }
+}
+
 // ─── Value Conversion Helper ────────────────────────────────────────────────
 
 /** GQL value fields fragment — include in any query that fetches values for copying. */
@@ -408,10 +415,12 @@ export interface DeleteEntityOptions {
  * 2. Delete all outgoing relations
  * 3. Optionally check if "to" entities are now orphaned and recursively delete them
  *
- * Returns the generated ops (and publishes them unless dryRun is set).
+ * Returns the generated ops. Publishes them only with `dryRun: false`; with an
+ * `opsBatch` they are added to the batch instead. Otherwise it is a preview.
  */
 export async function deleteEntity(options: DeleteEntityOptions): Promise<Op[]> {
-  const { entityId, spaceId, dryRun = false, skipOrphanCleanup = false, excludeFromOrphanCheck = [], opsBatch, prefetchedEntityData, entityDataCache, backlinksCache, orphanTypeFilter, keepIncomingRelations = false } = options;
+  const { entityId, spaceId, dryRun = !options.opsBatch, skipOrphanCleanup = false, excludeFromOrphanCheck = [], opsBatch, prefetchedEntityData, entityDataCache, backlinksCache, orphanTypeFilter, keepIncomingRelations = false } = options;
+  notePreview('deleteEntity', options);
   // Initialize deletingIds internally if not provided so recursive orphan
   // detection correctly ignores sibling orphans even for single-entity calls.
   const deletingIds = options.deletingIds ?? new Set<string>();
@@ -571,7 +580,8 @@ export interface ChangeEntityIdOptions {
  * With `migrateValuesAndRelations: false`, only references are redirected (no data move).
  */
 export async function changeEntityId(options: ChangeEntityIdOptions): Promise<Op[]> {
-  const { oldEntityId, newEntityId, spaceId, dryRun = false, opsBatch, migrateValuesAndRelations = true } = options;
+  const { oldEntityId, newEntityId, spaceId, dryRun = !options.opsBatch, opsBatch, migrateValuesAndRelations = true } = options;
+  notePreview('changeEntityId', options);
 
   console.log(`\n[changeEntityId] ${oldEntityId} → ${newEntityId} in space ${spaceId}${migrateValuesAndRelations ? '' : ' (references only)'}`);
   const { values, relations } = await queryEntityData(oldEntityId, spaceId);
@@ -709,7 +719,8 @@ export interface MoveEntityOptions {
  * relations become cross-space) nor its block children (not cascaded).
  */
 export async function moveEntity(options: MoveEntityOptions): Promise<{ createOps: Op[]; deleteOps: Op[] }> {
-  const { entityId, fromSpaceId, toSpaceId, mode = 'move', dryRun = false, opsBatch } = options;
+  const { entityId, fromSpaceId, toSpaceId, mode = 'move', dryRun = !options.opsBatch, opsBatch } = options;
+  notePreview('moveEntity', options);
 
   console.log(`\n[moveEntity] ${mode} ${entityId}: space ${fromSpaceId} → ${toSpaceId}`);
   const { values, relations } = await queryEntityData(entityId, fromSpaceId);
@@ -794,7 +805,8 @@ export interface ChangeSpaceOptions {
  * Backlinks with toSpaceId set to the old space are updated to point to the new space.
  */
 export async function changeSpace(options: ChangeSpaceOptions): Promise<{ createOps: Op[]; deleteOps: Op[] }> {
-  const { entityId, fromSpaceId, toSpaceId, dryRun = false, opsBatch } = options;
+  const { entityId, fromSpaceId, toSpaceId, dryRun = !options.opsBatch, opsBatch } = options;
+  notePreview('changeSpace', options);
 
   console.log(`\n[changeSpace] Entity ${entityId}: space ${fromSpaceId} → ${toSpaceId}`);
   const { values, relations } = await queryEntityData(entityId, fromSpaceId);
@@ -947,7 +959,7 @@ export interface MergeEntitiesOptions {
  */
 export async function mergeEntities(options: MergeEntitiesOptions): Promise<Op[]> {
   const {
-    mainEntityId: inputMainEntityId, mainSpaceId, secondaries, dryRun = false,
+    mainEntityId: inputMainEntityId, mainSpaceId, secondaries, dryRun = !options.opsBatch,
     addPropertiesToMain = true, allowCanonicalDelete = false, opsBatch,
     entityDataCache: inputEntityDataCache,
     backlinksCache: inputBacklinksCache,
@@ -956,6 +968,7 @@ export async function mergeEntities(options: MergeEntitiesOptions): Promise<Op[]
     seedIds,
     untouchableSpaceIds,
   } = options;
+  notePreview('mergeEntities', options);
 
   // Where each secondary survives (all residencies incl. personal/dataset) — used
   // to leave backlinks in untouchable spaces pointing at the surviving copy.
@@ -1609,7 +1622,8 @@ export interface UpdateDataBlockFiltersOptions {
  * with the new ID.
  */
 export async function updateDataBlockFilters(options: UpdateDataBlockFiltersOptions): Promise<Op[]> {
-  const { oldId, newId, dryRun = false, opsBatch } = options;
+  const { oldId, newId, dryRun = !options.opsBatch, opsBatch } = options;
+  notePreview('updateDataBlockFilters', options);
 
   console.log(`\n[updateDataBlockFilters] ${oldId} → ${newId}`);
 
@@ -1778,7 +1792,8 @@ export interface MigratePropertyIdOptions {
  * - Logs a warning for spaces that need updates but we can't write to
  */
 export async function migratePropertyReferences(options: MigratePropertyIdOptions): Promise<Op[]> {
-  const { oldPropertyId, newPropertyId, dryRun = false, opsBatch } = options;
+  const { oldPropertyId, newPropertyId, dryRun = !options.opsBatch, opsBatch } = options;
+  notePreview('migratePropertyReferences', options);
 
   console.log(`\n[migratePropertyReferences] ${oldPropertyId} → ${newPropertyId} (scanning all spaces)`);
 

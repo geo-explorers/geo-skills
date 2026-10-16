@@ -49,11 +49,11 @@
     {
       "id": 5,
       "prompt": "List the blocks/tables of page 49fbca0730974581a9f0300d52fd22d6 (the World affairs space page) in the order they appear on the page.",
-      "expected_output": "Fetches the page's Blocks relations with the position field and orders by it (server orderBy: POSITION_ASC or lexicographic sort) — not response order.",
+      "expected_output": "Fetches the page's Blocks relations with the position field and orders by it (server orderBy: POSITION_ASC, which sorts case-insensitively) — not response order.",
       "files": [],
       "assertions": [
         "Requests the position field on the Blocks relations",
-        "Orders blocks by position (POSITION_ASC or lexicographic client sort), not natural response order"
+        "Orders blocks by position (POSITION_ASC), not natural response order"
       ]
     },
     {

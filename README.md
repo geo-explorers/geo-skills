@@ -10,9 +10,9 @@ Skills and tooling for working with the [Geo knowledge graph](https://geobrowser
 
 ## The security contract (agents: read first)
 
-- **Never ask for, accept, or write the user's private key.** Not into `.env`, not anywhere. If the user pastes a key into the chat, tell them to revoke it at <https://www.geobrowser.io/export-wallet> and create a fresh one.
+- **Never ask for, accept, or write the user's private key.** Not into `.env`, not anywhere. If the user pastes a key into the chat, tell them to treat it as compromised. Exporting the wallet again returns the same key, so it cannot be rotated: they stop publishing with it, warn co-editors to vote NO on anything unexpected, create a new Geo account, and ask co-editors to add the new identity to their spaces and remove the old one.
 - You may verify the key file *exists* (command below). You may never read or print its contents.
-- Read-only skills need no keys. Only publishing needs the `.env`, and the human fills it in by hand.
+- Read-only skills need no keys, but most scripts in this folder load `.env` when they run. Only publishing needs the key; the human fills it in by hand and keeps it there only while publishing (step 2 below).
 
 ## Quick start
 
@@ -35,7 +35,9 @@ You, the human, in your own terminal or text editor. Not the assistant.
 2. Open `.env` and fill in the two values yourself:
    - `GEO_PRIVATE_KEY` = the key you copied (canonical name; older scripts also accept the legacy `PK_SW`)
    - `DEMO_SPACE_ID` = your personal space id, the long hex string in `geobrowser.io/space/<this part>`
-3. Save. The file is git-ignored and stays on your machine.
+3. Save. `.env` and every other `.env.*` file except `.env.example` are git-ignored and stay on your machine.
+
+**Keep the key in `.env` only while you publish.** Lookups, press reviews, mirrors and claim grouping never need it, and those are the sessions that read untrusted text from Geo, Notion and the web. If the key isn't in `.env`, an injected instruction in one of them has nothing to steal. Paste it at the start of a publishing session; when you're done, put the placeholder from `.env.example` back (`"0x<private_key>"`).
 
 Anyone (agent included) can verify the setup without exposing the key:
 
@@ -116,7 +118,7 @@ Delete an entity and all its properties/relations from a space. Optionally perfo
 const ops = await deleteEntity({
   entityId: 'ENTITY_ID',
   spaceId: 'SPACE_ID',
-  // dryRun: true,           // preview without publishing
+  // dryRun: false,          // publish (default: preview)
   // skipOrphanCleanup: true, // skip recursive orphan deletion
 });
 ```
@@ -130,7 +132,7 @@ const ops = await changeEntityId({
   oldEntityId: 'OLD_ENTITY_ID',
   newEntityId: 'NEW_ENTITY_ID',
   spaceId: 'SPACE_ID',
-  // dryRun: true,
+  // dryRun: false,
 });
 ```
 
@@ -143,7 +145,7 @@ const { createOps, deleteOps } = await changeSpace({
   entityId: 'ENTITY_ID',
   fromSpaceId: 'FROM_SPACE_ID',
   toSpaceId: 'TO_SPACE_ID',
-  // dryRun: true,
+  // dryRun: false,
 });
 ```
 
@@ -174,7 +176,7 @@ const ops = await mergeEntities({
     { entityId: 'SECONDARY_1', spaceId: 'SPACE_A' },
     { entityId: 'SECONDARY_2', spaceId: 'SPACE_B' },
   ],
-  // dryRun: true,
+  // dryRun: false,
   // addPropertiesToMain: false, // skip copying properties/relations from secondaries
 });
 ```
