@@ -13,9 +13,23 @@
       "Bash(curl *)",
       "Bash(bun run --env-file=.env scripts/*)",
       "Bash(bun run --env-file=.env skills/actionable/*/scripts/*)",
-      "Bash(node --env-file=.env skills/non-actionable/*/scripts/*)",
-      "Bash(bun run --env-file=.env skills/non-actionable/*/scripts/*)",
-      "Bash(node skills/non-actionable/*/scripts/*)"
+      "Bash(node lib/gql-cli.mjs *)"
+    ],
+    "ask": [
+      "Bash(*--publish*)",
+      "Bash(*--prune*)",
+      "Bash(*--clear-root*)",
+      "Bash(*CONFIRM_DESTRUCTIVE*)",
+      "Bash(*scripts/20*)",
+      "Bash(*inject-publish-example*)",
+      "Bash(*publish_gaps*)",
+      "Bash(*build_dashboard*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(.env)",
+      "Edit(.env.*)"
     ]
   }
 }

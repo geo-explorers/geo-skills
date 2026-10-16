@@ -13,6 +13,11 @@ import { ANCHORED_IMAGE_RELATION_TYPE_IDS } from "./constants.ts";
 
 dotenv.config();
 
+// Read once at load, after .env: a script that sets process.env.CONFIRM_DESTRUCTIVE
+// in its own body can no longer switch the circuit breaker off. A speed bump, not a
+// lock — a module imported earlier, or a CONFIRM_DESTRUCTIVE line in .env, still sets it.
+const CONFIRM_DESTRUCTIVE_AT_START = process.env.CONFIRM_DESTRUCTIVE === "1";
+
 // ─── Configuration ───────────────────────────────────────────────────────────
 // 2026-07 infra migration: endpoints, chain id, and contract addresses all come
 // from the SDK's network config — never hardcode them here. A `bun install`
@@ -27,10 +32,12 @@ export const geo = createGeoClient({ network: NETWORK });
 let walletClientPromise: Promise<GeoWalletClient> | undefined;
 export function getWalletClient(): Promise<GeoWalletClient> {
   if (!walletClientPromise) {
-    const privateKey = (process.env.GEO_PRIVATE_KEY ?? process.env.PK_SW) as `0x${string}` | undefined;
-    if (!privateKey) throw new Error(
+    const rawKey = process.env.GEO_PRIVATE_KEY ?? process.env.PK_SW;
+    if (!rawKey) throw new Error(
       `GEO_PRIVATE_KEY not found in the environment. Checked GEO_PRIVATE_KEY and the legacy PK_SW. ` +
       `Make sure .env is in the folder you ran from (cwd: ${process.cwd()}) and that you passed --env-file=.env.`);
+    // Accept the key with or without the 0x prefix, as geo-publish's script template does.
+    const privateKey = (rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`) as `0x${string}`;
     walletClientPromise = createGeoWalletClient({
       signer: privateKeyToAccount(privateKey),
       network: NETWORK,
@@ -226,15 +233,17 @@ export async function publishOps(ops: Op[], editName: string, input_space?: stri
   // ── Destructive-op circuit-breaker ─────────────────────────────────────────
   // Backstop against an improvised script mass-deleting a space (an agent wrote
   // its own delete loop and nuked a personal space). Deletion shows up as
-  // `deleteRelation` + `updateEntity` with an `unset` array; a space wipe is
+  // `deleteRelation` + `updateEntity` with an `unset` array (and `deleteEntity`,
+  // which the SDK does not emit yet but GRC-20 defines); a space wipe is
   // hundreds/thousands of these in one batch. Refuse a large destructive batch
   // unless the caller explicitly opts in. The geo-clean skill — which has its own
   // orphan check + human confirmation — sets CONFIRM_DESTRUCTIVE=1 after that
   // confirmation; a hand-written script won't, so it gets stopped here.
   const destructiveOps = ops.filter((o: any) =>
-    o?.type === "deleteRelation" || (o?.type === "updateEntity" && o?.unset?.length > 0)).length;
+    o?.type === "deleteRelation" || o?.type === "deleteEntity" ||
+    (o?.type === "updateEntity" && o?.unset?.length > 0)).length;
   const DESTRUCTIVE_LIMIT = 50; // ~25 entities; normal cleanups pass, a space-nuke does not
-  if (destructiveOps > DESTRUCTIVE_LIMIT && process.env.CONFIRM_DESTRUCTIVE !== "1") {
+  if (destructiveOps > DESTRUCTIVE_LIMIT && !CONFIRM_DESTRUCTIVE_AT_START) {
     throw new Error(
       `SAFETY STOP: this publish would remove data from ~${destructiveOps} relations/values in space ${spaceId} — ` +
       `that is a bulk delete. Refusing to broadcast. Deletion must go through the geo-clean skill ` +

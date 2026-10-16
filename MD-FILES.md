@@ -25,7 +25,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 
 | Skill | Version | Contents | Key needed |
 |---|---|---|---|
-| `skills/non-actionable/geo-query/SKILL.md` | 0.2.9 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
+| `skills/non-actionable/geo-query/SKILL.md` | 0.2.10 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
 | `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.0 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
 | `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
@@ -34,7 +34,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/notion-operations/SKILL.md` | 1.0.1 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
 | `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.0 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |
 | `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.0 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
-| `skills/actionable/geo-publish/SKILL.md` | 0.11.0 | Create, update and delete entities and relations. Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
+| `skills/actionable/geo-publish/SKILL.md` | 0.12.0 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
 | `skills/actionable/geo-clean/SKILL.md` | 0.5.1 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
 | `skills/actionable/geo-mirror/SKILL.md` | 0.13.0 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
 | `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.0 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
@@ -86,12 +86,6 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `MD-FILES.md` | This manifest |
 | `skill-dev/skill-quality-check/SKILL.md` | The linter itself, packaged as a skill |
 
-## 5. Not distributed — temporary
-
-| File | Why it is excluded |
-|---|---|
-| `audit/` and `audit-2/` (46 files, listed by pattern) | Working notes behind the migration to `geo-agents`. Temporary: removed when the migration is finished |
-
 ---
 
 ## Keeping this current
@@ -101,4 +95,4 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 - **Changing a skill:** bump `version` in its `SKILL.md`, add a line to `skills/versions.md`, regenerate `skills/SKILL-VERSIONS.json`, and update the version in section 3.
 - **Before trusting an install:** compare the installed `SKILL.md` version with this file. A mismatch means the install is stale — run `bash skill-dev/sync-skills.sh` and restart the host. Two agents running different versions of the same skill will overwrite each other's work.
 
-*Counts on 14 October 2026: **93** tracked `.md` files — 2 entry points, 15 skills, 21 skill reference files, 3 ontology/standard documents, 6 maintainer documents and 46 migration working notes. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6.*
+*Counts on 15 October 2026: **47** tracked `.md` files — 2 entry points, 15 skills, 21 skill reference files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*
