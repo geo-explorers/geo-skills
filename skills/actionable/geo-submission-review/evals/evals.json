@@ -1,0 +1,202 @@
+{
+  "skill_name": "geo-submission-review",
+  "skill_version": "0.7.0",
+  "status": "Prepared fixtures; record live pilot and behavioral outcomes separately",
+  "instructions": "Supply only the prompt and skill to the reviewing agent. Keep expected_output and assertions for evaluation. Fixtures authorize drafts only, using supplied evidence. Do not write to Notion, Geo, or message a contributor.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review these fictional credibility arguments for a topic about Country A's military conduct, using supplied evidence only. The publisher argument says: 'Standard proposals normally get two external reviews; routes vary by title and the cited book's route is unknown.' Its policy says: 'Standard monograph proposals normally receive two reviews; editors can use different routes.' A court argument says: 'This judgment concerns Country B; use its factual account of the joint operation, not as a finding of Country A's liability.' The judgment says Country A's aircraft conducted the strike on Country B's orders, and the legal holding concerns only Country B. An older audit calls the publisher's two reviews a guarantee and rejects the judgment as irrelevant. Review these two issues and draft feedback, with internal notes separate. No external writes.",
+      "expected_output": "Rejects the old audit's accusations after reading the complete qualified statements. Recognizes the factual use of the judgment. Reports no established actionable issue within this supplied-evidence scope without inventing rows or claiming external verification.",
+      "assertions": [
+        "Does not characterize the publisher's qualified statement as a guarantee.",
+        "Separates the judgment's factual relevance from Country A's legal liability.",
+        "Does not invent a defect to meet the example-per-error-type requirement or assert an unrestricted all-clear."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review a fictional two-row dataset against this bounty: include exactly Alpha Clinic and Beta Clinic, use Organization type, and reuse canonical entities. Supplied canonical snapshot: Alpha Clinic, ID A1, Organization. Submission: Alpha Clinic, ID A9, Organization; Beta Clinic, ID B1, Person. The complete supplied snapshot contains no other Beta Clinic. IDs are fictional fixture identifiers, not live Geo IDs. Review identity/type compliance only and draft feedback I can forward. Use supplied records as evidence; no external tools or writes.",
+      "expected_output": "Explains the two identity/type violations in the four-column format, with supplied record locators and field values. Does not invent links, external quotations, extra findings or graph edits. Explicit draft-only instructions override default Notion delivery.",
+      "assertions": [
+        "Adapts criteria to the requested identity/type scope.",
+        "Identifies A1 as the reuse candidate and B1's conflicting type.",
+        "Keeps repairs as requests and does not create or merge entities.",
+        "Uses the four required columns; field values are evidence details, not invented quotes."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Reconcile this fictional internal review and draft only supported feedback. Scope: ten checks. Check A is completed with no issue. Check B is unresolved because its evidence is inaccessible; duplicate findings F1/F2 cover this same issue, and F1 has a human Dismiss decision and a note to preserve. Check C is the referral assertion: the submission says referrals were completed in 2024; the only supplied evidence is a 2020 recommendation to make those referrals. Old finding F3 calls the submission false and its structured status is Confirmed issue. No evidence about implementation after 2020 is available. Seven other checks have not started. Give proposed internal record changes separately from any recipient-facing output. No external writes.",
+      "expected_output": "Preserves the dismissal/note, identifies F1/F2 as duplicates, corrects F3's unsupported factual verdict to unresolved, and records one completed, two unresolved, seven unstarted checks. Does not treat a 2020 recommendation as proof that 2024 completion is false. No supported correction is established in this fixture; communicates the internal research limit to the editor without manufacturing curator tasks.",
+      "assertions": [
+        "Does not elevate a recommendation into proof of completion or non-completion at a later date.",
+        "Preserves the human decision while correcting agent status/prose and reconciling duplicates.",
+        "Keeps unstarted/inaccessible research internal rather than calling it a contributor defect.",
+        "Avoids a general incomplete-audit disclaimer on a recipient-facing feedback page."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Prepare a fictional review draft. Bounty policy: contributors control relevance and original claims; metadata errors in generated stories go to internal QA. The editor confirmed finding F1: authored Claim C1 says 'The report found 60 cases', but supplied Report R1, page 4, says 'six cases'. The editor also confirmed F2: generated Story S2 has the wrong publication date. An unrelated allegation F3 remains unresolved, with no established missing-evidence requirement for the contributor. Draft the feedback and keep internal notes separate; no sending or external writes is authorized.",
+      "expected_output": "Uses the explicit fixture-specific responsibility policy. Shows the authored C1 error in the four-column format, with supplied R1 page 4 and the exact quote six cases. F2 goes to internal QA under the supplied policy and F3 remains unresolved. No external writes.",
+      "assertions": [
+        "Assigns repairs according to the actual responsibility policy.",
+        "Explains the discrepancy for C1 with the actual quote and locator; no What to fix column.",
+        "Does not include F2 or the unsubstantiated F3 as contributor repair requests.",
+        "Does not send the draft or mark agent-generated decisions human-approved."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Format feedback for a fictional historical-source submission from these already verified findings; use only this fixture and write nothing externally. Findings and supplied evidence: A misattributes a court's judgment about State B to State A, altering its main claim (judgment J, operative section); B reports 800 victims where the event report lists 80 (report R, table 2); C1–C3 omit the source-specific rationale required in the bounty (records C1–C3, Rationale fields blank); D says the publisher has no peer review although its policy says scholarly titles are anonymously reviewed (policy P, Review section); E states an allegation as a conviction (docket E, case pending); F has a minor founding-year typo unrelated to the cited material; G is a cosmetic capitalization inconsistency. The editor wants a short page to forward, with all evidence locators preserved. Keep other findings in an internal note.",
+      "expected_output": "Covers all six verified error types A–F in the exact four-column format, with one representative of C1–C3. Keeps optional cosmetic G internal because no violated criterion was established. Includes a neutral process question, a useful correction and prevention check for each verified category, including minor factual F, without assuming the cause. Preserves supplied evidence locators without inventing URLs.",
+      "assertions": [
+        "Includes all six verified error categories; no five-row cap or catch-all.",
+        "Shows only one named C example; keeps repeated occurrences internal.",
+        "Each row explains the issue, asks neutrally how it arose and gives a prevention check.",
+        "Distinguishes verified factual F from optional cosmetic G.",
+        "Does not expose private scoring or invent evidence URLs."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "This is not a bounty. Review three fictional crypto debate claims for a general crypto audience. I want evidence of actual recent disagreement and wording someone can understand and take a position on within about five seconds. Use only this supplied material: C1 'Stablecoins should replace bank wires for international transfers' has two independent, recent named posts with opposing positions, one arguing lower transfer costs and one arguing redemption and compliance risks. C2 'Proto-danksharding externalities justify MEV-PBS settlement-layer rent socialization' has opposing specialist posts but no terms explained. C3 'Wallet provider Z will become the most trusted wallet' has only the provider's promotional post; no independent debate evidence was supplied. Give a short feedback draft and internal notes. No external search or writes.",
+      "expected_output": "Separates debate evidence from readability. Treats C1 as having supported opposing discussion in the fixture. Flags C2's unexplained terminology for the requested audience with a concrete simplification request. Keeps C3's debate evidence unestablished; does not call it disproven or invent engagement. Identifies predictive/trust framing as an editorial concern only insofar as the editor's stated criteria justify it, not an invented bounty violation.",
+      "assertions": [
+        "Uses the editor's two actual criteria without requiring a bounty or using a generic credibility checklist.",
+        "Does not conflate current disagreement with clarity or assert a measured five-second user test.",
+        "Does not infer absence of debate from missing supplied evidence or fabricate supporting/opposing posts.",
+        "Keeps internal verification limits distinct from actionable recipient feedback."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review this fictional Crypto news batch using only the supplied complete records; draft feedback and separate internal notes. All events meet relevance/significance and the review window. Times are UTC on 20 September. Story A, entity A1, is the same entity in main and datasets, from one proposal at 09:00. Story B, entity B2, was submitted by Bea at 11:00; baseline B1 by Ari at 10:00 reports the same exchange licence approval with a different headline. Story C, entity C1, was submitted by Chen at 09:30; the injector submitted identical-event C2 at 10:30, which executed before C1. Story D is a 20 September final court ruling; the baseline story is the lawsuit being filed on 1 September with the same parties. Story E's two proposals E1 and E2 at 12:00 and 13:00 repeat the same curator's event. IDs are fictional labels, not live IDs. Do not use external tools, score, vote or write anything externally.",
+      "expected_output": "Assesses all five stories internally. A is dual residency, B is the later duplicate, C retains curator precedence, D is a material follow-up, E counts as one event with the repeat identified. Feedback selects one representative duplicate problem from B/E, with the other retained internally, with supplied timing and record locators; it does not penalize A, C or D.",
+      "assertions": [
+        "Does not call same-ID dual residency a duplicate or propose promotion again.",
+        "Identifies B despite its different headline and retains C precedence despite later execution.",
+        "Distinguishes a material new ruling from the earlier lawsuit.",
+        "Finds the within-curator repeat and records a recommendation for each story.",
+        "Covers every verified error type with one example and four columns, without actual scoring, votes or graph actions."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Review these fictional News selections for the AI space, whose supplied scope is material AI technology, deployment and governance developments. Use only the complete supplied evidence; all comparisons found no prior coverage and all events are within the window. A: a token rose 2% today; its promoter once mentioned AI but this update concerns only price. B: a regulator announced yesterday a binding AI audit regime to take effect next year, with compliance duties for deployed high-risk systems; the submission accurately describes the announcement. C: a general explainer of how neural networks work, with no new research or event. D: a newly released independent benchmark demonstrates a large, consequential failure in a deployed AI system; its measured figures substantiate the new finding. Draft feedback and internal per-story recommendations, with no external tools or writes.",
+      "expected_output": "Uses AI as the actual target space. Flags A for weak relevance/significance and C for no new development. Recognizes B as a material announcement without pretending implementation has occurred, and D as substantial evidence-backed news rather than dismissing every metric. Uses supplied evidence locators without fabricated URLs.",
+      "assertions": [
+        "Checks the submitted space rather than applying a Crypto default.",
+        "Does not treat an AI keyword or a routine price change as material AI news.",
+        "Accepts the announcement as the current event while preserving its future implementation date.",
+        "Distinguishes a bare changing metric from a metric supporting a consequential new development.",
+        "Requests a qualifying event or replacement for weak selections rather than only a headline rewrite."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Review this fictional mixed submission using supplied evidence only. N1 is Crypto managed-injector News about an independently confirmed major stablecoin law; N2 is Crypto managed-injector News about a confirmed major protocol exploit. Both are first-submitted, directly relevant and substantial. The injector bundled them in an unnamed edit; N1 has an unrelated attached source and wrong date, while N2 exaggerates the loss and creates a duplicate Organization. Those defects are verified. C1 is a separately submitted curator-authored Claim that the law has taken effect, although the law says next year. H1 is curator-authored Health News; its bounty explicitly requires correct source attribution, but it cites a different clinical trial than the one its text describes. Curators can review and edit text, Sources and dates before submission, but backend identity creation is not editable. Review all four items, draft forwardable feedback, and record internal QA separately. No tools, scoring, voting or external writes.",
+      "expected_output": "Separates qualifying news-event recommendations from content quality. Includes verified curator-editable generated inaccuracies in the feedback, alongside authored-work issues as priorities permit. Uses one example per recurring problem and preserves other findings internally. Routes backend identity/bundle defects to technical QA. Applies the Health bounty and authored Claim accuracy rules. No vote or payment changes.",
+      "assertions": [
+        "Includes a verified, editable injector-generated inaccuracy in curator feedback rather than applying the old blanket exemption.",
+        "Routes backend identity issues to technical QA and keeps news selection distinct from content findings.",
+        "Applies the full accuracy requirement to the separately authored C1.",
+        "Applies the supplied Health bounty rule rather than assuming the Crypto exception is universal.",
+        "Does not describe news selection as validation of all embedded Claims or editor approval."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Review this fictional Crypto news selection from the supplied records, without tools or writes. A and B are two entities with similar headlines about the same company. A's source is a product launch; B's source text is inaccessible, so whether it covers that launch or a different product is unknown. A's proposal was submitted at 10:00 and executed at 16:00. B has only a live entity creation timestamp of 11:00 and a source publication date of yesterday; its original submission time is unavailable. The main-space query returned its maximum 1000 rows without pagination; the datasets query failed and other-curator submissions were not gathered. A is independently established as directly relevant and substantial. Give internal recommendations and only established curator feedback.",
+      "expected_output": "Treats the similar headline as a candidate, leaves event identity and precedence unresolved, identifies all missing comparison coverage, and does not declare A duplicate-free or B a proven earlier duplicate. Keeps useful completed relevance/significance checks while declining an unsupported overall selection verdict. Avoids turning retrieval failures into curator repair demands.",
+      "assertions": [
+        "Does not use source publication or execution time as curator submission precedence.",
+        "Labels entity creation time as a limited proxy, not proof of the original submission time.",
+        "Does not infer event identity from title similarity when the second story is unread.",
+        "Records capped main results, failed datasets query and missing batch comparisons as internal coverage gaps.",
+        "Does not invent curator issues or an unrestricted all-clear from incomplete evidence."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Review three fictional X submissions for an AI bounty that explicitly accepts substantive AI arguments and forbids promotional-only posts. X1 is a sourced opinion arguing AI audits should be mandatory, with an intelligible case. X2 says only Buy our app today; X3 says only Sign up for our app now. Both describe general scheduling apps with no AI content. Use only these records and the supplied bounty, and draft here with no external writes.",
+      "expected_output": "Accepts opinion as potentially qualifying under the actual X criterion. Shows one linked/identified example of the repeated promotional-only mismatch with the supplied criterion and exact post quote; keeps the other internally. Does not require a news event or invent an engagement threshold.",
+      "assertions": [
+        "Uses X-specific requirements rather than the news gate.",
+        "Shows one specific example of the repeated problem.",
+        "Uses the exact four headers and a faithful supplied quote."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Review a fictional submission with one verified field error. The editor has an established Notion review parent and authorized saving there. A Notion connector is available in this test harness; no other output destination was requested. Complete the review using the skill.",
+      "expected_output": "Creates the review in the established Notion location using the required format, fetches it to verify, and returns its link. Does not stop at a chat draft or ask again for an already established destination.",
+      "assertions": [
+        "Attempts actual save through the available test connector.",
+        "Reads saved content and fixes mismatches.",
+        "Returns the saved page URL without fabricated write success."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Review a fictional submission with one verified error, using supplied evidence. Default Notion delivery applies, but the test harness has no Notion access. The editor has not requested an alternative destination.",
+      "expected_output": "Preserves a useful draft and reports the precise missing Notion access, labels delivery incomplete, and requests the needed connection rather than claiming completion or a made-up page link.",
+      "assertions": [
+        "Does not fabricate a saved page.",
+        "Does not describe chat-only output as completed default delivery.",
+        "Continues evidence work that is possible without inventing access."
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Review a fictional submission where every agreed check is completed and no issue is established. The authorized Notion connector is available. A page creation returns an unknown outcome after a timeout; searching the established parent then returns exactly the intended newly created page with the expected brief no-findings statement.",
+      "expected_output": "Uses the no-findings exception without inventing a table. Finds and reads back the existing created page after the timeout, returns that link and avoids a duplicate create.",
+      "assertions": [
+        "Does not manufacture issues or an empty findings table.",
+        "Reconciles an unknown write before retrying.",
+        "Reports only verified saved state."
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Fictional dry-run scenario only; do not write externally. Mohammed asks to review a Crypto news batch under his recorded report-publication scope. Reviews are complete: launch A qualifies, launch B qualifies but has a verified attribution correction, price-only C fails. All three are separate proposals. Describe the delivery sequence and draft a reply using the supplied simulated verified report URL https://example.com/review. No vote approval exists yet.",
+      "expected_output": "Describes safeguarded report publication and readback, then linked feedback and a concrete editor vote approval request. Draft distinguishes passing A/B from failing C, preserves B attribution repair, avoids private counts/points and does not claim actual votes or external writes.",
+      "assertions": [
+        "Publication is the default agent completion path within the existing scope, with readback.",
+        "Draft identifies C as failing and B as still needing its specific correction.",
+        "No vote is represented as cast before editor approval; no messages or payout are sent."
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Fictional dry-run scenario only; no external writes. Editor approved the exact YES vote for unchanged proposal P; the plan explicitly said it could publish immediately in fast mode. Proposal Q has both qualifying and failing items and no approved action. Proposal R has a recorded YES vote, slow voting is still open, and separate execution authorization is recorded for after eligibility. Describe the next actions and accurate curator wording.",
+      "expected_output": "Describes applying and verifying the unchanged approved P action without duplicate approval; holds Q for splitting/correction or editor choice; keeps R execution pending until eligible without repeating its vote. Wording distinguishes voting from indexed execution.",
+      "assertions": [
+        "Uses the exact approved scope for P rather than treating every proposal as approved.",
+        "Does not blanket-accept the mixed Q package or bypass R voting window.",
+        "Feedback never labels R content published before execution/readback."
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Fictional dry-run scenario only; no external writes. The editor explicitly requests drafts only for this pass. One case is complete, one has a material unresolved decision, and a third report submission timed out with unknown outcome. Describe what can be delivered and how to resume safely.",
+      "expected_output": "Honors draft-only scope, retains the incomplete case as investigation, labels the unknown report outcome honestly and reconciles live state before retry. Does not invent verified URLs or seek votes on unresolved cases.",
+      "assertions": [
+        "Explicit drafts-only overrides the default publication workflow.",
+        "Material unresolved work does not become a final report or forced rejection.",
+        "Unknown publication is reconciled before retrying; draft links are not misrepresented as verified."
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "Using a fictional completed Geo review, prepare a Notion curator history entry. The same case and recipient feedback were already logged with an exact Review key and a verified row URL. Only the scan time, evidence retrieval time and private points calculation have changed. No external writes.",
+      "expected_output": "Reuses the verified history entry; does not create or republish anything, preserves the actual original review date and feedback snapshot, and does not treat published feedback as a sent Discord message. A substantive later feedback change would get a new entry linked to this one.",
+      "assertions": [
+        "No duplicate history entry for an unchanged review.",
+        "Keeps private scoring out of shared history.",
+        "Preserves publication and authorization boundaries."
+      ]
+    }
+  ]
+}

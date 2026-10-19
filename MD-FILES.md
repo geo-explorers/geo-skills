@@ -34,6 +34,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/notion-operations/SKILL.md` | 1.0.1 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
 | `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.0 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |
 | `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.1 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
+| `skills/actionable/geo-submission-review/SKILL.md` | 0.7.3 | Group and review bounty submissions, publish verified datasets reports, and preserve full Notion review evidence with concise introductions and human editor feedback | **yes** (report publication) |
 | `skills/actionable/geo-publish/SKILL.md` | 0.12.1 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
 | `skills/actionable/geo-clean/SKILL.md` | 0.5.1 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
 | `skills/actionable/geo-mirror/SKILL.md` | 0.13.0 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
@@ -67,6 +68,21 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/geo-claim-grouping-notion/references/column-contract.md` | Which Notion columns the grouping results are written into |
 | `skills/non-actionable/ontology-advisor/README.md` | How to run the ontology-advisor scripts |
 
+### Submission review references and assets
+
+| File | Contents |
+|---|---|
+| `skills/actionable/geo-submission-review/assets/editor-run-report.md` | Fixed private editor handoff template or generation contract |
+| `skills/actionable/geo-submission-review/evals/results-2026-10-03.md` | Historical offline evaluation results; maintainer evidence |
+| `skills/actionable/geo-submission-review/references/bounty-profiles.md` | Review criteria for routine and bespoke bounty families |
+| `skills/actionable/geo-submission-review/references/editor-run-report.md` | Fixed private editor handoff template or generation contract |
+| `skills/actionable/geo-submission-review/references/feedback-and-votes.md` | Linked feedback, useful repair requests and exact vote/action authorization |
+| `skills/actionable/geo-submission-review/references/geo-delivery.md` | Geo datasets report model, full findings and publication/readback contract |
+| `skills/actionable/geo-submission-review/references/news-review.md` | News event selection, precedence, copy feedback and technical QA |
+| `skills/actionable/geo-submission-review/references/notion-review.md` | Three concise bullets, full Geo-compatible table and final submission toggle |
+| `skills/actionable/geo-submission-review/references/review-history.md` | Notion review history schema, Editor feedback preservation and duplicate-safe logging |
+| `skills/actionable/geo-submission-review/references/routine.md` | Paired-space discovery, durable state, scheduled defaults and completion gates |
+
 ## 3. Ontology and standards — the judgment layer
 
 | File | Contents | Read by | Trigger |
@@ -95,4 +111,4 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 - **Changing a skill:** bump `version` in its `SKILL.md`, add a line to `skills/versions.md`, regenerate `skills/SKILL-VERSIONS.json`, and update the version in section 3.
 - **Before trusting an install:** compare the installed `SKILL.md` version with this file. A mismatch means the install is stale — run `bash skill-dev/sync-skills.sh` and restart the host. Two agents running different versions of the same skill will overwrite each other's work.
 
-*Counts on 15 October 2026: **47** tracked `.md` files — 2 entry points, 15 skills, 21 skill reference files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*
+*Counts on 19 October 2026: **58** tracked `.md` files — 2 entry points, 16 skills, 31 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*

@@ -10,6 +10,13 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ---
 
+
+### geo-submission-review — 0.7.3
+- 2026-10-19 · Bring the previously shared v0.7.2 package from `all-skills` into the protected `main` library with the approved Notion layout fix: exactly three concise Accepted / Needs correction / Next steps bullets, complete Geo-compatible findings table, and a final collapsed Submissions reviewed list. Preserve human Editor feedback, full evidence, review keys and metadata; retain safe duplicate/retry behavior and gate explicit single-page format updates. Geo rendering is unchanged. Includes the portable runner, templates, references and 97 offline regression tests; local identity/configuration/history and credentials stay outside the skill.
+
+### geo-submission-review — 0.7.2
+- 2026-10-14 · Previously shared through PR #52 into `all-skills`: complete submission review, datasets delivery, private editor handoff, error-type feedback, prospective Notion history, and concise routine introductions. This entry records the inherited baseline; it does not authorize historical backfills or live actions.
+
 ## non-actionable/
 
 ### image-banner-recompose — 0.2.1
