@@ -1,4 +1,4 @@
-# CLAUDE.md — content-management
+# CLAUDE.md — geo-skills
 
 **This repo is operated through skills, not by improvising. On EVERY request, first decide which skill applies, then invoke it.** Do not hand-write scripts to do a job a skill covers — the skills carry mandatory safeguards, and bypassing them is how duplicates and bad data reach Geo.
 

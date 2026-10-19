@@ -45,7 +45,7 @@ const PUBLISH_DATE_PROP = '94e43fe8faf241009eb887ab4f999723';
 // per-space, it won't be defined there.
 const NEWS_STORY_TYPE_ID = 'e550fe517e904b2c8fffdf13408f5634';
 
-// Spaces (name → id). Mirror of content-management/src/constants.ts plus the
+// Spaces (name → id). Mirror of geo-skills/src/constants.ts plus the
 // AI space the brief referenced.
 const SPACES: Record<string, string> = {
   geo:              'a19c345ab9866679b001d7d2138d88a1',

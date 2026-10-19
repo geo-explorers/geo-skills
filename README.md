@@ -1,4 +1,4 @@
-# Geo content management
+# Geo skills
 
 Skills and tooling for working with the [Geo knowledge graph](https://geobrowser.io). This repo is the single install source: clone it once and you get every skill plus the entity-management toolkit, all pointed at the current network (`api-testnet.geobrowser.io`).
 
@@ -19,8 +19,8 @@ Skills and tooling for working with the [Geo knowledge graph](https://geobrowser
 ### 1. Clone and install (agent can do this)
 
 ```bash
-git clone https://github.com/geo-explorers/content-management.git
-cd content-management
+git clone https://github.com/geo-explorers/geo-skills.git
+cd geo-skills
 bun install
 cp -n .env.example .env
 ```

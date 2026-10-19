@@ -2,14 +2,14 @@
   "_doc": "Approved version of each editor-facing skill. Regenerate with skill-dev/skill_versions.py generate after reviewing a change.",
   "skills": {
     "actionable/geo-claim-grouping": {
-      "version": "0.7.0",
+      "version": "0.7.1",
       "approved_commit": "add3a0cb7c494a3b2c35f7f204c37d8aa25de832",
-      "content_sha256": "752599f39b52b06aa7d325a08fe4f84be65075902e00fa47d49c4e1f8157568c"
+      "content_sha256": "eb128c2b95a0fe1064bdf6ff79553f6ce2ea1cc1ba30cdf0543f2255bd0ed1c9"
     },
     "actionable/geo-clean": {
-      "version": "0.5.0",
+      "version": "0.5.1",
       "approved_commit": "88b62448baeb3de587b5997ee1083085ef678176",
-      "content_sha256": "75bfb4723f7219663ded1d5836b139c43c1c261bbb2176c0bc72f552596b688d"
+      "content_sha256": "fe5a6e74486ca029e179f4ebcdb36e71fa32be50378650458b9ad839e2187581"
     },
     "actionable/geo-discovery": {
       "version": "0.1.1",
@@ -22,14 +22,14 @@
       "content_sha256": "83ac5442d8a4f14c053b7df463997bdfb686c84e89df5d0fca03c44d1f1ed110"
     },
     "actionable/geo-orchestrate": {
-      "version": "0.2.0",
+      "version": "0.2.1",
       "approved_commit": "8329034c51b504972c9cdf60ca12f3abae5c5b4c",
-      "content_sha256": "023b001f49241841bf0a79ca36458cf2a4c9989deb97b28d900cc69ec4a36dc3"
+      "content_sha256": "935eca3ec530d9add3cad9c0d005f4956d020367f33c53a22db0f4436a1d2b6f"
     },
     "actionable/geo-publish": {
-      "version": "0.12.0",
+      "version": "0.12.1",
       "approved_commit": "ee3d0ee0c6156325b8bd73e35b25819501169dd0",
-      "content_sha256": "762afe1abd35f6ee709c76b04ad0929bb3734848ef7be379bb8b85a24f82d133"
+      "content_sha256": "471a1ad23b70a721bf2904b3751c7599ed577c3f7122e652ff1ac4c727737496"
     },
     "non-actionable/daily-report": {
       "version": "0.1.0",
@@ -47,9 +47,9 @@
       "content_sha256": "3ce74619445c9d01daf7ffcc226a2121f5943137c1cb4035c475868f465a9300"
     },
     "non-actionable/geo-mirror-and-group": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "approved_commit": "add3a0cb7c494a3b2c35f7f204c37d8aa25de832",
-      "content_sha256": "9da3312746ca716e60bffed36feccbd407b3b0e45811d9378d17487c079bb6ea"
+      "content_sha256": "b10ee2f3c561e3eef1ef5b06fd917aa0cba1bd91d51d2b0c1a1d2593e23524f7"
     },
     "non-actionable/geo-press-review": {
       "version": "0.5.3",
@@ -57,9 +57,9 @@
       "content_sha256": "3c21d5df84e962d95d90a46f5fd486141dfff908d5777624b6a5cfdd02cb3f88"
     },
     "non-actionable/geo-query": {
-      "version": "0.2.10",
+      "version": "0.2.11",
       "approved_commit": "335014d3c7df6e5442dca3ca07c7250a5de88371",
-      "content_sha256": "cf2750f51932c3b2c72df08b40f31674fb0b0314f719a5da3e7ec30640d8bf69"
+      "content_sha256": "ad671cb17f25ccbe29f2ebce0648771c1ede74053f900c0b7b226899128031dd"
     },
     "non-actionable/image-banner-recompose": {
       "version": "0.2.0",

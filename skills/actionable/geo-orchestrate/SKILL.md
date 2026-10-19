@@ -3,7 +3,7 @@ name: geo-orchestrate
 description: Editor-facing entry point for Geo workflows. Translates natural-language intent ("find X and merge into Y", "assign Topics to all Claims about Bitcoin", "publish a podcast episode", "deduplicate Persons", "add Web URL to every Project") into a query plan + a publish plan, generates a runnable script, dry-runs it, confirms with the editor, then publishes. Triggers on "I want to", "find and merge", "deduplicate", "assign", "bulk update", "for all entities of type", "edit Geo", "fix", "clean up", "merge duplicates".
 metadata:
   author: geobrowser
-  version: 0.2.0
+  version: 0.2.1
 ---
 
 # Geo Knowledge Graph — Orchestrator
@@ -130,9 +130,9 @@ Wait for the editor to reply "go" (or to change something). Only then flip `DRY_
 
 ### Job — "Find duplicates of type X across all spaces and merge them"
 
-1. **Discover** (`geo-query`): `list_entities({ type: "X", compact: true, limit: 500 })` → group by lowercased name → for each group `get_related_entities({ direction: "incoming" })` to count backlinks → pick Main (most backlinks, then highest-priority space using the SPACES rank from `content-management/src/constants.ts`).
+1. **Discover** (`geo-query`): `list_entities({ type: "X", compact: true, limit: 500 })` → group by lowercased name → for each group `get_related_entities({ direction: "incoming" })` to count backlinks → pick Main (most backlinks, then highest-priority space using the SPACES rank from `geo-skills/src/constants.ts`).
 2. **Plan**: "Found N dup groups across M spaces. Will merge them into Mains. Skipping K Property groups due to data-type mismatch."
-3. **Generate**: script imports `mergeEntities` from `content-management/src/entity_ops.js`, batches ops with `OpsBatch`, prints op counts, dry-runs.
+3. **Generate**: script imports `mergeEntities` from `geo-skills/src/entity_ops.js`, batches ops with `OpsBatch`, prints op counts, dry-runs.
 4. **Confirm + publish**: flip `DRY_RUN`, re-run, show transaction hashes per space.
 
 ### Job — "Assign Topics to Claims" (worked example)
@@ -160,7 +160,7 @@ Wait for the editor to reply "go" (or to change something). Only then flip `DRY_
 
 1. **Discover** (`geo-query`): for each candidate, `get_entity` + `get_related_entities({ direction: "incoming" })` to confirm zero backlinks.
 2. **Plan**: "Will delete N entities. Orphan cleanup ON / OFF?"
-3. **Generate**: script imports `deleteEntity` from `content-management/src/entity_ops.js`, uses `OpsBatch`, prints, dry-runs.
+3. **Generate**: script imports `deleteEntity` from `geo-skills/src/entity_ops.js`, uses `OpsBatch`, prints, dry-runs.
 4. **Confirm + publish.**
 
 ## Script generation rules
@@ -171,11 +171,11 @@ When you write a script for the editor:
 - **One file, one job.** `scripts/2026-05-08-merge-bitcoin-duplicates.ts`. Date prefix so successful scripts become a pattern library.
 - **Top of file: comment block** restating the editor's intent and the discovered data (entity IDs, schema, source spaces). Future-you needs this.
 - **TypeScript `.ts`** so it runs with `bun run scripts/<file>.ts`. The repo is set up for Bun (see `bun.lock`); `bun install` once and TypeScript executes natively.
-- **`DRY_RUN` constant at top, default `true`.** Same convention as `content-management/03_merge_duplicates.ts`.
+- **`DRY_RUN` constant at top, default `true`.** Same convention as `geo-skills/03_merge_duplicates.ts`.
 - **Collect ALL ops in one array, publish ONCE.** This rule is in `geo-publish`; it bites just as hard from a generated script.
-- **Print before publishing.** Either `console.log(allOps.length)` plus a sample of the ops, or write to a `.txt` file via `printOps` (mirror `content-management/src/functions.ts`).
+- **Print before publishing.** Either `console.log(allOps.length)` plus a sample of the ops, or write to a `.txt` file via `printOps` (mirror `geo-skills/src/functions.ts`).
 - **Idempotency where it matters.** For relation entities and image attachments, use deterministic IDs (`from.slice(0,16) + to.slice(0,16)`) so reruns don't create duplicates.
-- **Reuse, don't reimplement.** Import from `geo-publish`'s vendored SDK and from `content-management/src/` whenever the operation already exists. Don't rewrite `mergeEntities`.
+- **Reuse, don't reimplement.** Import from `geo-publish`'s vendored SDK and from `geo-skills/src/` whenever the operation already exists. Don't rewrite `mergeEntities`.
 
 ## Confirmation template
 
@@ -213,7 +213,7 @@ Use ONE message for the plan, in this exact shape, then wait for the editor:
 - → `geo-query` for any read.
 - → `geo-publish` for the actual op build + transaction submission via `publishOps` from `src/functions.ts`.
 - ← when the editor's request is ambiguous, return to the editor with **one** clarifying question, then continue.
-- → manual fallback: if the job is too risky for automation (mass deletes, cross-space merges with unclear Mains), point the editor to the matching guide in `content-management/documentation/From Rush/`.
+- → manual fallback: if the job is too risky for automation (mass deletes, cross-space merges with unclear Mains), point the editor to the matching guide in `geo-skills/documentation/From Rush/`.
 
 ## More
 
