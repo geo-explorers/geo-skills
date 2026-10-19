@@ -1,6 +1,6 @@
 # geo-clean — reference
 
-Deep detail split out of `SKILL.md`. Read this before generating any cleanup script. Paths are relative to the cloned `content-management` repo (the skill runs from there).
+Deep detail split out of `SKILL.md`. Read this before generating any cleanup script. Paths are relative to the cloned `geo-skills` repo (the skill runs from there).
 
 ## Script-generation rules
 

@@ -3,7 +3,7 @@
 # all run the SAME version that's in git — the fix for the "deployed copies drift stale"
 # problem (editors were on geo-publish 0.5.1 while main was 0.8.0).
 #
-# Run from the content-management repo root:  bash skill-dev/sync-skills.sh
+# Run from the geo-skills repo root:  bash skill-dev/sync-skills.sh
 # NOTE: this only refreshes LOCAL hosts. Editors on claude.ai must re-upload via
 # Settings -> Skills (browser skills are not on disk, can't be synced from here).
 set -euo pipefail

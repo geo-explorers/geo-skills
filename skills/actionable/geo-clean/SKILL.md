@@ -2,7 +2,7 @@
 name: geo-clean
 description: Clean the Geo knowledge graph — find and merge duplicates, find entities without types, delete orphans, move/copy entities between spaces, fix data types, find blank properties, fix stale relations, delete space data. Runs safeguards (deterministic canonical selection, both-scored escalation, untouchable-space protection, voting-data exclusion, system-entity exclusion (governance proposals / space bookkeeping / rankings), ranked-entity review escalation, anchored-entity (page/avatar/cover) protection, dry-run expiry, orphan check, dry-run, explicit publish confirmation) before any destructive op. Triggers on "find duplicates", "merge", "deduplicate", "delete orphan", "delete entity", "move entity", "copy entity", "delete space data", "fix data type", "find blank properties", "fix stale relations", "clean", "cleanup".
 metadata:
-  version: "0.5.0"
+  version: "0.5.1"
 ---
 
 # Geo Knowledge Graph — Cleaning
@@ -13,7 +13,7 @@ This skill complements the publishing skill (which creates new entities). Both s
 
 ## Prerequisites — verify before first run
 
-1. **`content-management` repo cloned** locally. The skill runs FROM this directory and imports helpers from `src/` (`mergeEntities`, `selectCanonicalTopic`, `OpsBatch`, etc.).
+1. **`geo-skills` repo cloned** locally. The skill runs FROM this directory and imports helpers from `src/` (`mergeEntities`, `selectCanonicalTopic`, `OpsBatch`, etc.).
 2. **Bun installed** (`bun --version` works).
 3. **`bun install` already run** (`node_modules/` exists).
 4. **Repo migrated to the 2026-07 Geo infrastructure**: `@geoprotocol/geo-sdk` pinned **≥ 0.20.0** (beta pins like `^0.20.0-beta.8` count) in `package.json`, with all endpoints derived from the SDK's network config — quick check: `grep -q 'GeoTestnetConfig' src/functions.ts && echo migrated`. The old infrastructure (SDK ≤ 0.19.x, hardcoded `testnet-api.geobrowser.io` / old Conduit RPC URLs) is decommissioned: during the short post-migration grace window the old endpoints still respond — everything LOOKS fine — but edits published there are not carried over, and then the endpoints go offline for good. If the check fails, STOP — migrating `src/` and the SDK pin is repo work, never something to patch around inside a generated script.
