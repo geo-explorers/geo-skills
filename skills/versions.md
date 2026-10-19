@@ -12,6 +12,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## non-actionable/
 
+### image-banner-recompose — 0.2.1
+- 2026-10-19 · **Release-flow test.** Adds one HTML comment to exercise the change, release and sync process end to end. No behaviour change. Remove in the next release.
+
 ### geo-query — 0.2.11
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
 
