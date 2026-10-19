@@ -16,8 +16,10 @@ compatibility: >
   the claude.ai / Cowork paths /mnt/user-data/uploads, /mnt/user-data/outputs, /home/claude.
 metadata:
   author: armando
-  version: "0.2.0"
+  version: "0.2.1"
 ---
+
+<!-- Release-flow test, 2026-10-19: this comment exists only to exercise the skill release process end to end. Remove it in the next release. It changes nothing about how the skill works. -->
 
 # image-banner-recompose
 

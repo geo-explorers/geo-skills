@@ -3,12 +3,12 @@
   "skills": {
     "actionable/geo-claim-grouping": {
       "version": "0.7.1",
-      "approved_commit": "add3a0cb7c494a3b2c35f7f204c37d8aa25de832",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "eb128c2b95a0fe1064bdf6ff79553f6ce2ea1cc1ba30cdf0543f2255bd0ed1c9"
     },
     "actionable/geo-clean": {
       "version": "0.5.1",
-      "approved_commit": "88b62448baeb3de587b5997ee1083085ef678176",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "fe5a6e74486ca029e179f4ebcdb36e71fa32be50378650458b9ad839e2187581"
     },
     "actionable/geo-discovery": {
@@ -23,12 +23,12 @@
     },
     "actionable/geo-orchestrate": {
       "version": "0.2.1",
-      "approved_commit": "8329034c51b504972c9cdf60ca12f3abae5c5b4c",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "935eca3ec530d9add3cad9c0d005f4956d020367f33c53a22db0f4436a1d2b6f"
     },
     "actionable/geo-publish": {
       "version": "0.12.1",
-      "approved_commit": "ee3d0ee0c6156325b8bd73e35b25819501169dd0",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "471a1ad23b70a721bf2904b3751c7599ed577c3f7122e652ff1ac4c727737496"
     },
     "non-actionable/daily-report": {
@@ -48,7 +48,7 @@
     },
     "non-actionable/geo-mirror-and-group": {
       "version": "1.0.1",
-      "approved_commit": "add3a0cb7c494a3b2c35f7f204c37d8aa25de832",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "b10ee2f3c561e3eef1ef5b06fd917aa0cba1bd91d51d2b0c1a1d2593e23524f7"
     },
     "non-actionable/geo-press-review": {
@@ -58,13 +58,13 @@
     },
     "non-actionable/geo-query": {
       "version": "0.2.11",
-      "approved_commit": "335014d3c7df6e5442dca3ca07c7250a5de88371",
+      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
       "content_sha256": "ad671cb17f25ccbe29f2ebce0648771c1ede74053f900c0b7b226899128031dd"
     },
     "non-actionable/image-banner-recompose": {
-      "version": "0.2.0",
+      "version": "0.2.1",
       "approved_commit": "dd56a5e954aa4b18fc5cf896732b6cbf2395a315",
-      "content_sha256": "ea9e37588885018e2246020f7b885c792ff1b8bb73730fdda8edd01deb1ce6a5"
+      "content_sha256": "48041c61b16e222381d246272bc4a0f3d22a0fd127a22edd01be5d24ef9f9243"
     },
     "non-actionable/notion-operations": {
       "version": "1.0.1",
