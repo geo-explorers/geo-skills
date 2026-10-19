@@ -45,5 +45,5 @@ One folder per skill, containing `SKILL.md` (+ any `bin/`, `examples/`, `referen
 
 ## Notes
 
-- These skills assume the `content-management` repo is cloned locally **unless** the "Runs in" column says Browser. Cloning instructions live in the repo setup guide.
+- These skills assume the `geo-skills` repo is cloned locally **unless** the "Runs in" column says Browser. Cloning instructions live in the repo setup guide.
 - `write/` skills need a wallet key. Never paste the key into chat — see each write skill's prerequisites for the `.env` handoff.

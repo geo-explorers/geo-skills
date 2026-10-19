@@ -24,7 +24,7 @@ import json
 import argparse
 
 RESERVED = ("anthropic", "claude")
-CODE_PREFIXES = ("src/", "content-management/", "node_modules/", "../", "./src/")
+CODE_PREFIXES = ("src/", "geo-skills/", "node_modules/", "../", "./src/")
 
 
 def read(path):

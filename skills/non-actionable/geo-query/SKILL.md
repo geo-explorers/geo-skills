@@ -3,7 +3,7 @@ name: geo-query
 description: Query the Geo knowledge graph via GraphQL. Use when looking up entities, searching by type, exploring relations, discovering schemas, or inspecting entity properties. Triggers on "look up", "find entity", "query geo", "search the graph", "what type is", "show me relations", "get entity".
 metadata:
   author: geobrowser
-  version: "0.2.10"
+  version: "0.2.11"
 ---
 
 # Geo Knowledge Graph — Querying
@@ -545,7 +545,7 @@ More type, property, and space IDs live in `../../../src/constants.ts` and `../.
 
 ## Canonical client — use this, not hand-rolled curl
 
-`tooling/content-management/lib/gql.mjs` is the canonical read client (zero-dependency, Node 18+/Bun, endpoint baked in, 2 retries with backoff on 5xx/429/network + transient GraphQL errors, and it **throws with the full GraphQL error text** — it never swallows errors into an empty `data`, the classic false-"entity not found" bug). Prefer it over ad-hoc `curl`/`fetch` in every script and one-off:
+`tooling/geo-skills/lib/gql.mjs` is the canonical read client (zero-dependency, Node 18+/Bun, endpoint baked in, 2 retries with backoff on 5xx/429/network + transient GraphQL errors, and it **throws with the full GraphQL error text** — it never swallows errors into an empty `data`, the classic false-"entity not found" bug). Prefer it over ad-hoc `curl`/`fetch` in every script and one-off:
 
 ```js
 import { query, Q, paginate } from "../lib/gql.mjs"; // adjust relative path

@@ -12,6 +12,12 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## non-actionable/
 
+### geo-query — 0.2.11
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
+### geo-mirror-and-group — 1.0.1
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
 ### geo-query — 0.2.10
 - 2026-10-15 · **Four live facts corrected** (audit finding #16). (1) `createdAt` is a Unix-seconds string, so the "added in the last N hours" example now filters with epoch seconds — mufasasa's unmerged `88f3e4a`, cherry-picked. An ISO cutoff raises no error and returns 0 (Crypto News stories since 1 Oct: ISO 0, epoch 209). (2) `POSITION_ASC` sorts positions case-insensitively, not "lexicographically", and the claim that it reproduces the page order exactly is withdrawn: on page `cd93a634…` the API returns `aA1Bg, aaBja, aB0MB`, while ASCII order puts every uppercase position first. Whether the site follows the API order is not verified. Eval 5 no longer accepts a "lexicographic" client sort. (3) `name`/`description` also differ per space and the top-level field returns one of them (`7e0594b2…`); added the per-space values query. (4) A table's columns are `Properties` relations on the Blocks relation's entity, not on the block (checked live: 6 on the relation entity, 0 on the block).
 
@@ -89,6 +95,18 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 - 2026-09-14 · **Initial.** Notion sink for geo-claim-grouping: run the parent skill's Stage A discovery (unmodified, scoped to the mirror via `--scope-file`) and Stage B adjudication, then write the results into the Notion Claims mirror as review columns instead of Geo proposals — `Proposed exact duplicates`, `Proposed semantic duplicates`, `Proposed related claims`, `Proposed supporting / opposing arguments` (self-relations, one-way, Geo direction semantics copied from the ops template) + `Proposed grouping notes` (one hyperlinked line per counterpart with tag · confidence · reason). Four zero-dep Node scripts: `roster-from-notion.mjs` (Claims DB → roster = `--scope-file` shape), `scope-candidates.mjs` (keep only pairs with BOTH sides in the mirror — discovery keeps either-side matches), `existing-edges-from-geo.mjs` (Root Related/Duplicate/Similar/Supporting/Opposing edges between roster claims — discovery's `alreadyRelatedClaims` is the legacy Crypto property), `write-grouping-to-notion.mjs` (schema-agnostic sink: needs only `Geo ID` + title; creates its six columns, never re-types or touches any other column; skips edges already on Geo per direction; diff-first; additive by default, `--prune` opt-in; dry-run default with a mandatory six-section report incl. "Needs your eyes"; `--publish` then read-back must report 0 remaining). Non-actionable: never writes Geo. Verified live read-only on the Relationships test mirror (186 rows) and on a fixture campaign covering every bracket/direction/skip class.
 
 ## actionable/
+
+### geo-publish — 0.12.1
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
+### geo-orchestrate — 0.2.1
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
+### geo-clean — 0.5.1
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
+### geo-claim-grouping — 0.7.1
+- 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
 
 ### geo-publish — 0.12.0
 - 2026-10-15 · **Gate 1 finds exact-name duplicates, deletes route to geo-clean, relation ids are typed** (audit findings #7, #8, #19). (1) The mandatory duplicate query asked for a `type` field that `Entity` does not have, so the API rejected it; with that fixed, its first 20 substring hits for "Bitcoin" held none of the 11 exact matches. It is now one query with a `$name` variable: every case-insensitive exact match (up to 100, plus a count) and a 20-hit substring sample; Space, Proposal and block-type hits are not duplicates. Checked live: Bitcoin 11 exact, Donald Trump 2, an invented name 0, a name containing a quote returns without error. (2) The skill triggered on "delete entity" and said it deletes entities, while CLAUDE.md hard rule 3 sends every delete to geo-clean, which carries the orphan, anchored-entity and vote-data checks this skill lacks. It now creates and updates only: it may remove values or relations inside an update, after `publish`; entity deletes, merges and bulk removals route to geo-clean. (3) Deterministic relation ids now use geo-claim-grouping's typed scheme (its hard rule 6) instead of `from16+to16`, which gave two relation types between the same pair one relation entity. Ids already published are never regenerated.

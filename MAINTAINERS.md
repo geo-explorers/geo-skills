@@ -1,4 +1,4 @@
-# MAINTAINERS.md — content-management
+# MAINTAINERS.md — geo-skills
 
 For the people who maintain this repository. Editors and agents do not need this file.
 
@@ -173,7 +173,7 @@ A release is a signed tag on `main`. It is the only thing consumers pin to, so i
    `v1.0.0` is the library as it stood before the agents moved out. `v1.1.0` follows the cut-over in migration step 6.
 3. **Tag and push.** The tag is signed, so signing must be set up in your git configuration first.
    ```bash
-   git tag -s vX.Y.Z -m "content-management vX.Y.Z" <commit>
+   git tag -s vX.Y.Z -m "geo-skills vX.Y.Z" <commit>
    git push origin vX.Y.Z
    ```
 4. **Record the commit.** A tag can be moved; a commit hash cannot. Print the full 40-character hash and put it in the release notes:
