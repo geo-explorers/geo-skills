@@ -1,4 +1,4 @@
-# MD file manifest — content-management
+# MD file manifest — geo-skills
 
 Every Markdown file in this repository: what it contains, who reads it, and when it is loaded. This is the repo-side answer to "provide a list of all MD files and their contents"; the Notion [Agent Composition](https://app.notion.com/p/3dc273e214eb814088b8de2e3184f988) catalog links to the same files and must not become a second copy of them.
 
@@ -25,7 +25,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 
 | Skill | Version | Contents | Key needed |
 |---|---|---|---|
-| `skills/non-actionable/geo-query/SKILL.md` | 0.2.10 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
+| `skills/non-actionable/geo-query/SKILL.md` | 0.2.11 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
 | `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.0 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
 | `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
@@ -33,12 +33,12 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/daily-report/SKILL.md` | 0.1.0 | The editor's end-of-day Notion update routine | no |
 | `skills/non-actionable/notion-operations/SKILL.md` | 1.0.1 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
 | `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.0 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |
-| `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.0 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
-| `skills/actionable/geo-publish/SKILL.md` | 0.12.0 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
+| `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.1 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
+| `skills/actionable/geo-publish/SKILL.md` | 0.12.1 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
 | `skills/actionable/geo-clean/SKILL.md` | 0.5.1 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
 | `skills/actionable/geo-mirror/SKILL.md` | 0.13.0 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
-| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.0 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
-| `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.0 | Turn natural-language intent into a query plan, publish plan and script | **yes** |
+| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.1 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
+| `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.1 | Turn natural-language intent into a query plan, publish plan and script | **yes** |
 | `skills/actionable/geo-discovery/SKILL.md` | 0.1.1 | Gap-discovery passes over a space, published as Gap finding entities | **yes** |
 
 ### Skill reference files — loaded by their own skill only

@@ -41,7 +41,7 @@ Check **FORM and QUALITY only** - frontmatter validity, description quality, str
 ## Notes
 
 - Severity: **FAIL** = a hard, machine-checkable rule (frontmatter validity). **WARN** = advisory/quality. Numeric budgets (500 lines, ~5k/~100 tokens) are WARN, not FAIL.
-- The script checks bundled `.md` references for existence; it deliberately ignores code imports (`../src/...`, `content-management/src/...`) - those are runtime, not skill docs.
+- The script checks bundled `.md` references for existence; it deliberately ignores code imports (`../src/...`, `geo-skills/src/...`) - those are runtime, not skill docs.
 - This skill checks form, not whether the skill *works*. Functional/behavioral testing is a separate job (see the skill-creator eval flow).
 
 ## Files

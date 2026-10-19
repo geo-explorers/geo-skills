@@ -3,7 +3,7 @@ name: geo-publish
 description: Publish entities and relations to the Geo knowledge graph via the GRC-20 SDK. Runs mandatory safeguards (ontology/correct-type check via ontology-advisor + semantic-duplicate check + schema check + type-required check + two-phase dry-run/confirm) before any write. Use when creating or updating entities and relations; entity deletes, merges and clean-ups go to geo-clean. Triggers on "publish", "create entity", "add person", "add to geo", "add to my space", "submit proposal", "create relation", "update entity".
 metadata:
   author: geobrowser
-  version: 0.12.0
+  version: 0.12.1
 ---
 
 # Geo Knowledge Graph — Publishing
@@ -15,7 +15,7 @@ Every write passes mandatory safeguards FIRST: an **ontology / correct-type chec
 ## Prerequisites
 
 1. **Runtime**: Node 20.6+ or Bun (both support `--env-file`). **For the publish step, prefer Node** — Bun's `fetch` has hit a bug reaching the API host (`api-testnet.geobrowser.io`) in some environments, stalling the publish on "socket closed / retrying" while `curl` and Node's `fetch` reach the same host fine. If a dry-run works but `bun run` stalls on network during publish, re-run with `node --env-file=.env scripts/<file>.ts` — it's a Bun fetch quirk, not an outage.
-2. **SDK available**: either the `content-management` repo cloned with `bun install` run (`node_modules/@geoprotocol/geo-sdk` exists), or the skill's own `node_modules`. **Post-migration (v20 contracts) this must be `@geoprotocol/geo-sdk` v0.20+** — 0.19.x and earlier publish to the retired contracts and their edits silently go nowhere after the grace window.
+2. **SDK available**: either the `geo-skills` repo cloned with `bun install` run (`node_modules/@geoprotocol/geo-sdk` exists), or the skill's own `node_modules`. **Post-migration (v20 contracts) this must be `@geoprotocol/geo-sdk` v0.20+** — 0.19.x and earlier publish to the retired contracts and their edits silently go nowhere after the grace window.
 3. **Wallet key** in **`.env` at the project root** — `GEO_PRIVATE_KEY=0x...` (this is exactly what the setup guide creates, alongside `DEMO_SPACE_ID=`). Scripts read `GEO_PRIVATE_KEY`, fall back to the legacy `PK_SW`, and also accept a separate `.env.geo-publish` if present. Export the key from <https://www.geobrowser.io/export-wallet>.
 
 **Never put the key in the transcript.** Do NOT read/print the value, do NOT `export` it in-session, do NOT ask the user to paste it.
@@ -284,7 +284,7 @@ Block entities pass automatically (the block recipes always set their types; rec
 
 ## Bulk / dataset publishing — data goes in the file, not the script
 
-**Spreadsheet source? Convert to CSV first — the publish path reads CSV/JSON, not `.xlsx`/`.xls`/Sheets/Notion.** You publish from the `content-management` repo, so the converter is right there:
+**Spreadsheet source? Convert to CSV first — the publish path reads CSV/JSON, not `.xlsx`/`.xls`/Sheets/Notion.** You publish from the `geo-skills` repo, so the converter is right there:
 ```bash
 node src/xlsx-to-csv.cjs <file.xlsx>      # → <file>.csv  (uses `xlsx`; already installed via bun install)
 ```
