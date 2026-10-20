@@ -4,12 +4,12 @@ Skills for working with the Geo knowledge graph from Claude Code / Codex / brows
 
 Skills are organized by **what they can do to Geo**, because that's the safety-critical distinction:
 
-- **`non-actionable/`** — skills that only *read* Geo (and the web). They cannot create, update, delete, or publish anything. Safe for anyone, including non-technical curators.
+- **`non-actionable/`** — skills that never write to Geo; they read Geo and the web. Four of them do write to **Notion**: **daily-report** (the editor's own daily-update row), **geo-mirror-and-group** (creates a Notion mirror database), **geo-claim-grouping-notion** (review columns on that database, only with `--publish`) and **notion-operations** (guidance for Notion writes: bulk row updates, schema changes). Fine for non-technical curators, as long as they know those four change shared Notion pages.
 - **`actionable/`** — skills that *change* Geo (publish, merge, delete). Only for trained editors. Every write goes through safeguards (dry-run, duplicate/existence check, explicit publish confirmation). Never give these to someone who hasn't been onboarded.
 
 ## Index
 
-### non-actionable/ — read-only, can't break anything
+### non-actionable/ — never writes to Geo (four write to Notion, see above)
 
 | Skill | What it does | Runs in |
 |---|---|---|
@@ -34,7 +34,7 @@ Skills are organized by **what they can do to Geo**, because that's the safety-c
 
 ## Which to give whom
 
-- **Non-technical curator / domain expert** → `non-actionable/` only. They explore and review; they can't damage production.
+- **Non-technical curator / domain expert** → `non-actionable/` only. They explore and review; they can't change Geo.
 - **Trained editor** → `non-actionable/` + `actionable/`, with the wallet key set up per the setup guide. Start them on dry-runs.
 - **Browser-only user (no terminal)** → `geo-query` works with nothing installed (it's just GraphQL over HTTP). Writing still requires the repo.
 
