@@ -34,7 +34,7 @@ test('history payload retains actual date, all submission links and feedback, wi
   const c=fixture();c.review.scoring={rate:999,ruleSource:'PRIVATE_SCORING_SENTINEL'};c.editorDecisions=[{kind:'private',evidence:['PRIVATE_APPROVAL_SENTINEL']}];
   const out=prepareHistoryEntry(c,input(c),config),p=out.create.pages[0].properties;
   assert.equal(out.lookup.mode,'view');assert.equal(out.lookupArchived.is_archived,true);assert.equal(out.lookup.view_url,config.lookupViewUrl);
-  assert.equal(p.Curator,'Curator');assert.equal(p['Curator ID'],c.curatorId);assert.equal(p['date:Review date:start'],'2026-10-13T13:00:00.000Z');assert.equal(p['Geo report'],c.delivery.receipt.url);assert.match(p.Submission,/proposalId=/);assert.match(out.create.pages[0].content,/How did you check/);assert.match(out.create.pages[0].content,/Review recommendation:/);assert.equal(JSON.stringify(out).includes('PRIVATE_'),false);assert.equal(Object.hasOwn(p,'Editor feedback'),false);
+  assert.equal(p.Curator,'Curator');assert.equal(p['Curator ID'],c.curatorId);assert.equal(p['date:Review date:start'],'2026-10-13T13:00:00.000Z');assert.equal(p['Geo report'],c.delivery.receipt.url);assert.match(p.Submission,/proposalId=/);assert.match(out.create.pages[0].content,/How did you check/);assert.match(out.create.pages[0].content,/0 items recommended for acceptance/);assert.equal(JSON.stringify(out).includes('PRIVATE_'),false);assert.equal(Object.hasOwn(p,'Editor feedback'),false);
 });
 test('scan timestamps, private scoring and citation refreshes do not create another review key',()=>{
   const c=fixture(),key=historyKey(c);c.review.checkedAt='2026-10-14T12:00:00Z';c.review.scoring={rate:10};c.review.findings[0].citations[0].retrievedAt='2026-10-14T12:00:00Z';assert.equal(historyKey(c),key);
@@ -96,7 +96,7 @@ test('all distinct findings and their exact published finding identifiers are re
 test('Notion introduction rejects multiline, oversized and unsupported action claims',()=>{
   const c=fixture(),summary={accepted:'The reviewed work is supported.',needsCorrection:'Check the findings.',nextSteps:'Address eligible issues.'};
   for(const bad of ['First line\nSecond line','First line<br>Second line','x'.repeat(201),'Votes recorded and published.','Points paid.'])assert.throws(()=>prepareHistoryEntry(c,{...input(c),notionSummary:{...summary,accepted:bad}},config),/single-line|action claims/);
-  const body=prepareHistoryEntry(c,{...input(c),notionSummary:summary},config).create.pages[0].content;assert.match(body,/Accepted:\*\* Review recommendation:/);
+  const body=prepareHistoryEntry(c,{...input(c),notionSummary:summary},config).create.pages[0].content;assert.match(body,/Accepted:\*\* 0 items recommended for acceptance/);
 });
 
 test('layout validation rejects extra sections, lost findings, broken columns and expanded submission lists',()=>{
