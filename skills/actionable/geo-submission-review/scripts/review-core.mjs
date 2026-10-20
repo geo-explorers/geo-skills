@@ -229,8 +229,12 @@ export function recipientGroups(c){
   for(const itemId of ids){
     const row=coverage.find(r=>r.itemId===itemId),selection=row.selection?.outcome;
     const accepted=selection?selection==='qualifies':row.outcome==='meets_requirements';
-    const rejected=selection?selection==='does_not_qualify':row.outcome==='does_not_meet_requirements';
-    const repairs=!rejected&&(row.outcome==='needs_correction'||(c.review.findings??[]).some(f=>f.itemId===itemId&&f.repairEligible===true));
+    const repairEligible=(c.review.findings??[]).some(f=>f.itemId===itemId&&f.repairEligible===true);
+    // A recorded correction return can fail today's selection without being an
+    // independent rejection. Never promote it to accepted before the repair.
+    const correctionReturn=row.outcome==='needs_correction'&&repairEligible;
+    const rejected=(selection?selection==='does_not_qualify':row.outcome==='does_not_meet_requirements')&&!correctionReturn;
+    const repairs=!rejected&&(row.outcome==='needs_correction'||repairEligible);
     if(!accepted&&!rejected&&!repairs)throw Error('Recipient item decision still needs investigation');
     const item={...row,accepted,rejected,repairs};
     if(accepted)groups.accepted.push(item);

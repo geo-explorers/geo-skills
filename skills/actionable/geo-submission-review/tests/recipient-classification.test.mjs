@@ -83,3 +83,11 @@ test('presentation changes preserve identity, verified delivery and already-logg
  c.curatorReviewLog=[{key,status:'verified',url:'https://example.org/history'}];
  assert.equal(prepareHistoryEntry(c,{}, {dataSourceId:id(99),databaseUrl:'https://example.org/history',lookupViewUrl:'view://12345678-1234-1234-1234-123456789abc'}).status,'already_logged');
 });
+
+test('explicit correction returns remain unaccepted and require changes rather than independent rejection',()=>{
+ const c=fixture();c.review.coverage[1].selection.outcome='does_not_qualify';
+ c.review.findings=[{itemId:id(2),repairEligible:true}];
+ const g=recipientGroups(c);assert.deepEqual([g.accepted.length,g.rejected.length,g.changes.length],[1,1,1]);
+ assert.equal(g.changes[0].itemId,id(2));assert.equal(g.changes[0].accepted,false);
+ assert.equal(c.review.coverage[1].selection.outcome,'does_not_qualify');
+});
