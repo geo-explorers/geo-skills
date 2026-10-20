@@ -77,9 +77,9 @@
       "content_sha256": "8482332082fd810de09dc5b7ab7328286877b223cf6f1dfe4548382ef0d80aec"
     },
     "non-actionable/ontology-advisor": {
-      "version": "0.1.0",
-      "approved_commit": "a2f1f9f2e7bb0949ea27ddbc30f60b9cfa7b6a87",
-      "content_sha256": "5ea2bb42ca7d873114e8278daa2890bc148f5460ac248bcf5a89b2a8082d592d"
+      "version": "0.1.1",
+      "approved_commit": "8f3a0daab66bb0672c1348e58d19004fc694674a",
+      "content_sha256": "3d5e09ab3f7c8440a591702664610160b27ed6eaf2fd4b094ee7aa132a8cd121"
     }
   }
 }

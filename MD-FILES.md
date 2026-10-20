@@ -26,7 +26,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | Skill | Version | Contents | Key needed |
 |---|---|---|---|
 | `skills/non-actionable/geo-query/SKILL.md` | 0.2.11 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
-| `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.0 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
+| `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.1 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
 | `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
 | `skills/non-actionable/image-banner-recompose/SKILL.md` | 0.2.1 | Recompose any image into a 2364×640 Geo banner | no |

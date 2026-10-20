@@ -2,7 +2,8 @@ name: Verify skill integrity
 
 # Fails the build if any shipped skill changed without being re-approved
 # (bump version + changelog + `python3 skill-dev/skill_versions.py generate`),
-# or if MD-FILES.md no longer matches the repo's Markdown files.
+# if MD-FILES.md no longer matches the repo's Markdown files, or if shipped code
+# points at the retired Geo endpoint.
 #
 # This is a REQUIRED status check on main, so it runs on every pull request with
 # no path filter: a required check that is skipped never reports, and the pull
@@ -26,3 +27,11 @@ jobs:
         run: python3 skill-dev/skill_versions.py verify
       - name: Verify MD-FILES.md matches the repo
         run: python3 skill-dev/check_md_manifest.py
+      # The retired host refuses connections; the live one is api-testnet.geobrowser.io.
+      # geo-discovery is exempt until the PR #38 decision (audit finding #17).
+      - name: No retired Geo endpoint in shipped code
+        run: |
+          if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills lib src scripts ':!skills/actionable/geo-discovery'; then
+            echo "::error::Retired Geo endpoint found above. Use https://api-testnet.geobrowser.io/graphql"
+            exit 1
+          fi

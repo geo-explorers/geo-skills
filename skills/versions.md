@@ -67,6 +67,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 - 2026-07 · Hardened by independent 43-check live test: fixed StringFilter exact-match (`is`/`isInsensitive`, not `equalTo`); documented `first`≤1000 + offset-cap-on-Connections (cursor-only past 1000); `entity(id:)` never-null stub + correct existence check; one-query inline relation-properties + `backlinks` + count-only/`search()`/`relation(id:)`/`property(id:)`/`relationsExist` extras; softened stale unscoped-500 claim to performance rule; evals: dead fixture replaced, 4 new evals covering the v0.2.0 patterns.
 - 2026-06 · Initial. GraphQL-over-HTTP querying (Nick's version); runs anywhere incl. browser. Folded in submission review/fact-check (merged from the retired geo-query-web). Person-ID corrected to `7ed45f2b…`.
 
+### ontology-advisor — 0.1.1
+- 2026-10-15 · **Live endpoint** (audit finding #17). `scripts/geo_graphql.py` still pointed at the retired `testnet-api` host, which refuses connections (checked 13 and 15 Oct), so every live check in the skill failed. It now uses `api-testnet.geobrowser.io` (also in the two docstrings). The `verify` workflow gains a step that fails if the retired address returns to `skills`, `lib`, `src` or `scripts`; geo-discovery is exempt until the PR #38 decision.
+
 ### ontology-advisor — 0.1.0
 - 2026-06 · Initial. Conversational modelling advice grounded in ONTOLOGY.md + live graph; read-only.
 
