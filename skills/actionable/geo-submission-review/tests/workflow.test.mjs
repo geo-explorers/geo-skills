@@ -57,7 +57,7 @@ test('readable outcomes do not turn unfinished research or a recommendation into
   assert.equal(d.markdown.includes(d.title),false);
   assert.equal(d.markdown.includes('Agent assessment:'),false);
   assert.equal(d.markdown.includes('Evidence checked:'),false);
-  assert.equal(/approved|paid|accepted/i.test(d.markdown),false);
+  assert.equal(/approved|paid|already accepted/i.test(d.markdown),false);
   if(outcome==='unresolved'){assert.match(d.markdown,/still in progress/);assert.equal(d.markdown.includes('ready for you to address'),false);}
  }
 });

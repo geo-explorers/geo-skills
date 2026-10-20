@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {stableId,normalizeId,atomicJson,reviewReadiness,findingIssue,usesRoutineIntroduction} from './review-core.mjs';
+import {stableId,normalizeId,atomicJson,reviewReadiness,findingIssue,usesRoutineIntroduction,acceptanceSummary} from './review-core.mjs';
 const P={related:'dfa6aebe1ca94bf29faccc4cc7afb24c',sources:'49c5d5e1679a4dbdbfd33f618f227c94',url:'412ff593e9154012a43d4c27ec5c68b6',markdown:'e3e363d1dd294ccb8e6ff3b76d99bc33',blocks:'beaba5cba67741a8b35377030613fc70',columns:'01412f8381894ab1836565c7fd358cc1',types:'8f151ba4de204e3c9cb499ddf96f48f1',sourceType:'1f69cc9880d444abad493df6a7b15ee4',item:'a99f9ce12ffa4dac8c61f6310d46064a',view:'1907fd1c81114a3ca378b1f353425b65',original:'5d4dda664938562da3eec5bc6017c04c',excerpt:'4ecf5a8df4e45301a72b9c29d59f3f7a',issue:'6bb3a7b114ac5582af25aeb811115301',evidence:'77508faa156b5802a5e46147f5fbd8a1'};
 const T={page:'480e3fc267f3499385fbacdf4ddeaa6b',finding:'b14985a95e0c5a3ca872f29e22719ace',text:'76474f2f00894e77a0410b39fb17d0bf',data:'b8803a8665de412bbb357e0c84adf473',source:'706779bf537744a68694ea06cf87a3a2'};
 const hex=x=>Buffer.from(x).toString('hex');
@@ -33,7 +33,9 @@ export function buildReportOps(draft,plan,Graph){
   if(usesRoutineIntroduction(draft.reviewScope??{})){
     if(draft.introductionLayout!=='routine-three-bullets-v1'||typeof draft.introduction!=='string')throw Error('Routine reports need the three-bullet introduction');
     const lines=draft.introduction.trim().split('\n');
-    if(lines.length!==3||lines.some((line,i)=>!line.startsWith(['- **Acceptance:** ','- **Rejection:** ','- **Feedback:** '][i])||!line.split('** ')[1]?.trim()))throw Error('Routine report text area must contain exactly the acceptance, rejection and feedback bullets');
+    if(lines.length!==3||lines.some((line,i)=>!line.startsWith(['- **Accepted:** ','- **Rejection:** ','- **Feedback:** '][i])||!line.split('** ')[1]?.trim()))throw Error('Routine report text area must contain exactly the acceptance, rejection and feedback bullets');
+    const accepted=acceptanceSummary({...draft.reviewScope,review:draft.review});
+    if(!lines[0].startsWith('- **Accepted:** '+accepted))throw Error('Accepted must use the accurate count and specific item rundown from the recorded review');
     intro=draft.introduction;
   }else{
     intro=draft.review.findings.length?draft.markdown.split('## Review feedback')[0].trimEnd():draft.markdown;

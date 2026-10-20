@@ -11,6 +11,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 ---
 
 
+### geo-submission-review — 0.7.4
+- 2026-10-20 · Make Geo and Notion Accepted summaries lead with accurate unique story/item counts and specific brief rundowns. Retain the reviewed toggle and add separately counted accepted, rejected and requiring-changes lists with captured titles/links, truthful empty groups, explicit accepted-with-repairs overlap and unaccepted correction returns separate from independent rejection. Preserve review hashes/keys, verified reports, human feedback and runtime configuration; formatting upgrades never enqueue historical rewrites. Add classification, count, linking and preservation regression coverage.
+
 ### geo-submission-review — 0.7.3
 - 2026-10-19 · Bring the previously shared v0.7.2 package from `all-skills` into the protected `main` library with the approved Notion layout fix: exactly three concise Accepted / Needs correction / Next steps bullets, complete Geo-compatible findings table, and a final collapsed Submissions reviewed list. Preserve human Editor feedback, full evidence, review keys and metadata; retain safe duplicate/retry behavior and gate explicit single-page format updates. Geo rendering is unchanged. Includes the portable runner, templates, references and 97 offline regression tests; local identity/configuration/history and credentials stay outside the skill.
 

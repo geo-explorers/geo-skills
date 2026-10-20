@@ -27,13 +27,14 @@ test('publication builder refuses an extra paragraph or missing routine intro in
  const d=reportDraft(fixture()),p=plan(d);
  assert.throws(()=>buildReportOps({...d,introduction:d.introduction+'\nExtra paragraph.'},p,Graph),/exactly/);
  assert.throws(()=>buildReportOps({...d,introduction:undefined},p,Graph),/three-bullet/);
+ for(const first of ['The qualifying launches and governance proposals listed in Geo.','99 stories recommended for acceptance: Alpha.'])assert.throws(()=>buildReportOps({...d,introduction:d.introduction.replace(d.introduction.split('\n')[0],'- **Accepted:** '+first)},p,Graph),/accurate count/);
 });
 test('fallback separates selection credit from copy repairs and uses only current verified vote/execution stages',()=>{
- const c=fixture();let d=reportDraft(c);assert.ok(d.introduction.includes('Recommended for acceptance: Alpha'));
+ const c=fixture();let d=reportDraft(c);assert.ok(d.introduction.includes('1 story recommended for acceptance: Alpha'));
  c.editorDecisions=[{kind:'vote',status:'verified',fingerprint:'fp',itemId:id(3),vote:'YES',executed:false},{kind:'vote',status:'verified',fingerprint:'fp',itemId:id(7),vote:'NO'}];
- d=reportDraft(c);assert.ok(d.introduction.includes('publication is pending: Alpha'));assert.ok(d.introduction.includes('NO votes recorded: Beta'));
- c.editorDecisions[0].executed=true;assert.ok(reportDraft(c).introduction.includes('Published: Alpha'));
- c.editorDecisions[0].fingerprint='old';assert.ok(reportDraft(c).introduction.includes('Recommended for acceptance: Alpha'));
+ d=reportDraft(c);assert.ok(d.introduction.includes('publication is pending'));assert.ok(d.introduction.includes('NO votes recorded: Beta'));
+ c.editorDecisions[0].executed=true;assert.ok(reportDraft(c).introduction.includes('Confirmed published.'));
+ c.editorDecisions[0].fingerprint='old';assert.ok(reportDraft(c).introduction.includes('1 story recommended for acceptance: Alpha'));
 });
 test('no findings invents no question and rejected-only findings request no futile repairs',()=>{
  const c=fixture();c.review.findings=[];assert.equal(reportDraft(c).introduction.includes('?'),false);
