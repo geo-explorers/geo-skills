@@ -23,6 +23,7 @@ Skills are organized by **what they can do to Geo**, because that's the safety-c
 
 | Skill | What it does | Runs in |
 |---|---|---|
+| **geo-submission-review** | Discover paired-space submissions, group curator/bounty cases, review full requirements, publish verified datasets reports, and log full Notion feedback; exact actions remain approval-gated. | Node 20+ and repo dependencies; connected Notion; geo-query/geo-publish for retrieval/delivery |
 | **geo-publish** | Create/update/delete entities and relations via the GRC-20 SDK. | Repo + wallet key |
 | **geo-clean** | Find/merge duplicates, delete orphans, fix data types, fix stale relations, etc. Safeguards before any destructive op. | Repo + wallet key |
 | **geo-orchestrate** | Editor entry point. Turns "I want to X" into a plan → generates a script → dry-run → confirm → publish. Routes to query + publish. | Repo + wallet key |

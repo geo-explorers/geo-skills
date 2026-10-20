@@ -5,7 +5,7 @@ geo_graphql.py — thin client + query helpers for the Geo knowledge graph.
 Shared by the dataset-validator (and, later, the graph-health auditor).
 Authoritative source for live schemas and entity IDs. No auth needed for reads.
 
-Endpoint: https://testnet-api.geobrowser.io/graphql
+Endpoint: https://api-testnet.geobrowser.io/graphql
 
 Key gotchas baked in (see geo-query skill for the full list):
   - `entities(...)` returns a FLAT array (no { nodes }).
@@ -21,7 +21,7 @@ import urllib.request
 import urllib.error
 from typing import Any
 
-ENDPOINT = "https://testnet-api.geobrowser.io/graphql"
+ENDPOINT = "https://api-testnet.geobrowser.io/graphql"
 
 # Meta type IDs (stable, from the geo-query skill)
 TYPE_META_ID = "e7d737c536764c609fa16aa64a8c90ad"      # the type of types

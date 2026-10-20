@@ -11,7 +11,7 @@ The judgment layer is ONTOLOGY.md; the mechanical layer is rules.json (via
 lint.py); these helpers are the ground-truth layer. If the live graph and
 rules.json disagree, trust the graph.
 
-Endpoint: https://testnet-api.geobrowser.io/graphql (no auth needed for reads).
+Endpoint: https://api-testnet.geobrowser.io/graphql (no auth needed for reads).
 """
 from __future__ import annotations
 import csv

@@ -10,7 +10,17 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ---
 
+
+### geo-submission-review — 0.7.3
+- 2026-10-19 · Bring the previously shared v0.7.2 package from `all-skills` into the protected `main` library with the approved Notion layout fix: exactly three concise Accepted / Needs correction / Next steps bullets, complete Geo-compatible findings table, and a final collapsed Submissions reviewed list. Preserve human Editor feedback, full evidence, review keys and metadata; retain safe duplicate/retry behavior and gate explicit single-page format updates. Geo rendering is unchanged. Includes the portable runner, templates, references and 97 offline regression tests; local identity/configuration/history and credentials stay outside the skill.
+
+### geo-submission-review — 0.7.2
+- 2026-10-14 · Previously shared through PR #52 into `all-skills`: complete submission review, datasets delivery, private editor handoff, error-type feedback, prospective Notion history, and concise routine introductions. This entry records the inherited baseline; it does not authorize historical backfills or live actions.
+
 ## non-actionable/
+
+### image-banner-recompose — 0.2.1
+- 2026-10-19 · **Release-flow test.** Adds one HTML comment to exercise the change, release and sync process end to end. No behaviour change. Remove in the next release.
 
 ### geo-query — 0.2.11
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
@@ -56,6 +66,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 - 2026-07 · **Performance + freshness fixes** (editor feedback: "topic query takes 5–10 min"): new Performance section — never N+1, use server-side relation filters (measured live: Iran-war stories 469ms vs ~131s+ N+1); bulk-scan pattern (relationsConnection 1000 rows/330ms with inlined nested fields). New Data-freshness section (verified: no cache, indexer lag ~seconds; re-query, don't distrust). Review-a-submission: block/table order = relation `position` (server `orderBy: POSITION_ASC`; verified vs live UI). Gotchas 9–12.
 - 2026-07 · Hardened by independent 43-check live test: fixed StringFilter exact-match (`is`/`isInsensitive`, not `equalTo`); documented `first`≤1000 + offset-cap-on-Connections (cursor-only past 1000); `entity(id:)` never-null stub + correct existence check; one-query inline relation-properties + `backlinks` + count-only/`search()`/`relation(id:)`/`property(id:)`/`relationsExist` extras; softened stale unscoped-500 claim to performance rule; evals: dead fixture replaced, 4 new evals covering the v0.2.0 patterns.
 - 2026-06 · Initial. GraphQL-over-HTTP querying (Nick's version); runs anywhere incl. browser. Folded in submission review/fact-check (merged from the retired geo-query-web). Person-ID corrected to `7ed45f2b…`.
+
+### ontology-advisor — 0.1.1
+- 2026-10-15 · **Live endpoint** (audit finding #17). `scripts/geo_graphql.py` still pointed at the retired `testnet-api` host, which refuses connections (checked 13 and 15 Oct), so every live check in the skill failed. It now uses `api-testnet.geobrowser.io` (also in the two docstrings). The `verify` workflow gains a step that fails if the retired address returns to `skills`, `lib`, `src` or `scripts`; geo-discovery is exempt until the PR #38 decision.
 
 ### ontology-advisor — 0.1.0
 - 2026-06 · Initial. Conversational modelling advice grounded in ONTOLOGY.md + live graph; read-only.
