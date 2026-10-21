@@ -36,7 +36,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.1 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
 | `skills/actionable/geo-submission-review/SKILL.md` | 0.7.4 | Group and review bounty submissions, publish verified datasets reports, and preserve full Notion review evidence with concise introductions and human editor feedback | **yes** (report publication) |
 | `skills/actionable/geo-publish/SKILL.md` | 0.12.1 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
-| `skills/actionable/geo-clean/SKILL.md` | 0.5.1 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
+| `skills/actionable/geo-clean/SKILL.md` | 0.5.2 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
 | `skills/actionable/geo-mirror/SKILL.md` | 0.13.0 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
 | `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.1 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
 | `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.1 | Turn natural-language intent into a query plan, publish plan and script | **yes** |

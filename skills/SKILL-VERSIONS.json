@@ -7,9 +7,9 @@
       "content_sha256": "eb128c2b95a0fe1064bdf6ff79553f6ce2ea1cc1ba30cdf0543f2255bd0ed1c9"
     },
     "actionable/geo-clean": {
-      "version": "0.5.1",
-      "approved_commit": "2ec00815a5773bd68532d86d3a28257189d14feb",
-      "content_sha256": "fe5a6e74486ca029e179f4ebcdb36e71fa32be50378650458b9ad839e2187581"
+      "version": "0.5.2",
+      "approved_commit": "95d3a127930e0695c9b564b901ff5abda326f9ee",
+      "content_sha256": "a0215f8cc8814072ed7fb048483dffefcb0e10a84d7acf94d37e03c1178aefa0"
     },
     "actionable/geo-discovery": {
       "version": "0.1.1",
