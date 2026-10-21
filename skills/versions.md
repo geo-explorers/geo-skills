@@ -121,6 +121,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 ### geo-clean — 0.5.1
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
 
+### geo-claim-grouping — 0.7.2
+- 2026-10-20 · **Two wording fixes** (audit finding #18). (1) The ops-script step listed the existing-edge check as "both directions"; HARD RULE 7 and `references/ops-script-template.md` check the SAME direction only, because an either-direction check suppresses intentional mirror edges on reruns. (2) Gate 4's similarity bar was labelled the "recommended default" while the step-2 warning calls the broad bar the mistake the 2026-08-12 review corrected; it is now labelled step-1 recall only, since step 2 re-adjudicates every pair against the strict brackets. No behaviour change.
+
 ### geo-claim-grouping — 0.7.1
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
 
