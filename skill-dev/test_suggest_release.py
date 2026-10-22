@@ -14,6 +14,8 @@ import sys
 import unittest
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # keep the checkout free of __pycache__
+
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("suggest_release", HERE / "suggest_release.py")
 sr = importlib.util.module_from_spec(spec)

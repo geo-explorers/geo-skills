@@ -63,7 +63,7 @@ jobs:
         run: |
           base=$(git merge-base "origin/$BASE_REF" HEAD)
           python3 skill-dev/bump_skills.py --base "$base" --level "$LEVEL" --title "$PR_TITLE" --pr "$PR_NUMBER"
-          if [ -z "$(git status --porcelain)" ]; then
+          if [ -z "$(git status --porcelain -- skills MD-FILES.md)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           python3 skill-dev/skill_versions.py verify

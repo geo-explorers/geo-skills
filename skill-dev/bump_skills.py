@@ -29,6 +29,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Loading suggest_release.py must not leave a __pycache__ folder in the checkout:
+# the skill-bump workflow treats any new file as a change.
+sys.dont_write_bytecode = True
+
 REPO = Path(__file__).resolve().parent.parent
 SKILLS_DIR = REPO / "skills"
 CHANGELOG = SKILLS_DIR / "versions.md"

@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # keep the checkout free of __pycache__
+
 HERE = Path(__file__).resolve().parent
 
 CHANGELOG = """# Skill versions & changelog
