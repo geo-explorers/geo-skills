@@ -7,6 +7,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 ---
 
 
+### geo-submission-review — 0.7.4
+- 2026-10-20 · Make Geo and Notion Accepted summaries lead with accurate unique story/item counts and specific brief rundowns. Retain the reviewed toggle and add separately counted accepted, rejected and requiring-changes lists with captured titles/links, truthful empty groups, explicit accepted-with-repairs overlap and unaccepted correction returns separate from independent rejection. Preserve review hashes/keys, verified reports, human feedback and runtime configuration; formatting upgrades never enqueue historical rewrites. Add classification, count, linking and preservation regression coverage.
+
 ### geo-submission-review — 0.7.3
 - 2026-10-19 · Bring the previously shared v0.7.2 package from `all-skills` into the protected `main` library with the approved Notion layout fix: exactly three concise Accepted / Needs correction / Next steps bullets, complete Geo-compatible findings table, and a final collapsed Submissions reviewed list. Preserve human Editor feedback, full evidence, review keys and metadata; retain safe duplicate/retry behavior and gate explicit single-page format updates. Geo rendering is unchanged. Includes the portable runner, templates, references and 97 offline regression tests; local identity/configuration/history and credentials stay outside the skill.
 
@@ -102,6 +105,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## actionable/
 
+### geo-clean — 0.5.2
+- 2026-10-19 · **Hard rule 5 matches what the helpers do** (audit finding #19). It required `from.slice(0,16) + to.slice(0,16)` for relation entities created during merges, but every `src/` helper that re-points a relation (merge, move, backlink migration, property-id change) and big-merge.md keep the old edge's `entityId`; following the rule by hand would have given re-pointed relations new, empty relation entities. The rule now says so, and a relation that never existed before takes geo-claim-grouping's typed scheme (its hard rule 6) instead of the retired untyped one, which gave two relation types between the same pair one relation entity. Published ids are never regenerated; copies still mint fresh relation entities.
+
 ### geo-publish — 0.12.1
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
 
@@ -110,6 +116,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ### geo-clean — 0.5.1
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.
+
+### geo-claim-grouping — 0.7.2
+- 2026-10-20 · **Two wording fixes** (audit finding #18). (1) The ops-script step listed the existing-edge check as "both directions"; HARD RULE 7 and `references/ops-script-template.md` check the SAME direction only, because an either-direction check suppresses intentional mirror edges on reruns. (2) Gate 4's similarity bar was labelled the "recommended default" while the step-2 warning calls the broad bar the mistake the 2026-08-12 review corrected; it is now labelled step-1 recall only, since step 2 re-adjudicates every pair against the strict brackets. No behaviour change.
 
 ### geo-claim-grouping — 0.7.1
 - 2026-10-19 · **Repository renamed.** References to `content-management` now say `geo-skills`, the library's new name. Wording only; no behaviour change.

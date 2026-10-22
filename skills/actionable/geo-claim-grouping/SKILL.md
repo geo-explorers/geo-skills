@@ -2,7 +2,7 @@
 name: geo-claim-grouping
 description: Group Claim entities in Geo via the team's two-step process — step 1 links every adjudicated pair with Related claims (the initial grouping), step 2 assigns established groups to their corresponding brackets (Duplicate claims, Similar claims, Supporting/Opposing arguments) under the strict bracket definitions. Runs the bundled read-only discovery script to generate scored candidate claim pairs for a space, a page/tab of claims, or one seed claim — optionally pooling other spaces for cross-space matches — adjudicates every pair, dry-runs an ops script reading an editor-approved decisions file, and publishes held-for-review proposals only on an explicit publish. Triggers on "claim grouping", "group claims", "claim brackets", "related claims", "duplicate claims", "similar claims", "group related claims", "link similar claims", "assign similar claims", "claims like this one", "claim similarity pass", "claim relations pass", "which claims are similar to".
 metadata:
-  version: "0.7.1"
+  version: "0.7.2"
 ---
 
 # Geo Knowledge Graph — Claim Grouping (Related / Duplicate / Similar / Arguments)
@@ -128,7 +128,7 @@ Reply **go** to authorize the dry-run. (Then **publish** — a separate reply �
 
 **Gate 4 — Parameters (HARD STOP on first run in a space).**
 
-> Pilot parameters — confirm: (1) **direction**: `both` (mirrored A→B and B→A — recommended default, editor decision 2026-08-04: each claim's page lists its similar claims; 2× ops) or `one` (single canonical edge, from = lexically smaller ID; halves the ops, reverse visible only via backlinks); (2) **similarity bar**: `assertion-family-broad` (recommended default, editor decision 2026-08-05) — same assertion family PLUS tightly-coupled claims on the same specific event/process/debate question; or `assertion-family-strict` (the narrower 08-04 bar — near-restatements only); (3) **confidence floor**: `high` (recommended — medium-confidence pairs stay in the report as editor calls). Reply with choices or `defaults`.
+> Pilot parameters — confirm: (1) **direction**: `both` (mirrored A→B and B→A — recommended default, editor decision 2026-08-04: each claim's page lists its similar claims; 2× ops) or `one` (single canonical edge, from = lexically smaller ID; halves the ops, reverse visible only via backlinks); (2) **similarity bar — step-1 recall only** (it picks which pairs get adjudicated; step 2 re-adjudicates each against the strict brackets, so it never decides `Similar claims` — see ⚠️ above): `assertion-family-broad` (default, editor decision 2026-08-05) — same assertion family PLUS tightly-coupled claims on the same specific event/process/debate question; or `assertion-family-strict` (the narrower 08-04 bar — near-restatements only); (3) **confidence floor**: `high` (recommended — medium-confidence pairs stay in the report as editor calls). Reply with choices or `defaults`.
 
 **Gate 5 — Volume.** Adjudication batches cap at 80 pairs (quality over throughput — remaining candidates persist in `candidates.json` for the next campaign). Planned ops > 200 in one proposal → ask before splitting. Never raise the cap to "finish faster".
 
@@ -163,7 +163,7 @@ The two most load-bearing calls:
 ## Script generation rules (Stage D)
 
 - File: `scripts/<YYYY-MM-DD>-claim-grouping-<slug>.ts`; artifacts into the campaign dir `scripts/<date>-claim-grouping-<slug>/`. One file, one campaign.
-- Copy the annotated template from [`references/ops-script-template.md`](references/ops-script-template.md) — imports (`Graph` from the SDK; `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds` from `src/functions.ts`), runtime read of `decisions.json`, the per-pair check sequence (liveness → existing-edge both directions → `relation(id:)` collision), `Graph.createRelation({ id, fromEntity, toEntity, type }).ops`, `printOps` + `decisions.dryrun.json`, `DRY_RUN` guard, publish tail with proposal URL.
+- Copy the annotated template from [`references/ops-script-template.md`](references/ops-script-template.md) — imports (`Graph` from the SDK; `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds` from `src/functions.ts`), runtime read of `decisions.json`, the per-pair check sequence (liveness → existing edge in the SAME direction, HARD RULE 7 → `relation(id:)` collision), `Graph.createRelation({ id, fromEntity, toEntity, type }).ops`, `printOps` + `decisions.dryrun.json`, `DRY_RUN` guard, publish tail with proposal URL.
 - Reuse, don't reimplement: `src/functions.ts` (`gql` retries 5xx/429/transients up to 50×; `publishOps` resolves personal-vs-DAO routing and returns the proposalId).
 - No other op kinds, ever (HARD RULE 10). Rerun of the dry-run must be byte-identical (zero drift) before `publish` is offered.
 

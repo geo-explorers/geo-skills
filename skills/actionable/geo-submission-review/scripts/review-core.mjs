@@ -221,24 +221,62 @@ function recipientAssessment(review){
 }
 const recipientDate = timestamp => new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(timestamp));
 export const usesRoutineIntroduction = c => c.family==='routine'&&['news','x','blog'].includes(c.kind)&&new Set(c.itemIds??[]).size>1;
+// Presentation-only groups: never mutate the recorded review or its identity.
+export function recipientGroups(c){
+  const groups={accepted:[],rejected:[],changes:[]};
+  const coverage=c.review?.coverage??[],ids=[...new Set(c.itemIds??coverage.map(r=>r.itemId))];
+  if(coverage.length!==ids.length||new Set(coverage.map(r=>r.itemId)).size!==coverage.length||coverage.some(r=>!ids.includes(r.itemId)))throw Error('Recipient classifications need exactly one assessment per scoped item');
+  for(const itemId of ids){
+    const row=coverage.find(r=>r.itemId===itemId),selection=row.selection?.outcome;
+    const accepted=selection?selection==='qualifies':row.outcome==='meets_requirements';
+    const repairEligible=(c.review.findings??[]).some(f=>f.itemId===itemId&&f.repairEligible===true);
+    // A recorded correction return can fail today's selection without being an
+    // independent rejection. Never promote it to accepted before the repair.
+    const correctionReturn=row.outcome==='needs_correction'&&repairEligible;
+    const rejected=(selection?selection==='does_not_qualify':row.outcome==='does_not_meet_requirements')&&!correctionReturn;
+    const repairs=!rejected&&(row.outcome==='needs_correction'||repairEligible);
+    if(!accepted&&!rejected&&!repairs)throw Error('Recipient item decision still needs investigation');
+    const item={...row,accepted,rejected,repairs};
+    if(accepted)groups.accepted.push(item);
+    if(rejected)groups.rejected.push(item);
+    if(repairs)groups.changes.push(item);
+  }
+  return groups;
+}
+export function acceptanceSummary(c,items={}){
+  const groups=recipientGroups(c),rows=groups.accepted,n=rows.length;
+  const unit=c.kind==='news'?(n===1?'story':'stories'):(n===1?'item':'items');
+  if(!n)return `0 ${unit} recommended for acceptance.`;
+  const short=value=>String(value).replace(/\s+/g,' ').replaceAll('<','‹').replaceAll('>','›').trim();
+  const names=rows.map(r=>short(r.recipientName??items[r.itemId]?.recipientName??items[r.itemId]?.name??r.itemName??r.itemId));
+  const repairs=rows.filter(r=>r.repairs).length,suffix=repairs?` ${repairs} still ${repairs===1?'needs':'need'} correction.`:'';
+  const prefix=`${n} ${unit} recommended for acceptance: `;
+  // The accurate total never changes when a long batch needs a short preview.
+  let shown=names.slice(0,3).map(name=>name.length>65?name.slice(0,62).trimEnd()+'…':name);
+  const rundown=()=>prefix+shown.join('; ')+(n>shown.length?`; and ${n-shown.length} more.`:'.')+suffix;
+  while(shown.length>1&&rundown().length>200)shown.pop();
+  return rundown();
+}
 export function routineIntroduction(c){
   const summary=c.review.recipientSummary;
   let acceptance,rejection,feedback;
-  if(summary){({acceptance,rejection,feedback}=summary);}
+  if(summary){({rejection,feedback}=summary);}
   else{
     const coverage=c.review.coverage??[],passing=coverage.filter(r=>r.selection?.outcome==='qualifies'),failing=coverage.filter(r=>r.selection?.outcome==='does_not_qualify');
     const names=rows=>rows.every(r=>r.recipientName||r.itemName)?rows.map(r=>String(r.recipientName??r.itemName).replace(/\s+/g,' ').trim()).join(', '):null;
-    const selected=names(passing),rejected=names(failing),decisions=c.editorDecisions??[];
+    const rejected=names(failing),decisions=c.editorDecisions??[];
     const passedVotes=passing.length&&passing.every(r=>decisions.some(d=>d.kind==='vote'&&d.status==='verified'&&d.fingerprint===c.fingerprint&&d.itemId===r.itemId&&d.vote==='YES'));
     const published=passedVotes&&passing.every(r=>decisions.some(d=>d.kind==='vote'&&d.status==='verified'&&d.fingerprint===c.fingerprint&&d.itemId===r.itemId&&d.vote==='YES'&&d.executed===true));
     const rejectedVotes=failing.length&&failing.every(r=>decisions.some(d=>d.kind==='vote'&&d.status==='verified'&&d.fingerprint===c.fingerprint&&d.itemId===r.itemId&&d.vote==='NO'));
-    acceptance=passing.length?(published?'Published: ':passedVotes?'Voted to accept; publication is pending: ':'Recommended for acceptance: ')+(selected??'the qualifying submissions')+'.':'None passed the selection review.';
+    // Keep verified governance stages separate from the acceptance recommendation.
+    acceptance=acceptanceSummary(c)+(published?' Confirmed published.':passedVotes?' YES votes recorded; publication is pending.':'');
     rejection=failing.length?(rejectedVotes?'NO votes recorded: ':'Recommended for rejection: ')+(rejected??'the selections that did not meet the requirements')+'. See the findings for the reasons.':'None failed the selection review.';
     const findings=c.review.findings??[],repairs=findings.some(f=>f.repairEligible===true);
     feedback=!reviewReadiness(c).complete?'This review is still in progress.':findings.length?'Please check your work against the bounty requirements and the checks explained in the findings. Could you explain how these issues slipped through your checks? '+(repairs?'Please correct the eligible content issues, check for similar errors throughout this submission, and strengthen your checks to prevent these issues in future work.':'Please strengthen the checks described in the findings for future submissions; no repair is requested for independently rejected work.')+' Open each finding for details.':'No issues requiring correction were found in the reviewed scope.';
   }
+  acceptance??=acceptanceSummary(c);
   for(const text of [acceptance,rejection,feedback])if(typeof text!=='string'||!text.trim()||/[\r\n]/.test(text))throw Error('Routine introduction needs exactly three single-paragraph bullets');
-  return `- **Acceptance:** ${acceptance.trim()}\n- **Rejection:** ${rejection.trim()}\n- **Feedback:** ${feedback.trim()}\n`;
+  return `- **Accepted:** ${acceptance.trim()}\n- **Rejection:** ${rejection.trim()}\n- **Feedback:** ${feedback.trim()}\n`;
 }
 // Decision completeness, separate from exhaustive audits and payment-ledger reconciliation.
 export function reviewReadiness(c){
@@ -265,7 +303,7 @@ export function reportDraft(c){
   const routine=usesRoutineIntroduction(c),introduction=routine?routineIntroduction(c):undefined;
   return {schemaVersion:1,caseId:c.id,fingerprint:c.fingerprint,targetSpaceId:SPACES[c.space].datasets,pageId:c.delivery?.reportId??stableId('submission-report:'+c.id),title,publicationStatus:'draft_only',reviewScope:{itemIds:c.itemIds,kind:c.kind,family:c.family},readiness:reviewReadiness(c),review:c.review,
     introductionLayout:routine?'routine-three-bullets-v1':undefined,introduction,reviewDate:recipientDate(c.review.checkedAt),
-    markdown:routine?introduction+(rows.length?'\n## Review feedback\n\n'+table+'\n':''):`Bounty: [${c.bountyName}](https://www.geobrowser.io/space/${c.spec.spaceId}/${c.bountyId})\n\n${recipientAssessment(c.review)}\n\nLast reviewed: ${recipientDate(c.review.checkedAt)}.\n\n## Proposals reviewed\n\n${proposalLinks.join('\n')}\n\n## Review feedback\n\n${table}\n`,
+    markdown:routine?introduction+(rows.length?'\n## Review feedback\n\n'+table+'\n':''):`Bounty: [${c.bountyName}](https://www.geobrowser.io/space/${c.spec.spaceId}/${c.bountyId})\n\n**Accepted:** ${acceptanceSummary(c)}\n\n${recipientAssessment(c.review)}\n\nLast reviewed: ${recipientDate(c.review.checkedAt)}.\n\n## Proposals reviewed\n\n${proposalLinks.join('\n')}\n\n## Review feedback\n\n${table}\n`,
     findings:rows,editorDecisions:c.editorDecisions};
 }
 
@@ -319,7 +357,7 @@ export function prepareReportDraft(c,draftFile){
   return {draft:{...draft,publicationAction:readyToPublish?(c.delivery.reportId?'update':'create'):'none'},changed,readyToPublish};
 }
 
-// Internal only. Recipient generators never call or embed this tally.
+// Internal scoring tally. Recipient acceptance counts use recipientGroups instead.
 export function editorSummary(c){
   if(c.family!=='routine'||!['news','x','blog'].includes(c.kind)||new Set(c.itemIds).size<2)return null;
   if(!c.review||c.review.fingerprint!==c.fingerprint)throw Error('No current recorded review');

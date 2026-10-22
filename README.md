@@ -47,7 +47,7 @@ test -f .env && grep -qE '^(GEO_PRIVATE_KEY|PK_SW)=' .env && echo ok || echo "mi
 
 ### 3. Put the skills where your assistant looks (agent can do this)
 
-Skills live in `skills/actionable/` (they write to Geo, need the key) and `skills/non-actionable/` (read-only, no key).
+Skills live in `skills/actionable/` (they write to Geo, need the key) and `skills/non-actionable/` (never write to Geo, no key; four write to Notion, see `skills/README.md`).
 
 | Platform | How to install |
 |---|---|
@@ -190,7 +190,7 @@ MAINTAINERS.md              # What belongs here, how to change a skill, how to c
 MD-FILES.md                 # Manifest of every .md file in this repo
 skills/
   actionable/               # Skills that write to Geo (need GEO_PRIVATE_KEY)
-  non-actionable/           # Read-only skills (no key)
+  non-actionable/           # Skills that never write to Geo (no key); some write to Notion
   SKILL-VERSIONS.json       # Approved fingerprint of every skill, checked by CI
 skill-dev/                  # Linter, manifest tools, local install script
 lib/gql.mjs                 # Canonical zero-dependency GraphQL client

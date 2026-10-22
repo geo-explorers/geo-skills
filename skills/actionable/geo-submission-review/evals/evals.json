@@ -49,8 +49,8 @@
     },
     {
       "id": 5,
-      "prompt": "Format feedback for a fictional historical-source submission from these already verified findings; use only this fixture and write nothing externally. Findings and supplied evidence: A misattributes a court's judgment about State B to State A, altering its main claim (judgment J, operative section); B reports 800 victims where the event report lists 80 (report R, table 2); C1–C3 omit the source-specific rationale required in the bounty (records C1–C3, Rationale fields blank); D says the publisher has no peer review although its policy says scholarly titles are anonymously reviewed (policy P, Review section); E states an allegation as a conviction (docket E, case pending); F has a minor founding-year typo unrelated to the cited material; G is a cosmetic capitalization inconsistency. The editor wants a short page to forward, with all evidence locators preserved. Keep other findings in an internal note.",
-      "expected_output": "Covers all six verified error types A–F in the exact four-column format, with one representative of C1–C3. Keeps optional cosmetic G internal because no violated criterion was established. Includes a neutral process question, a useful correction and prevention check for each verified category, including minor factual F, without assuming the cause. Preserves supplied evidence locators without inventing URLs.",
+      "prompt": "Format feedback for a fictional historical-source submission from these already verified findings; use only this fixture and write nothing externally. Findings and supplied evidence: A misattributes a court's judgment about State B to State A, altering its main claim (judgment J, operative section); B reports 800 victims where the event report lists 80 (report R, table 2); C1\u2013C3 omit the source-specific rationale required in the bounty (records C1\u2013C3, Rationale fields blank); D says the publisher has no peer review although its policy says scholarly titles are anonymously reviewed (policy P, Review section); E states an allegation as a conviction (docket E, case pending); F has a minor founding-year typo unrelated to the cited material; G is a cosmetic capitalization inconsistency. The editor wants a short page to forward, with all evidence locators preserved. Keep other findings in an internal note.",
+      "expected_output": "Covers all six verified error types A\u2013F in the exact four-column format, with one representative of C1\u2013C3. Keeps optional cosmetic G internal because no violated criterion was established. Includes a neutral process question, a useful correction and prevention check for each verified category, including minor factual F, without assuming the cause. Preserves supplied evidence locators without inventing URLs.",
       "assertions": [
         "Includes all six verified error categories; no five-row cap or catch-all.",
         "Shows only one named C example; keeps repeated occurrences internal.",
@@ -196,6 +196,17 @@
         "No duplicate history entry for an unchanged review.",
         "Keeps private scoring out of shared history.",
         "Preserves publication and authorization boundaries."
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Fictional offline rendering only. Three news items in one proposal: Atlas wallet launch qualifies; Council staking rules qualifies but its date metadata needs repair; Earlier wallet announcement is a duplicate and remains rejected even if its metadata is repaired. Draft Geo/Notion Accepted wording and the final Notion lists. Do not write externally.",
+      "expected_output": "Accepted: 2 stories recommended for acceptance, followed by a brief specific rundown of Atlas and Council and a clear note that one still needs correction. Preserve reviewed and add accepted (2), rejected (1), requiring changes (1) collapsed lists with actual item titles and captured links. Council overlaps accepted and changes; do not sum the groups. Recommendations do not mean approval, publication or payment.",
+      "assertions": [
+        "Counts items, not the single proposal or finding rows.",
+        "Uses actual story names rather than generic categories or Review recommendation.",
+        "Keeps Council accepted while identifying its repair, and excludes the independently rejected duplicate from repair requests.",
+        "No historical review rewrite or external action."
       ]
     }
   ]
