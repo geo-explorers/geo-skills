@@ -13,3 +13,4 @@ output
 snapshots/
 logs/
 tmp/
+__pycache__/

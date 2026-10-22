@@ -37,16 +37,13 @@ Two rules from that guide that are easy to get wrong:
 
 ## Changing, adding or releasing a skill
 
-This applies when the task is to **edit the skills themselves**, not to use them. Read [`MAINTAINERS.md`](MAINTAINERS.md) first: "Changing a skill", "Adding a skill" and "Cutting a release". The short version:
+This applies when the task is to **edit the skills themselves**, not to use them. Read [`MAINTAINERS.md`](MAINTAINERS.md) first: "Changing a skill", "Adding a skill" and "How releases happen". The short version:
 
 - **Every change goes through a pull request.** `main` is protected: the required `verify` check must pass and a teammate must approve. Never push to `main`.
-- **Updating a skill**, all in the same pull request:
-  1. Lint it: `python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table`.
-  2. Bump `version` in its `SKILL.md`: patch for wording or a fix, minor for a new capability, major for a breaking change.
-  3. Add a dated line for it in `skills/versions.md`: what changed and why.
-  4. Update its version in `MD-FILES.md`, and add a row for any new Markdown file.
-  5. Commit the change, then re-approve it: `python3 skill-dev/skill_versions.py generate`, then `python3 skill-dev/skill_versions.py verify` and `python3 skill-dev/check_md_manifest.py` must both pass. Commit `skills/SKILL-VERSIONS.json`.
-- **Adding a skill** is the same, plus: put it in `skills/actionable/` if it can change Geo, otherwise in `skills/non-actionable/`; give `SKILL.md` frontmatter with `name`, a `description` full of trigger phrases, and `version: 0.1.0`; add a row to the index in `skills/README.md`; add a section for it in `skills/versions.md`; and add a row to the routing table above if editors should be sent to it by default. `verify` reports it as `UNLISTED` until the manifest is regenerated.
+- **Versions are automatic. Don't edit `version:` lines, `skills/versions.md` headings, the versions in `MD-FILES.md` or `skills/SKILL-VERSIONS.json` by hand.** The `skill-bump` workflow does all four in the pull request, as one bot commit. It bumps by patch; if the change is bigger than a fix, tell the developer to label the pull request `bump:minor` (new capability) or `bump:major` (breaking change).
+- **Updating a skill:** lint it (`python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table`), add a row to `MD-FILES.md` for any new Markdown file, and open the pull request. The first `verify` run is red (`DRIFT`) until the bot's commit lands, about a minute later: expected, don't "fix" it by regenerating. Afterwards, the bot's line in `skills/versions.md` may be reworded to say what changed and why.
+- **Adding a skill** is the same, plus: put it in `skills/actionable/` if it can change Geo, otherwise in `skills/non-actionable/`; give `SKILL.md` frontmatter with `name`, a `description` full of trigger phrases, and `version: 0.1.0`; add a row to the index in `skills/README.md` and to `MD-FILES.md`; and add a row to the routing table above if editors should be sent to it by default.
 - **If `verify` reports `DRIFT` on a skill you did not mean to change, undo that change. Do not regenerate.** Regenerating approves whatever changed.
 - **A skill built for one agent starts in that agent's folder** in `geo-agents` (`agents/<name>/`), not here. It moves into this library, as a new skill, once it is stable and evaluated.
-- **A change reaches the agents only through a release.** A maintainer tags `main` (`vX.Y.Z`), and `geo-agents` takes that tag in its own pull request with `node tools/sync-skills.mjs --ref vX.Y.Z`. Never edit the copies under `geo-agents/.claude/skills/`. Never create, move or delete a release tag yourself.
+- **Releases are automatic, so merging a skill pull request ships it.** On each merge to `main` that changed a skill, the `release` workflow computes the version, tags `vX.Y.Z`, publishes a release page and notifies `geo-agents`, which vendors it through a bot pull request that merges itself. Before a skill pull request is merged, run `python3 skill-dev/suggest_release.py --to HEAD --no-fetch` and tell the developer what release merging will produce.
+- **Never create, move or delete a tag or a release,** and never edit the copies under `geo-agents/.claude/skills/`. Only the release workflow tags; a tag ruleset refuses everyone else.

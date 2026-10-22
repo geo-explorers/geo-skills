@@ -2,23 +2,19 @@
 
 Developer-facing tools for **building** Geo skills. **Not shipped to editors** — editors only pull `../skills/`.
 
-## ✅ Before you commit a skill change (every time)
+## ✅ Changing a skill
 
-Any add/edit to a skill under `../skills/` must end with these, or **CI fails the PR**:
+Lint it, open a pull request, and let the bot do the versioning:
 
 ```bash
-# 1. (recommended) lint the skill against the authoring standard
 python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table
-
-# 2. (required) bump version + add a versions.md changelog bullet  — see ../skills/versions.md
-
-# 3. (required) re-approve: commit the skill change, then regenerate the manifest and commit it IN THE SAME PULL REQUEST
-python3 skill-dev/skill_versions.py generate
-python3 skill-dev/skill_versions.py verify        # must print "✅ All skills match"
-git add skills/SKILL-VERSIONS.json
 ```
 
-Skip step 3 and CI's `verify-skills` job rejects the PR as `DRIFT` (you changed a skill) or `UNLISTED` (you added one). The manifest **must** be committed in the same pull request as the skill change. The full procedure, including adding a new skill, is in [`../MAINTAINERS.md`](../MAINTAINERS.md). Details below.
+- **Don't edit `version:` lines, `skills/versions.md` headings or `skills/SKILL-VERSIONS.json` by hand.** The `skill-bump` workflow runs `bump_skills.py` on the pull request and pushes one commit with all of them. Patch by default; label the pull request `bump:minor` or `bump:major` for more.
+- The first `verify` on a skill change is red (`DRIFT` or `UNLISTED`) until the bot's commit lands, about a minute later. That is expected.
+- Merging releases the library automatically (`release` workflow). To see what merging will release: `python3 skill-dev/suggest_release.py --to HEAD --no-fetch`.
+
+The full procedure, including adding a new skill, is in [`../MAINTAINERS.md`](../MAINTAINERS.md). Details below.
 
 ---
 
@@ -42,6 +38,25 @@ python3 skill-dev/check_md_manifest.py --list   # counts
 ```
 
 A stale manifest is worse than none, because people check it instead of the files. Add a new `.md` to the right section in the same commit that creates it.
+
+## `bump_skills.py` — per-skill version bumps (the bot)
+
+Bumps every skill whose folder differs from a base commit, by one level from its base version, and never lowers a version a person set higher. A new skill keeps its version (`0.1.0` if it has none). For each, it adds the `skills/versions.md` entry and sets the version in `MD-FILES.md`, then regenerates the manifest. A second run changes nothing. The `skill-bump` workflow runs it on every pull request.
+
+```bash
+python3 skill-dev/bump_skills.py --base origin/main --level patch --title "What changed" --dry-run
+python3 skill-dev/test_bump_skills.py       # its tests, against a throwaway repository
+```
+
+## `suggest_release.py` — the next release version
+
+Computes the next library release from the changes since the last `vX.Y.Z` tag, using the rule in `MAINTAINERS.md` ("How releases happen"): major for a removed or renamed skill or a skill's major bump; minor for an added skill, a skill's minor bump, or files outside skill folders added or removed; patch otherwise. A release is needed only when a skill folder changed. The `release` workflow runs it on every merge to `main` and tags the result. It never creates tags itself.
+
+```bash
+python3 skill-dev/suggest_release.py --to HEAD --no-fetch            # what merging this branch releases
+python3 skill-dev/suggest_release.py --from v1.2.0 --to v1.2.1 --json
+python3 skill-dev/test_suggest_release.py                            # its tests
+```
 
 ## `skill_versions.py` — approved-version verification
 

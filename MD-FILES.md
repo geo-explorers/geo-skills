@@ -97,8 +97,8 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 |---|---|
 | `skills/README.md` | What the skills folder is, the actionable/non-actionable split, how to add a skill |
 | `skills/versions.md` | Per-skill changelog: what changed, why, and the evidence. Paired with `SKILL-VERSIONS.json` |
-| `skill-dev/README.md` | Maintainer tooling: version manifest generator, quality linter, `sync-skills.sh` |
-| `MAINTAINERS.md` | What belongs in this repository (the bucket list), how to change a skill, how to cut a release |
+| `skill-dev/README.md` | Maintainer tooling: version manifest generator, version bump bot, release calculator, quality linter, `sync-skills.sh` |
+| `MAINTAINERS.md` | What belongs in this repository (the bucket list), how to change a skill, how releases happen, the release automation and its tokens |
 | `MD-FILES.md` | This manifest |
 | `skill-dev/skill-quality-check/SKILL.md` | The linter itself, packaged as a skill |
 
@@ -108,7 +108,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 
 - **CI enforces this file.** `python3 skill-dev/check_md_manifest.py` fails if a tracked `.md` is missing here, if a listed file no longer exists, or if a `SKILL.md` version differs from the one recorded above. It runs on every pull request as part of the required `verify` check, so run it before you push.
 - **Adding an MD file:** add a row here in the same pass, and a row in the Notion catalog only if agents outside this repo need to find it.
-- **Changing a skill:** bump `version` in its `SKILL.md`, add a line to `skills/versions.md`, regenerate `skills/SKILL-VERSIONS.json`, and update the version in section 3.
+- **Changing a skill:** the `skill-bump` workflow bumps `version` in its `SKILL.md`, adds the `skills/versions.md` entry, updates the version above and regenerates `skills/SKILL-VERSIONS.json`, in the pull request. A new skill's rows here are still added by hand.
 - **Before trusting an install:** compare the installed `SKILL.md` version with this file. A mismatch means the install is stale — run `bash skill-dev/sync-skills.sh` and restart the host. Two agents running different versions of the same skill will overwrite each other's work.
 
 *Counts on 19 October 2026: **58** tracked `.md` files — 2 entry points, 16 skills, 31 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*

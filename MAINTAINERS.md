@@ -2,7 +2,7 @@
 
 For the people who maintain this repository. Editors and agents do not need this file.
 
-This repository is a **skills library**. The agents moved to `geo-explorers/geo-agents` in migration step 6. This file records what belongs here and what does not. It also holds the procedures for changing a skill and for cutting a release.
+This repository is a **skills library**. The agents moved to `geo-explorers/geo-agents` in migration step 6. This file records what belongs here and what does not. It also holds the procedures for changing a skill, how releases happen, and the release automation.
 
 ## Bucket list — what belongs in this repository
 
@@ -113,25 +113,27 @@ Working notes from the 9 and 11 October audit sessions. They were the source of 
 
 ## Changing a skill
 
-Every change under `skills/` or `skill-dev/` goes through a pull request. Nothing is pushed straight to `main`.
+Every change under `skills/` or `skill-dev/` goes through a pull request. Nothing is pushed straight to `main`. Versions, changelog headings and the integrity manifest are written by a bot, not by hand.
 
 1. **Branch from `main`** and make the change.
 2. **Lint the skill** against the authoring standard:
    ```bash
    python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table
    ```
-3. **Bump `version`** in the skill's `SKILL.md` frontmatter. Patch for wording or a fix, minor for a new capability, major for a breaking change to how the skill is used.
-4. **Add a dated bullet** for the skill in `skills/versions.md`: what changed and why.
-5. **Update `MD-FILES.md`** if the version changed or a Markdown file was added or removed.
-6. **Commit the change, then re-approve it.** Regenerate the integrity manifest and commit it in the same pull request:
-   ```bash
-   python3 skill-dev/skill_versions.py generate
-   python3 skill-dev/skill_versions.py verify       # must end with "All skills match"
-   python3 skill-dev/check_md_manifest.py           # must end with "matches the repo"
-   ```
-7. **Open the pull request.** It can merge only when the `verify` check passes and another team member has approved. A new commit on the pull request cancels earlier approvals.
+3. **Add a row to `MD-FILES.md`** for any new Markdown file.
+4. **Open the pull request.** If the change is more than a fix, add a label: `bump:minor` for a new capability, `bump:major` for a breaking change to how the skill is used. No label means patch.
+5. **The bot bumps the version.** The `skill-bump` workflow runs `skill-dev/bump_skills.py` and pushes one commit, "Bump skill versions (<level>)", that:
+   - sets each changed skill's `version` to its version on `main` bumped by the level, unless the `SKILL.md` already has a higher one (it never lowers a version);
+   - adds a `### <skill> — <version>` entry to `skills/versions.md` with the pull request's title and number;
+   - updates the skill's version in `MD-FILES.md`;
+   - regenerates `skills/SKILL-VERSIONS.json`.
 
-What the `verify` check proves: every skill folder matches the content fingerprint recorded for it in `skills/SKILL-VERSIONS.json`, and every Markdown file is listed in the manifest. A skill edited without step 6 fails as `DRIFT`; a new skill fails as `UNLISTED`. The fingerprint covers the skill folders only, not the shared code in `src/`, `lib/` and `scripts/`.
+   It then starts the `verify` check on its own commit. The first `verify`, on your push, is red (`DRIFT` or `UNLISTED`) until then: expected. Reword the bot's changelog line to say what changed and why if you like; keep the heading.
+6. **Review and merge.** It can merge only when the `verify` check passes and another team member has approved. A new commit on the pull request, including the bot's, cancels earlier approvals. Merging releases the library (see "How releases happen"): run `python3 skill-dev/suggest_release.py --to HEAD --no-fetch` on the branch to see which release that will be.
+
+Changing a label after the bot ran re-runs it. Removing a label never lowers a version the bot already set; lower it by hand if needed. Pull requests from forks can't be pushed to: their authors bump `version`, add the changelog entry, update `MD-FILES.md` and run `python3 skill-dev/skill_versions.py generate` by hand.
+
+What the `verify` check proves: every skill folder matches the content fingerprint recorded for it in `skills/SKILL-VERSIONS.json`, and every Markdown file is listed in the manifest. The fingerprint covers the skill folders only, not the shared code in `src/`, `lib/` and `scripts/`.
 
 ### Adding a skill
 
@@ -139,9 +141,10 @@ Everything in "Changing a skill" applies, plus:
 
 - **Pick the tier.** `skills/actionable/` if the skill can change Geo, otherwise `skills/non-actionable/`.
 - **Frontmatter.** `SKILL.md` starts with `name`, a `description` that carries the phrases that should trigger it, and `version: 0.1.0`.
-- **List it.** Add a row to the index in `skills/README.md`, a section in `skills/versions.md`, and a row in `MD-FILES.md` for every new Markdown file.
+- **List it.** Add a row to the index in `skills/README.md` and a row in `MD-FILES.md` for every new Markdown file. The bot adds its `skills/versions.md` entry.
 - **Route to it,** if editors should be sent to it by default: add a row to the routing table in `CLAUDE.md`.
-- **Expect `UNLISTED`.** `verify` reports the new skill as unlisted until the manifest is regenerated in step 6.
+- **Expect `UNLISTED`.** `verify` reports the new skill as unlisted until the bot regenerates the manifest.
+- **It releases as a minor version** of the library at least, because a skill was added.
 
 ### A skill built for one agent
 
@@ -151,39 +154,48 @@ A skill that only one agent needs starts in that agent's folder in `geo-agents` 
 
 - **Nothing downloads skills while it runs.** No agent fetches or overwrites skill files during a task. If a skill is missing, the agent stops and asks a person.
 - **A person updates a local install**, from a checkout of a release tag: `bash skill-dev/sync-skills.sh`, then restart the app.
-- **`geo-agents` updates through its own pull request.** It keeps a copy of the skills pinned to one release tag and one commit, with a fingerprint per file in `skills.lock.json`. Moving to a newer release is a reviewed pull request in that repository.
+- **`geo-agents` updates through its own pull request, opened and merged by a bot.** It keeps a copy of the skills pinned to one release tag and one commit, with a fingerprint per file in `skills.lock.json`. Each release notifies it; its `sync-skills-release` workflow vendors the release and merges once its own `verify-vendored` check passes. Editors' checkouts then offer the update at their next Claude Code session.
 
-## Cutting a release
+## How releases happen
 
-A release is a signed tag on `main`. It is the only thing consumers pin to, so it is cut on purpose, by a person, from a commit where the check is green.
+A release is an annotated tag `vX.Y.Z` on `main`, plus a GitHub Release page. It is the only thing consumers pin to. **Nobody tags by hand.** The `release` workflow (`.github/workflows/release.yml`) does it on every merge to `main`:
 
-1. **Pick the commit.** It must be on `main` with a passing `verify` run. Check locally from a clean checkout of that commit:
-   ```bash
-   python3 skill-dev/skill_versions.py verify
-   python3 skill-dev/check_md_manifest.py
-   ```
-2. **Pick the version.**
+1. **Gate.** It re-runs `skill_versions.py verify`, `check_md_manifest.py` and the release calculator's tests on the merged commit. No release from a red commit.
+2. **Decide.** `skill-dev/suggest_release.py` compares the commit with the last release tag. A release is made only when a file inside a skill folder changed. Merges that change only tooling, docs or CI end green with "waiting for a skill change"; their changes count toward the next release's version.
+3. **Version.** The highest of these signals:
 
    | Bump | When |
    |---|---|
-   | Major | A skill is removed or renamed, or the way a skill is used changes in a breaking way |
-   | Minor | A skill is added or gains a capability, or files outside the skill folders are added or removed |
-   | Patch | Fixes and wording only |
+   | Major | A skill is removed or renamed, or a skill's own version had a major bump |
+   | Minor | A skill is added, a skill's own version had a minor bump, or files outside the skill folders are added or removed |
+   | Patch | Anything else |
 
    `v1.0.0` is the library as it stood before the agents moved out. `v1.1.0` follows the cut-over in migration step 6.
-3. **Tag and push.** The tag is signed, so signing must be set up in your git configuration first.
-   ```bash
-   git tag -s vX.Y.Z -m "geo-skills vX.Y.Z" <commit>
-   git push origin vX.Y.Z
-   ```
-4. **Record the commit.** A tag can be moved; a commit hash cannot. Print the full 40-character hash and put it in the release notes:
-   ```bash
-   git rev-list -n 1 vX.Y.Z
-   ```
-5. **Write the release notes** on GitHub for that tag: the full commit hash, each skill with its version (from `skills/SKILL-VERSIONS.json`), and what changed since the previous release (from `skills/versions.md`).
-6. **Never move or delete a published tag.** A mistake in a release is fixed by the next version.
+4. **Tag** `vX.Y.Z` on the merged commit, annotated and unsigned, as the release app's bot user.
+5. **Release page** with the full commit hash, each changed skill with its `skills/versions.md` entries, and every skill's version.
+6. **Notify `geo-agents`** through GitHub's repository-dispatch API (`{tag, commit}`). Its `sync-skills-release` workflow vendors the release.
 
-After a release, `geo-agents` is updated by a pull request there that points its lock file at the new tag and commit.
+Rules:
+- **Exact `vX.Y.Z` only.** Suffixed tags such as `v1.2.0-test` are never created and never synced.
+- **Never move or delete a published tag.** A mistake in a release is fixed by the next version.
+- **Manual run:** Actions → release → Run workflow, on `main`. It releases even without a skill change; `level` overrides the computed level (a lower one prints a warning); `dry_run` only prints what would happen.
+- **Re-running a failed run is safe.** A commit that is already tagged only gets its release page and notification again.
+- **Preview** what merging a branch will release: `python3 skill-dev/suggest_release.py --to HEAD --no-fetch`.
+
+## Release automation
+
+The automation acts as one **GitHub App** owned by the `geo-explorers` organisation, not as a person. There are no personal access tokens: each workflow run asks the app for a token that expires after one hour and carries only the permissions that job needs.
+
+| Piece | Where | What it does |
+|---|---|---|
+| Release app | Organisation settings → Developer settings → GitHub Apps. Installed on `geo-skills` and `geo-agents` only | Repository permissions: Contents read and write, Pull requests read and write (Metadata read comes with them). No webhook. The only actor allowed to create `v*` tags here, and to merge in `geo-agents` without an approval |
+| `RELEASE_APP_ID` (variable) and `RELEASE_APP_PRIVATE_KEY` (secret) | This repository's environment `release`, and `geo-agents`' environment `skills-sync`. Both environments: deployment branch `main` only | The workflows turn them into a one-hour token with `actions/create-github-app-token`. Here: Contents write on both repositories (tag, release page, notify `geo-agents`). In `geo-agents`: Contents and Pull requests write there only |
+| Tag ruleset | This repository, Settings → Rules → Rulesets | Targets `refs/tags/v*`. Restricts creation, update and deletion. Bypass: the release app only |
+| Labels | This repository | `bump:minor` and `bump:major`, read by the `skill-bump` workflow |
+
+The `skill-bump` workflow needs no app: it pushes with the workflow's built-in token and then starts `verify` itself.
+
+**Rotating the private key.** The key does not expire, so rotate it once a year, or at once if it may have leaked: in the app's settings, generate a new private key, paste it into both environment secrets, check that the next `release` or `sync-skills-release` run is green, then delete the old key in the app's settings. A deleted or wrong key shows as a red run at the "Get a one-hour token" step; after fixing it, re-run that run.
 
 ## Branch protection on `main`
 

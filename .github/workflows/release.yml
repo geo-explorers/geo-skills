@@ -1,0 +1,164 @@
+name: release
+
+# Tags a geo-skills release automatically. Nobody tags by hand: a tag ruleset
+# lets only the org's release GitHub App create v* tags.
+#
+# No personal tokens: each run asks the app for a token that lasts one hour and
+# can only write contents in geo-skills and geo-agents. The app's id is the
+# variable RELEASE_APP_ID and its private key the secret RELEASE_APP_PRIVATE_KEY,
+# both in the environment `release`, which only main can use.
+#
+# On every merge to main:
+#   1. re-runs the integrity checks on the merged commit (no release from red);
+#   2. computes the version with skill-dev/suggest_release.py;
+#   3. if a skill folder changed since the last release: tags vX.Y.Z (annotated,
+#      unsigned), publishes a GitHub Release with notes, and notifies geo-agents,
+#      whose sync-skills-release workflow vendors it through a bot pull request.
+# Merges that change no skill end green with "waiting for a skill change"; their
+# changes count toward the next release's version.
+#
+# The notification must come from this job: a tag pushed from a workflow does
+# not start other workflows, and nothing else listens for tags.
+#
+# Manual run (Actions → release → Run workflow, on main): release now even with
+# no skill change, optionally with a level override, or preview with dry_run.
+# Re-running a run is safe: a commit that is already tagged only gets its
+# release page and notification again.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Version level (auto = computed)'
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
+      dry_run:
+        description: 'Only print what would be released'
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: release
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: No release from a red commit
+        env:
+          REQUIRE_RELEASE_TAGS: "1"
+        run: |
+          python3 skill-dev/skill_versions.py verify
+          python3 skill-dev/check_md_manifest.py
+          python3 skill-dev/test_suggest_release.py
+
+      - name: Compute the release
+        id: plan
+        env:
+          LEVEL: ${{ github.event_name == 'workflow_dispatch' && inputs.level || 'auto' }}
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          args=(--to "$GITHUB_SHA" --no-fetch --json)
+          [ "$LEVEL" != auto ] && args+=(--level "$LEVEL")
+          python3 skill-dev/suggest_release.py "${args[@]}" > "$RUNNER_TEMP/release.json"
+          python3 - <<'PY'
+          import json, os
+          r = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "release.json")))
+          manual = os.environ["MANUAL"] == "true"
+          open(os.path.join(os.environ["RUNNER_TEMP"], "notes.md"), "w").write(r["releaseNote"])
+          for w in r["warnings"]:
+              print(f"::warning::{w}")
+          print("\n".join(r["reasons"]) or "No changes since the last release.")
+          if r["already_released"]:
+              action, version = "republish", r["already_released"]
+              print(f"{r['commit']} is already released as {version}: refreshing its release page and notification.")
+          elif r["released_later_in"]:
+              action, version = "stop", ""
+              print(f"Already part of {r['released_later_in']}. Nothing to do.")
+          elif r["release_needed"] or manual:
+              action, version = "release", r["suggested"]
+              print(f"Releasing {version} ({r['level']}).")
+          else:
+              action, version = "stop", ""
+              print(f"No skill changed since {r['from']}: waiting for a skill change. The next release is at least {r['suggested']}.")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"action={action}\nversion={version}\n")
+          PY
+
+      - name: Dry run
+        if: inputs.dry_run && steps.plan.outputs.action != 'stop'
+        run: |
+          echo "Dry run: would ${{ steps.plan.outputs.action }} ${{ steps.plan.outputs.version }}. Release note:"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Get a one-hour token from the release app
+        if: steps.plan.outputs.action != 'stop' && !inputs.dry_run
+        id: app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: geo-skills,geo-agents
+          permission-contents: write
+
+      - name: Tag
+        if: steps.plan.outputs.action == 'release' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          # Act as the app's bot user, <slug>[bot].
+          bot="${APP_SLUG}[bot]"
+          id=$(gh api "users/${APP_SLUG}%5Bbot%5D" --jq .id)
+          git -c user.name="$bot" -c user.email="$id+$bot@users.noreply.github.com" \
+            tag -a "$VERSION" -m "geo-skills $VERSION" "$GITHUB_SHA"
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$auth"
+          git -c http.extraheader="AUTHORIZATION: basic $auth" \
+            push "https://github.com/$GITHUB_REPOSITORY.git" "refs/tags/$VERSION"
+
+      - name: Release page
+        if: steps.plan.outputs.action != 'stop' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "The release page for $VERSION already exists."
+          else
+            gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "geo-skills $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
+
+      - name: Notify geo-agents
+        if: steps.plan.outputs.action != 'stop' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          commit=$(git rev-parse "refs/tags/$VERSION^{commit}" 2>/dev/null || git ls-remote https://github.com/$GITHUB_REPOSITORY.git "refs/tags/$VERSION^{}" | cut -f1)
+          gh api repos/geo-explorers/geo-agents/dispatches \
+            -f event_type=geo-skills-release -f "client_payload[tag]=$VERSION" -f "client_payload[commit]=$commit"
+          echo "Notified geo-agents: $VERSION @ $commit"

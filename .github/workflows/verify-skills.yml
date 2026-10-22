@@ -8,10 +8,14 @@ name: Verify skill integrity
 # This is a REQUIRED status check on main, so it runs on every pull request with
 # no path filter: a required check that is skipped never reports, and the pull
 # request would wait on it forever.
+#
+# workflow_dispatch: the skill-bump workflow starts this run itself after it
+# pushes a version bump, because a push made by a workflow starts no workflows.
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   verify:
@@ -27,6 +31,12 @@ jobs:
         run: python3 skill-dev/skill_versions.py verify
       - name: Verify MD-FILES.md matches the repo
         run: python3 skill-dev/check_md_manifest.py
+      - name: The release calculator gives the right versions
+        env:
+          REQUIRE_RELEASE_TAGS: "1"
+        run: python3 skill-dev/test_suggest_release.py
+      - name: The version bump bot behaves
+        run: python3 skill-dev/test_bump_skills.py
       # The retired host refuses connections; the live one is api-testnet.geobrowser.io.
       # geo-discovery is exempt until the PR #38 decision (audit finding #17).
       - name: No retired Geo endpoint in shipped code
