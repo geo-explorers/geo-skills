@@ -2,11 +2,7 @@
 
 Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable integrity: approved commit + content hash) — this file is the **human "what changed and why"**.
 
-**On every approved change to a skill:**
-1. Bump the `version` in that skill's `SKILL.md` frontmatter (semver: patch = wording/fix, minor = new capability, major = breaking workflow change).
-2. Add a dated bullet under that skill below.
-3. Regenerate the manifest: `python3 skill-dev/skill_versions.py generate`.
-4. Commit all three together.
+**Entries are added by the bump bot.** On every pull request that changes a skill, the `skill-bump` workflow bumps that skill's `version`, adds a `### <skill> — <version>` entry here with the pull request's title, and regenerates the manifest. Patch by default; the label `bump:minor` or `bump:major` raises it. Edit the bot's line in the same pull request to say what changed and why, but keep the heading. See `MAINTAINERS.md`, "Changing a skill".
 
 ---
 

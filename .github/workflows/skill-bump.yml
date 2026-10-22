@@ -1,0 +1,86 @@
+name: skill-bump
+
+# Bumps the version of every skill a pull request changes, so nobody edits
+# version lines, changelog headings or the manifest by hand.
+#
+# Level: patch, or the label bump:minor / bump:major on the pull request.
+# The bot (skill-dev/bump_skills.py) sets each changed skill's version, adds its
+# skills/versions.md entry and MD-FILES.md version, regenerates the manifest,
+# and pushes one commit to the pull request's branch.
+#
+# A push made with this workflow's own token starts no workflows, so the bot
+# then starts verify-skills itself; its `verify` result lands on the bot's
+# commit. Until then the first `verify` on a skill change is red (DRIFT): expected.
+#
+# Pull requests from forks can't be pushed to; their authors bump by hand
+# (MAINTAINERS.md, "Changing a skill").
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: skill-bump-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  bump:
+    if: >-
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled')
+      || startsWith(github.event.label.name, 'bump:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HEAD_REF: ${{ github.head_ref }}
+      BASE_REF: ${{ github.base_ref }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      LEVEL: ${{ contains(github.event.pull_request.labels.*.name, 'bump:major') && 'major' || contains(github.event.pull_request.labels.*.name, 'bump:minor') && 'minor' || 'patch' }}
+    steps:
+      - name: Forks bump by hand
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::warning::This pull request comes from a fork, so the bot can't push to it. Bump the changed skills by hand: see MAINTAINERS.md, Changing a skill."
+
+      - uses: actions/checkout@v4
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          python-version: "3.x"
+
+      - name: Bump
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        id: bump
+        run: |
+          base=$(git merge-base "origin/$BASE_REF" HEAD)
+          python3 skill-dev/bump_skills.py --base "$base" --level "$LEVEL" --title "$PR_TITLE" --pr "$PR_NUMBER"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 skill-dev/skill_versions.py verify
+          python3 skill-dev/check_md_manifest.py || echo "::warning::MD-FILES.md still needs a hand edit (see above)."
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push the bump
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A skills MD-FILES.md
+          git commit --quiet -m "Bump skill versions ($LEVEL)"
+          git push --quiet origin "HEAD:refs/heads/$HEAD_REF"
+
+      - name: Re-run the required check on the bot's commit
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run verify-skills.yml --ref "$HEAD_REF"

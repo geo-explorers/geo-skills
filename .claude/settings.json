@@ -13,7 +13,8 @@
       "Bash(curl *)",
       "Bash(bun run --env-file=.env scripts/*)",
       "Bash(bun run --env-file=.env skills/actionable/*/scripts/*)",
-      "Bash(node lib/gql-cli.mjs *)"
+      "Bash(node lib/gql-cli.mjs *)",
+      "Bash(python3 skill-dev/suggest_release.py*)"
     ],
     "ask": [
       "Bash(*--publish*)",
@@ -29,7 +30,15 @@
       "Read(.env)",
       "Read(.env.*)",
       "Edit(.env)",
-      "Edit(.env.*)"
+      "Edit(.env.*)",
+      "Bash(git tag -a *)",
+      "Bash(git tag -s *)",
+      "Bash(git tag -f *)",
+      "Bash(git tag -d *)",
+      "Bash(git -C * tag *)",
+      "Bash(git push *refs/tags/*)",
+      "Bash(git push *--tags*)",
+      "Bash(git push *--delete *)"
     ]
   }
 }
