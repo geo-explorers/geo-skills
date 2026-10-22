@@ -38,10 +38,9 @@ jobs:
       - name: The version bump bot behaves
         run: python3 skill-dev/test_bump_skills.py
       # The retired host refuses connections; the live one is api-testnet.geobrowser.io.
-      # geo-discovery is exempt until the PR #38 decision (audit finding #17).
       - name: No retired Geo endpoint in shipped code
         run: |
-          if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills lib src scripts ':!skills/actionable/geo-discovery'; then
+          if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills lib src scripts; then
             echo "::error::Retired Geo endpoint found above. Use https://api-testnet.geobrowser.io/graphql"
             exit 1
           fi

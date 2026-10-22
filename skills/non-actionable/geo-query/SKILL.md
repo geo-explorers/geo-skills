@@ -50,10 +50,10 @@ There are two list queries with the same top-level args (`typeId`, `spaceId`, `t
 |              | `entities`                                        | `entitiesConnection`                        |
 | ------------ | ------------------------------------------------- | ------------------------------------------- |
 | Return shape | flat array                                        | `{ nodes, edges, pageInfo, totalCount }`    |
-| Pagination   | `first` + `offset` **(both ≤ 1000)**              | cursor `after`/`before` (`first`/`offset` ≤ 1000 here too) |
-| Use when     | small, bounded lookups; default for <1000 results | totalCount needed, or unbounded result sets |
+| Pagination   | `first` + `offset` **(both ≤ 1000)**; past 1000, **id order** ([Long lists](#long-lists-read-in-id-order)) | cursor `after`/`before` (`first`/`offset` ≤ 1000 here too) — **times out on long typed lists** |
+| Use when     | small lookups, and long lists read in id order    | `totalCount` (count-only), small relation-filtered lists |
 
-**CRITICAL — pagination caps:** `first` and `offset` are BOTH hard-capped at 1000 (400 `Pagination argument "offset"/"first" cannot exceed 1000`) — on flat lists (`entities`, `relations`, `values`) **and on `*Connection` queries alike**. Past row 1000 the only way forward is **cursor** pagination (`after`) on a `*Connection`; switching to a Connection but keeping `offset` hits the same wall. `first: 1000` is the hard **ceiling, not a default** — a large root page that *also* nests per-node `relations` is the shape that OOM-kills the API (see [Performance → memory blow-up](#-memory-blow-up--never-pair-a-big-root-page-with-unfiltered-nested-relations)); when you nest relations/values per node, keep the **root page ≤ 100** and **filter nested relations by `typeId`**. Count-only? `first: 0` + `totalCount` works and is the cheapest query there is.
+**CRITICAL — pagination caps:** `first` and `offset` are BOTH hard-capped at 1000 (400 `Pagination argument "offset"/"first" cannot exceed 1000`) — on flat lists (`entities`, `relations`, `values`) **and on `*Connection` queries alike**. Past row 1000, read in **id order** — `orderBy: ID_ASC` plus `filter: { id: { greaterThan: "<last id>" } }`, 1000 per page (see [Long lists](#long-lists-read-in-id-order)); switching to a Connection but keeping `offset` hits the same wall, and cursor pages (`after`) on long typed lists run into Geo's 15-second cutoff. `first: 1000` is the hard **ceiling, not a default** — a large root page that *also* nests per-node `relations` is the shape that OOM-kills the API (see [Performance → memory blow-up](#-memory-blow-up--never-pair-a-big-root-page-with-unfiltered-nested-relations)); when you nest relations/values per node, keep the **root page ≤ 100** and **filter nested relations by `typeId`**. Count-only? `entitiesConnection(typeId:, spaceId:, first: 0) { totalCount }` with the **top-level args** is the cheapest query there is (0.6–3.4 s, 2026-10-22); the same count written as `filter: { typeIds…, spaceIds… }` timed out.
 
 **CRITICAL — response shape:** `entities` returns a **flat array**. Do NOT wrap fields in `{ nodes { ... } }`.
 
@@ -191,26 +191,21 @@ Verified live (Bitcoin `2f8238b2…`): 6 Topic edges = three spaces with one eac
   }
 }
 
-# Large/unbounded — use cursor pagination
-{
-  entitiesConnection(typeId: "TYPE_ID", spaceId: "SPACE_ID", first: 500) {
-    totalCount
-    nodes {
-      id
-      name
-      description
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+# Large/unbounded — read in id order, 1000 per page
+query($filter: EntityFilter) {
+  entities(typeId: "TYPE_ID", spaceId: "SPACE_ID", first: 1000, orderBy: ID_ASC, filter: $filter) {
+    id
+    name
+    description
   }
 }
 ```
 
-### Cursor pagination
+### Long lists: read in id order
 
-Don't hand-roll it — use `paginate()` from the canonical client (below): `await paginate(Q.ENTITIES_BY_TYPE_CONNECTION, { typeId, spaceId })`. Manually, feed `pageInfo.endCursor` back as `after:` until `hasNextPage` is false — `entitiesConnection(…, first: 500, after: "<endCursor>") { nodes {…} pageInfo { hasNextPage endCursor } }`.
+Don't hand-roll it — use `paginate()` from the canonical client (below): `await paginate(Q.ENTITIES_BY_TYPE_PAGE, { typeId, spaceId })`. Manually: send the first page without `filter`; for each next page pass `filter: { id: { greaterThan: "<last id of the previous page>" } }`; stop when a page returns fewer than 1000 rows. Every page is a fresh indexed lookup, so page 30 is as fast as page 1 — measured 2026-10-22: all 641 AI-space Topics in **1.6 s**, and 28,264 US Politics claims in 29 pages of 1.2–4.1 s each.
+
+**Why not cursors:** since 13 Oct 2026 Geo's gateway cuts off every request at **15 s** with `504 upstream request timeout`, and retrying the same shape doesn't help. Cursor pages (`entitiesConnection(…, after:)`) on long typed lists are slow on every page: AI-space Topics took 15.6 s and returned 504 on page 1; US Politics claims took 7–8 s per page. Cursors are still fine on small or relation-filtered lists, such as `relationsConnection` scans and proposals.
 
 ## Performance — think in filters, not loops (fixes the "5–10 minute query")
 
@@ -233,7 +228,7 @@ N+1 is slow; the over-correction is *dangerous*. Inlining nested fields to kill 
 
 One request of this shape hydrates enough to blow the API pod's memory ceiling (real incident: 28 such requests → 5 pod OOM-kills; it also takes ~33 s, past the 30 s client timeout, so it never even succeeds — it just burns retries and a pod restart). Two **independent** knobs fix it:
 
-- **Root page ≤ 100** whenever you nest per-node relations — not `first: 1000`. More cursor pages, each cheap and inside the timeout.
+- **Root page ≤ 100** whenever you nest per-node relations — not `first: 1000`. More pages, each cheap and inside the timeout.
 - **Filter the nested relations by `typeId`** — `relations(filter: { typeId: { is: "…" } }, first: N)` hydrates ~1 relation per node instead of ~1000. This is the real fix, and it also reaches topics with >1000 relations an unfiltered page can't.
 
 The flat **`relationsConnection` bulk scan** (below) stays safe — it's a *flat* 1,000-row relation scan with bounded nested data, not `nodes × relations`. Page size alone isn't the danger; **root-page × nested-relations** is.
@@ -488,7 +483,13 @@ Semantic name search finds variants a string filter can't ("Iran war" also surfa
 { search(query: "Iran war", spaceId: "SPACE_ID", first: 5) { id name } }
 ```
 
-~5–6 s per call — a discovery tool, not a bulk primitive. (`searchConnection` variant exists; optional `similarityThreshold: Float`.)
+~0.3–1 s per call (OpenSearch since 16 Oct 2026) — a discovery tool, not a bulk primitive. (`searchConnection` variant exists; optional `similarityThreshold: Float`.)
+
+**Claims are left out unless the filter names their type** — so are text, image and data blocks, images, videos and comments. Searching a claim's exact wording with no filter returns no claims (verified 2026-10-22). Name the type:
+
+```graphql
+{ search(query: $q, first: 12, filter: { typeIds: { anyEqualTo: "96f859efa1ca4b229372c86ad58b694b" } }) { id name } }
+```
 
 ## Well-known IDs
 
@@ -551,10 +552,10 @@ More type, property, and space IDs live in `../../../src/constants.ts` and `../.
 import { query, Q, paginate } from "../lib/gql.mjs"; // adjust relative path
 
 const data = await query(Q.ENTITY_BY_ID, { id: "ENTITY_ID" });
-const all = await paginate(Q.ENTITIES_BY_TYPE_CONNECTION, { typeId: "TYPE_ID", spaceId: "SPACE_ID" });
+const all = await paginate(Q.ENTITIES_BY_TYPE_PAGE, { typeId: "TYPE_ID", spaceId: "SPACE_ID" });
 ```
 
-Exported templates (field shapes verified live): `Q.ENTITY_BY_ID`, `Q.ENTITIES_BY_TYPE`, `Q.ENTITIES_BY_TYPE_CONNECTION`, `Q.BACKLINKS`, `Q.PROPOSALS`. `paginate()` cursor-walks any `*Connection`.
+Exported templates (field shapes verified live): `Q.ENTITY_BY_ID`, `Q.ENTITIES_BY_TYPE`, `Q.ENTITIES_BY_TYPE_PAGE`, `Q.BACKLINKS`, `Q.PROPOSALS`. `paginate()` reads a flat `entities` list in id order; your own query works too if it declares `$first` and `$filter` and uses `orderBy: ID_ASC`.
 
 One-off from the shell — `lib/gql-cli.mjs` (prints JSON, exits 1 with the GraphQL error text on failure):
 
@@ -582,7 +583,7 @@ No Node/Bun? `curl -s --compressed <endpoint> -H 'Content-Type: application/json
 
 ## Critical gotchas — quick reference
 
-1. **`first`/`offset` both cap at 1000** — flat AND `*Connection` queries; past row 1000, cursor (`after`) is the only way. `first: 0` → cheap `totalCount`-only.
+1. **`first`/`offset` both cap at 1000** — flat AND `*Connection` queries; past row 1000, read in **id order** (`orderBy: ID_ASC` + `id: { greaterThan }`), not with cursors: any request over **15 s** returns 504. `first: 0` → cheap `totalCount`-only (top-level args, not the filter form).
 2. **`entities` is flat**, not `{ nodes { ... } }`.
 3. **Prefer top-level `typeId`/`spaceId` args** — `filter: { typeIds: { anyEqualTo } }` also works, but top-level is the canonical form.
 4. **Scope relation filters by `spaceId`** — unscoped is the slow path (26 s vs 0.3 s measured; historically could 500).

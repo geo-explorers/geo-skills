@@ -27,12 +27,12 @@
     {
       "id": 3,
       "prompt": "List every Claim in the AI space — there are several thousand.",
-      "expected_output": "Recognizes the result set exceeds the pagination caps and uses entitiesConnection with cursor pagination.",
+      "expected_output": "Recognizes the result set exceeds the pagination caps and reads it in id order (orderBy: ID_ASC, then filter id greaterThan the last id), 1000 per page.",
       "files": [],
       "assertions": [
-        "Uses entitiesConnection with after/endCursor pagination",
+        "Reads in id order: orderBy: ID_ASC with filter: { id: { greaterThan: <last id> } }, or paginate(Q.ENTITIES_BY_TYPE_PAGE, …) from lib/gql.mjs",
         "Does not paginate past offset 1000 on ANY shape (offset caps apply to Connections too) and keeps first <= 1000",
-        "Loops until pageInfo.hasNextPage is false"
+        "Stops when a page returns fewer rows than first, and does not use cursor (after/endCursor) pages"
       ]
     },
     {
@@ -43,7 +43,7 @@
       "assertions": [
         "Uses a single server-side relation filter, not an N+1 loop fetching each story's relations",
         "Scopes the relation filter with spaceId",
-        "Paginates the filtered result with cursors if it may exceed 1000"
+        "If the result may exceed 1000, pages it in id order rather than with offset"
       ]
     },
     {

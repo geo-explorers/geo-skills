@@ -17,7 +17,7 @@ Used by gap_diagnostic.py (identity resolution) and run.py. No auth (read-only).
 from __future__ import annotations
 import json, sys, time, urllib.request, urllib.error
 
-ENDPOINT = "https://testnet-api.geobrowser.io/graphql"
+ENDPOINT = "https://api-testnet.geobrowser.io/graphql"
 TYPE_META_ID = "e7d737c536764c609fa16aa64a8c90ad"   # the type-of-types
 MIN_COUNT = 5                                        # ignore orphan/tiny types
 
@@ -109,10 +109,12 @@ def list_types_in_space(space_id: str, page_size: int = 100, max_pages: int = 50
         if not pi.get("hasNextPage"):
             break
         cursor = pi.get("endCursor"); pages += 1
-    # batch in-space counts via GraphQL aliases (one POST)
+    # batch in-space counts via GraphQL aliases, 10 per POST: Geo cuts every request
+    # off at 15 s, and 32 counts in one POST took 10.3 s on AI (2026-10-22); batches
+    # of 10 took 0.7-5.4 s. A failed batch would leave its counts at 0.
     ids = list(seen)
-    for i in range(0, len(ids), 50):
-        chunk = ids[i:i + 50]
+    for i in range(0, len(ids), 10):
+        chunk = ids[i:i + 10]
         sub = " ".join(
             f'c{j}: entitiesConnection(typeId:"{tid}", spaceId:"{space_id}", first:1)'
             f'{{ totalCount }}' for j, tid in enumerate(chunk))

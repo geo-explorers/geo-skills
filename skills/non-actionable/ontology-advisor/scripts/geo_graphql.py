@@ -143,11 +143,13 @@ def count_entities_of_type(type_id: str, space_id: str | None = None) -> int:
 
 
 def count_entities_of_types_batched(
-    type_ids: list[str], space_id: str | None = None, batch_size: int = 50
+    type_ids: list[str], space_id: str | None = None, batch_size: int = 10
 ) -> dict[str, int]:
-    """totalCount for many type_ids in one (or a few) GraphQL POSTs via aliases.
-    Returns {type_id: count}. ~50× faster than calling count_entities_of_type
-    in a Python loop for big spaces (AI space: 24s -> ~0.5s)."""
+    """totalCount for many type_ids in a few GraphQL POSTs via aliases.
+    Returns {type_id: count}. Much faster than calling count_entities_of_type in a
+    Python loop. Batches of 10 keep each request well under Geo's 15-second cutoff:
+    32 counts in one POST took 10.3 s on the AI space (2026-10-22), batches of 10
+    took 0.7-5.4 s."""
     out: dict[str, int] = {}
     space_arg = f', spaceId: "{space_id}"' if space_id else ""
     for i in range(0, len(type_ids), batch_size):
@@ -192,9 +194,8 @@ def list_types_in_space(space_id: str, page_size: int = 100, max_pages: int = 50
             break
         cursor = pi.get("endCursor")
         pages += 1
-    # Batch the totalCount lookups — N+1 sequential calls used to take ~24s
-    # on the AI space (29 types); aliasing them into one GraphQL POST drops
-    # that to ~0.5s.
+    # Batch the totalCount lookups: N+1 sequential calls used to take ~24s on the
+    # AI space; aliased batches of 10 take a few seconds each (see the function).
     try:
         counts = count_entities_of_types_batched(
             list(types_seen.keys()), space_id=space_id
@@ -212,29 +213,27 @@ def list_types_in_space(space_id: str, page_size: int = 100, max_pages: int = 50
 def entities_of_type(
     type_id: str,
     space_id: str | None = None,
-    page_size: int = 200,
+    page_size: int = 1000,
     max_pages: int = 200,
 ):
-    """Yield every {id, name} for (type, space). max_pages caps a runaway loop."""
-    cursor: str | None = None
+    """Yield every {id, name} for (type, space), read in id order: each page asks for
+    ids greater than the last one seen, so every page stays fast. Cursor pages on long
+    lists (the AI space's Topics) run past Geo's 15-second cutoff and return 504.
+    max_pages caps a runaway loop."""
+    last: str | None = None
     pages = 0
     while pages < max_pages:
-        args = [f'typeId: "{type_id}"', f"first: {page_size}"]
+        args = [f'typeId: "{type_id}"', f"first: {page_size}", "orderBy: ID_ASC"]
         if space_id:
             args.append(f'spaceId: "{space_id}"')
-        if cursor:
-            args.append(f'after: "{cursor}"')
-        q = (
-            "{ entitiesConnection(" + ", ".join(args) + ") { "
-            "nodes { id name } pageInfo { hasNextPage endCursor } } }"
-        )
-        conn = gql(q).get("entitiesConnection") or {}
-        for n in (conn.get("nodes") or []):
+        if last:
+            args.append(f'filter: {{ id: {{ greaterThan: "{last}" }} }}')
+        rows = gql("{ entities(" + ", ".join(args) + ") { id name } }").get("entities") or []
+        for n in rows:
             yield n
-        pi = conn.get("pageInfo") or {}
-        if not pi.get("hasNextPage"):
+        if len(rows) < page_size:
             return
-        cursor = pi.get("endCursor")
+        last = rows[-1]["id"]
         pages += 1
 
 

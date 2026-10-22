@@ -144,36 +144,29 @@ const log = (m: string) => {
 interface Claim { id: string; name: string; description: string; createdAt: string; spaces: string[]; }
 
 async function pullClaims(spaceId: string): Promise<{ claims: Claim[]; pages: number; incomplete: boolean }> {
-  // The v2 index runs type+space FILTER-form entity scans on a slow path that errors
-  // outright at first:1000 (verified 2026-08-04 on Crypto: filter@1000 = deterministic
-  // "Unexpected error", filter@500 = ~20s, ARG form @1000 = ~5s — the old API's
-  // arg-vs-filter split survived the migration). Probe the shape ladder once with a
-  // tiny retry budget, then paginate with the winner at the full budget.
-  const FIELDS = "nodes { id name description createdAt } pageInfo { hasNextPage endCursor }";
-  const shapes = [
-    { label: "arg@1000", q: (after: string) => `{ entitiesConnection(typeId: "${CLAIM_TYPE}", spaceId: "${spaceId}", first: 1000${after}) { ${FIELDS} } }` },
-    { label: "arg@500", q: (after: string) => `{ entitiesConnection(typeId: "${CLAIM_TYPE}", spaceId: "${spaceId}", first: 500${after}) { ${FIELDS} } }` },
-    { label: "filter@500", q: (after: string) => `{ entitiesConnection(filter: { typeIds: { anyEqualTo: "${CLAIM_TYPE}" }, spaceIds: { anyEqualTo: "${spaceId}" } }, first: 500${after}) { ${FIELDS} } }` },
-    { label: "filter@250", q: (after: string) => `{ entitiesConnection(filter: { typeIds: { anyEqualTo: "${CLAIM_TYPE}" }, spaceIds: { anyEqualTo: "${spaceId}" } }, first: 250${after}) { ${FIELDS} } }` },
-  ];
-  let shape: (typeof shapes)[number] | undefined;
-  let conn: any;
-  for (const s of shapes) {
-    try { conn = (await gql(s.q(""), undefined, 2)).entitiesConnection; shape = s; log(`   S1 shape: ${s.label}`); break; }
-    catch (e: any) { log(`   S1 shape ${s.label} failed (${String(e.message).slice(0, 60)}) — trying next`); }
-  }
-  if (!shape) throw new Error("S1: no working entitiesConnection shape — API down?");
+  // Read the claims in id order, 1000 per page: each page asks for ids greater than
+  // the last one seen, so every page is a fresh indexed lookup and stays fast however
+  // deep the scan goes. Cursor pages on this list took 7-8 s each (US Politics,
+  // 2026-10-22), about half of Geo's 15-second gateway cutoff, and the old shape
+  // fallback only ran on page 1; id-order pages took 1.2-4.1 s.
+  const PAGE = 1000;
   const claims: Claim[] = [];
-  const ingest = (c: any) => { for (const n of c?.nodes ?? []) claims.push({ id: n.id, name: n.name ?? "", description: n.description ?? "", createdAt: n.createdAt ?? "0", spaces: [spaceId] }); };
-  ingest(conn);
-  let pages = 1, incomplete = false;
-  for (let page = 2; page <= PAGE_CAP && conn?.pageInfo?.hasNextPage; page++) {
-    conn = (await gql(shape.q(`, after: ${JSON.stringify(conn.pageInfo.endCursor)}`))).entitiesConnection;
-    ingest(conn);
-    pages = page;
-    if (page % 25 === 0) log(`   claims page ${page}: ${claims.length} so far`);
-    if (page === PAGE_CAP && conn?.pageInfo?.hasNextPage) { incomplete = true; log(`   WARNING: hit ${PAGE_CAP}-page cap — claim scan INCOMPLETE`); }
+  let last: string | null = null;
+  let pages = 0, incomplete = false;
+  while (true) {
+    const d = await gql(
+      `query($f: EntityFilter) { entities(typeId: "${CLAIM_TYPE}", spaceId: "${spaceId}", first: ${PAGE}, orderBy: ID_ASC, filter: $f) { id name description createdAt } }`,
+      { f: last ? { id: { greaterThan: last } } : undefined },
+    );
+    const rows = d.entities ?? [];
+    for (const n of rows) claims.push({ id: n.id, name: n.name ?? "", description: n.description ?? "", createdAt: n.createdAt ?? "0", spaces: [spaceId] });
+    pages++;
+    if (pages % 25 === 0) log(`   claims page ${pages}: ${claims.length} so far`);
+    if (rows.length < PAGE) break;
+    last = rows[rows.length - 1].id;
+    if (pages === PAGE_CAP) { incomplete = true; log(`   WARNING: hit ${PAGE_CAP}-page cap — claim scan INCOMPLETE`); break; }
   }
+  log(`   S1: ${claims.length} claims in ${pages} page(s), read in id order`);
   return { claims, pages, incomplete };
 }
 

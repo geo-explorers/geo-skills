@@ -29,9 +29,9 @@ Everything here was verified live against the post-2026-07-migration index. The 
 ## API quirks that bind this skill
 
 1. **`totalCount` errors on every form tried** (`first: 0` AND `first: 1`) — "Unexpected error". Never count via totalCount; **the pull IS the count.**
-2. `first`/`offset` hard-cap at 1000; past row 1000 only cursor `after` works. Use `first: 1000` + `pageInfo { hasNextPage endCursor }`, with a 400-page runaway guard that logs "scan INCOMPLETE" when hit.
+2. `first`/`offset` hard-cap at 1000. Past row 1000, read in **id order**: `orderBy: ID_ASC`, then `filter: { id: { greaterThan: <last id> } }`, stopping at a page shorter than 1000, with a 400-page runaway guard that logs "scan INCOMPLETE" when hit. Any request over 15 s returns 504 (Geo's gateway, since 2026-10-13), and cursor pages on long claim lists take 7–8 s each.
 3. `entity(id:)` **never returns null** — any ID returns a stub. Existence check = `spaceIds` or `typeIds` non-empty. A relation target with both empty is a **dangling edge** (deleted target).
-4. **Entity type+space scans: the arg-vs-filter split survived the migration.** The top-level-arg form `entitiesConnection(typeId:, spaceId:, first: 1000)` returns in ~5s; the filter form (`filter: { typeIds: { anyEqualTo }, spaceIds: { anyEqualTo } }`) is the slow path — ~20s at `first: 500` and a **deterministic "Unexpected error" at `first: 1000`** (verified on Crypto 2026-08-04; small pages like `first: 3` mask the problem). The discovery script probes a shape ladder (arg@1000 → arg@500 → filter@500 → filter@250) with a 2-retry budget and locks in the first that works. `relationsConnection` filter-form sweeps at `first: 1000` are unaffected (proven at 672k-edge scale by the 2026-08-03 campaign).
+4. **Entity type+space scans: use the top-level args, in id order.** `entities(typeId:, spaceId:, first: 1000, orderBy: ID_ASC)` pages take 1–4 s on US Politics (2026-10-22). The filter form (`filter: { typeIds: { anyEqualTo }, spaceIds: { anyEqualTo } }`) is the slow path — ~20 s at `first: 500` and a deterministic "Unexpected error" at `first: 1000` (Crypto, 2026-08-04) — so the type and space go in the args and only the id condition goes in `filter`. `relationsConnection` filter-form sweeps at `first: 1000` are unaffected (proven at 672k-edge scale by the 2026-08-03 campaign).
 5. `entities(filter: { id: { in: $ids } }, first: 100)` for batched lookups — chunk input to 40 IDs.
 6. `createdAt` is a **Unix-seconds numeric string** (e.g. `"1785350351"`), not ISO. `daysApart = |Number(a) − Number(b)| / 86400`.
 7. The `Value` type has **typed fields** (`text`, `date`, …), no generic `value` field — URL enrichment reads `valuesList { propertyId text }` and degrades gracefully if the shape shifts again.
@@ -42,17 +42,16 @@ Everything here was verified live against the post-2026-07-migration index. The 
 
 ## The verified queries
 
-**S1 — Claim corpus (cursor-paginate to completion; ARG form — see quirk 4):**
+**S1 — Claim corpus (id order to completion; ARG form — see quirks 2 and 4):**
 
 ```graphql
-{ entitiesConnection(
+query($f: EntityFilter) { entities(
     typeId: "96f859efa1ca4b229372c86ad58b694b", spaceId: "<SPACE>",
-    first: 1000, after: "<endCursor>") {
-    nodes { id name description createdAt }
-    pageInfo { hasNextPage endCursor } } }
+    first: 1000, orderBy: ID_ASC, filter: $f) {
+    id name description createdAt } }
 ```
 
-The script's shape ladder falls back to arg@500 → filter@500 → filter@250 if the arg form ever regresses.
+First page: no `$f`. Next pages: `$f = { id: { greaterThan: "<last id>" } }`. A page shorter than 1000 ends the scan.
 
 **S2 — one sweep per signal relation type (Sources, Notable claims, Topics ×2, Related claims):**
 
