@@ -3,7 +3,7 @@ name: ontology-advisor
 description: "Conversational assistant for the Geo ontology. Answers questions about how to model entities, types, and properties, using ONTOLOGY.md as the judgment prior and the live Geo graph as the source of truth. Use whenever the user wants advice on creating a new type, adding a new property, deciding whether something should be a relation, inspecting or categorizing the types in a space, finding duplicates or drift, drafting missing descriptions, or exporting types to CSV. Trigger phrases include 'should I create a type', 'what properties for', 'is this a relation', 'what types are in', 'duplicate types', 'missing descriptions', 'export types as CSV', 'what's a Topic vs a Tag', 'when do I use Related entities', any 32-char Geo space ID with a 'check / look at / what's in' verb. Read-only: suggests text, never writes to the graph."
 metadata:
   author: CptMoh
-  version: "0.1.1"
+  version: 0.1.2
 ---
 
 # Ontology Advisor

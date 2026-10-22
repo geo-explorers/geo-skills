@@ -3,7 +3,7 @@ name: geo-query
 description: Query the Geo knowledge graph via GraphQL. Use when looking up entities, searching by type, exploring relations, discovering schemas, or inspecting entity properties. Triggers on "look up", "find entity", "query geo", "search the graph", "what type is", "show me relations", "get entity".
 metadata:
   author: geobrowser
-  version: "0.2.11"
+  version: 0.2.12
 ---
 
 # Geo Knowledge Graph — Querying
