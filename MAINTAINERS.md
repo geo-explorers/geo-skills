@@ -128,7 +128,7 @@ Every change under `skills/` or `skill-dev/` goes through a pull request. Nothin
    - updates the skill's version in `MD-FILES.md`;
    - regenerates `skills/SKILL-VERSIONS.json`.
 
-   It then starts the `verify` check on its own commit. The first `verify`, on your push, is red (`DRIFT` or `UNLISTED`) until then: expected. Reword the bot's changelog line to say what changed and why if you like; keep the heading.
+   Its push, made as the bump app, starts the `verify` check on the bot's commit. The first `verify`, on your push, is red (`DRIFT` or `UNLISTED`) until then: expected. Reword the bot's changelog line to say what changed and why if you like; keep the heading.
 6. **Review and merge.** It can merge only when the `verify` check passes and another team member has approved. A new commit on the pull request, including the bot's, cancels earlier approvals. Merging releases the library (see "How releases happen"): run `python3 skill-dev/suggest_release.py --to HEAD --no-fetch` on the branch to see which release that will be.
 
 Changing a label after the bot ran re-runs it. Removing a label never lowers a version the bot already set; lower it by hand if needed. Pull requests from forks can't be pushed to: their authors bump `version`, add the changelog entry, update `MD-FILES.md` and run `python3 skill-dev/skill_versions.py generate` by hand.
@@ -193,9 +193,9 @@ The automation acts as one **GitHub App** owned by the `geo-explorers` organisat
 | Tag ruleset | This repository, Settings → Rules → Rulesets | Targets `refs/tags/v*`. Restricts creation, update and deletion. Bypass: the release app only |
 | Labels | This repository | `bump:minor` and `bump:major`, read by the `skill-bump` workflow |
 
-The `skill-bump` workflow needs no app: it pushes with the workflow's built-in token and then starts `verify` itself.
+The `skill-bump` workflow pushes with a second, smaller app, the **bump app** (`geo-skills-bump`): Contents read and write on `geo-skills` only, not on the tag ruleset's bypass list. Its ID is the repository variable `BUMP_APP_ID` and its key the repository secret `BUMP_APP_PRIVATE_KEY`; pull-request branches need them, so they can't sit in a `main`-only environment, and the app's narrow scope is what keeps that safe. It replaces the workflow's built-in token, whose pushes (as `github-actions[bot]`) made GitHub hold the next checks for a maintainer's approval.
 
-**Rotating the private key.** The key does not expire, so rotate it once a year, or at once if it may have leaked: in the app's settings, generate a new private key, paste it into both environment secrets, check that the next `release` or `sync-skills-release` run is green, then delete the old key in the app's settings. A deleted or wrong key shows as a red run at the "Get a one-hour token" step; after fixing it, re-run that run.
+**Rotating the private key.** The key does not expire, so rotate it once a year, or at once if it may have leaked: in the app's settings, generate a new private key, paste it into both environment secrets, check that the next `release` or `sync-skills-release` run is green, then delete the old key in the app's settings. A deleted or wrong key shows as a red run at the "Get a one-hour token" step; after fixing it, re-run that run. The bump app's key works the same way: it lives in the repository secret `BUMP_APP_PRIVATE_KEY`, and a bad key shows as a red `skill-bump` run.
 
 ## Branch protection on `main`
 

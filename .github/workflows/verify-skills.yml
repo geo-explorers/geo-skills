@@ -9,8 +9,7 @@ name: Verify skill integrity
 # no path filter: a required check that is skipped never reports, and the pull
 # request would wait on it forever.
 #
-# workflow_dispatch: the skill-bump workflow starts this run itself after it
-# pushes a version bump, because a push made by a workflow starts no workflows.
+# workflow_dispatch: a maintainer can start a run by hand (Actions → Run workflow).
 on:
   pull_request:
   push:
