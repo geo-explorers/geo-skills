@@ -2,7 +2,7 @@
 name: geo-mirror
 description: Mirror ANY Geo entity type from ANY space into Notion as linked databases, and (Part 2) sync reviewed Notion edits back to Geo. Type-generic — News stories, podcast Episodes, Events, People, etc. — one Notion database per entity type (primary + each related type), keyed by Geo ID so re-runs update in place. Read-only on Geo in Part 1. Triggers on "mirror to notion", "geo to notion", "export space to notion", "sync geo into notion", "mirror podcast into notion", "mirror episodes/events into notion".
 metadata:
-  version: "0.13.0"
+  version: 0.13.1
   author: geobrowser
 ---
 
@@ -62,7 +62,7 @@ node --env-file=.env scripts/mirror-claims-topics.mjs --space <SPACE_ID> \
 - The tab ids are the `tabId=` in the geobrowser URL. DB titles are `<space name> claims` / `<space name> topics` (override with `--db-prefix`).
 - **Tabs can mix block kinds.** *Collection* blocks list items by hand (Collection item relations). *Query* blocks (e.g. World affairs Topics tab) store a `Filter` JSON — `{"spaceId":{"in":[…]},"filter":{"<relationTypeId>":{"is"|"in":…}}}` — which the script evaluates with the relations scoped to the filter's spaces (unscoped also matches tags set in *other* spaces: WA "Main topics" 7 unscoped vs 4 on the tab). Query-block items have no "added" date, so `--added-since` doesn't drop them.
 - DB lookup is by title among the parent's children; re-runs add missing columns and update rows by `Geo ID`.
-- **Space-mode sweep gotchas:** filter topics with the native `typeId` arg, not a Types-relation filter (500s on large spaces); page size 200 returns INTERNAL_SERVER_ERROR on World affairs topics, so the sweep uses 100 and halves on error. Entities tagged Debate/Featured but with **no Claim type** are skipped (2 in AI) — flag them for a type fix in Geo.
+- **Space-mode sweep gotchas:** filter topics with the native `typeId` arg, not a Types-relation filter (500s on large spaces); the sweep reads in id order, 1000 per page, and halves the page on an error (cursor pages on World affairs topics ran into Geo's 15-second cutoff). Entities tagged Debate/Featured but with **no Claim type** are skipped (2 in AI) — flag them for a type fix in Geo.
 - **Names are per space.** `Geo Name` is the `Name` value set **in the mirrored space**, not `entity.name` (Geo's denormalized display name, often from another space — WA "Strait of Hormuz blockade" vs entity.name "…blockage"). When the space has no Name of its own, `Geo Name` falls back to `entity.name` and `Geo Name source` = `Other space (fallback)`; never publish a fallback as this space's value.
 - **Verifying relations:** Notion's page API returns at most **25 items per relation property** — a read-back count below the extract is expected for topics with >25 claims; compare against `min(n, 25)` per row.
 

@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse, json, sys, time, urllib.request, urllib.error
 from datetime import datetime, timezone
 
-ENDPOINT = "https://testnet-api.geobrowser.io/graphql"
+ENDPOINT = "https://api-testnet.geobrowser.io/graphql"
 NEWS_TYPE = "e550fe517e904b2c8fffdf13408f5634"
 EPISODE_TYPE = "972d201ad78045689e01543f67b26bee"
 PODCASTS_SPACE = "b5a31f8182b042437ede0f84ee02f104"

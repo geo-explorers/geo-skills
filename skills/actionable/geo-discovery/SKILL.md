@@ -5,7 +5,7 @@ description: >
   publish the gaps as Gap finding entities. Surfaces coverage, depth, freshness,
   structural, and trending gaps at both entity and theme altitude. Triggers on
   "run discovery", "discover gaps", "what's missing in {space}", "discovery pass".
-version: "0.1.1"
+version: 0.1.2
 authors: CptMoh
 tools: Claude Code
 ---

@@ -18,6 +18,12 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## non-actionable/
 
+### ontology-advisor — 0.1.2
+- 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
+
+### geo-query — 0.2.12
+- 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
+
 ### image-banner-recompose — 0.2.1
 - 2026-10-19 · **Release-flow test.** Adds one HTML comment to exercise the change, release and sync process end to end. No behaviour change. Remove in the next release.
 
@@ -104,6 +110,15 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 - 2026-09-14 · **Initial.** Notion sink for geo-claim-grouping: run the parent skill's Stage A discovery (unmodified, scoped to the mirror via `--scope-file`) and Stage B adjudication, then write the results into the Notion Claims mirror as review columns instead of Geo proposals — `Proposed exact duplicates`, `Proposed semantic duplicates`, `Proposed related claims`, `Proposed supporting / opposing arguments` (self-relations, one-way, Geo direction semantics copied from the ops template) + `Proposed grouping notes` (one hyperlinked line per counterpart with tag · confidence · reason). Four zero-dep Node scripts: `roster-from-notion.mjs` (Claims DB → roster = `--scope-file` shape), `scope-candidates.mjs` (keep only pairs with BOTH sides in the mirror — discovery keeps either-side matches), `existing-edges-from-geo.mjs` (Root Related/Duplicate/Similar/Supporting/Opposing edges between roster claims — discovery's `alreadyRelatedClaims` is the legacy Crypto property), `write-grouping-to-notion.mjs` (schema-agnostic sink: needs only `Geo ID` + title; creates its six columns, never re-types or touches any other column; skips edges already on Geo per direction; diff-first; additive by default, `--prune` opt-in; dry-run default with a mandatory six-section report incl. "Needs your eyes"; `--publish` then read-back must report 0 remaining). Non-actionable: never writes Geo. Verified live read-only on the Relationships test mirror (186 rows) and on a fixture campaign covering every bracket/direction/skip class.
 
 ## actionable/
+
+### geo-mirror — 0.13.1
+- 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
+
+### geo-discovery — 0.1.2
+- 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
+
+### geo-claim-grouping — 0.7.3
+- 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
 
 ### geo-clean — 0.5.2
 - 2026-10-19 · **Hard rule 5 matches what the helpers do** (audit finding #19). It required `from.slice(0,16) + to.slice(0,16)` for relation entities created during merges, but every `src/` helper that re-points a relation (merge, move, backlink migration, property-id change) and big-merge.md keep the old edge's `entityId`; following the rule by hand would have given re-pointed relations new, empty relation entities. The rule now says so, and a relation that never existed before takes geo-claim-grouping's typed scheme (its hard rule 6) instead of the retired untyped one, which gave two relation types between the same pair one relation entity. Published ids are never regenerated; copies still mint fresh relation entities.

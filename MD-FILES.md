@@ -25,8 +25,8 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 
 | Skill | Version | Contents | Key needed |
 |---|---|---|---|
-| `skills/non-actionable/geo-query/SKILL.md` | 0.2.11 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
-| `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.1 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
+| `skills/non-actionable/geo-query/SKILL.md` | 0.2.12 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
+| `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.2 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
 | `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
 | `skills/non-actionable/image-banner-recompose/SKILL.md` | 0.2.1 | Recompose any image into a 2364×640 Geo banner | no |
@@ -37,10 +37,10 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/actionable/geo-submission-review/SKILL.md` | 0.7.4 | Group and review bounty submissions, publish verified datasets reports, and preserve full Notion review evidence with concise introductions and human editor feedback | **yes** (report publication) |
 | `skills/actionable/geo-publish/SKILL.md` | 0.12.1 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
 | `skills/actionable/geo-clean/SKILL.md` | 0.5.2 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
-| `skills/actionable/geo-mirror/SKILL.md` | 0.13.0 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
-| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.2 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
+| `skills/actionable/geo-mirror/SKILL.md` | 0.13.1 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
+| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.3 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
 | `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.1 | Turn natural-language intent into a query plan, publish plan and script | **yes** |
-| `skills/actionable/geo-discovery/SKILL.md` | 0.1.1 | Gap-discovery passes over a space, published as Gap finding entities | **yes** |
+| `skills/actionable/geo-discovery/SKILL.md` | 0.1.2 | Gap-discovery passes over a space, published as Gap finding entities | **yes** |
 
 ### Skill reference files — loaded by their own skill only
 

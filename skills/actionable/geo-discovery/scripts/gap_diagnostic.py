@@ -20,7 +20,7 @@ No auth needed (read-only). Endpoint is Geo testnet.
 from __future__ import annotations
 import json, sys, time, urllib.request, urllib.error
 
-ENDPOINT = "https://testnet-api.geobrowser.io/graphql"
+ENDPOINT = "https://api-testnet.geobrowser.io/graphql"
 AI_SPACE = "41e851610e13a19441c4d980f2f2ce6b"
 
 # Entities that count as a real "identity" for a candidate (not assertion/media noise).

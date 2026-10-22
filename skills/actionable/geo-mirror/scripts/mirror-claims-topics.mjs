@@ -164,20 +164,24 @@ process.stderr.write(spaceMode ? 'Sweeping space…\n' : 'Reading tabs…\n');
 // space mode: filtered sweeps (Tags relation scoped to the space, so a tag set only in a
 // sibling space doesn't pull the entity in) — returns ids of the given type
 // (pass typeId to scope by type natively — a Types-relation filter 500s on large spaces)
+// Reads in id order: each page asks for ids greater than the last one seen, so every
+// page stays fast. Cursor pages on World affairs topics took 12-16 s each, at Geo's
+// 15-second cutoff (2026-10-22); id order read all 889 in one 2.3 s page.
 async function spaceSweep(typeName, filter, typeId) {
-  const ids = []; let after = null; let pageSize = 100;   // 200 → INTERNAL_SERVER_ERROR on World affairs topics
+  const ids = []; let last = null; let pageSize = 1000;
   for (;;) {
     let d;
     try {
-      d = await gql(`query($f: EntityFilter, $after: Cursor) { entitiesConnection(first: ${pageSize}, after: $after, spaceId: "${spaceId}"${typeId ? `, typeId: "${typeId}"` : ''}, filter: $f) {
-      pageInfo { hasNextPage endCursor } nodes { id types { name } } } }`, { f: filter, after });
+      d = await gql(`query($f: EntityFilter) { entities(first: ${pageSize}, orderBy: ID_ASC, spaceId: "${spaceId}"${typeId ? `, typeId: "${typeId}"` : ''}, filter: $f) { id types { name } } }`,
+        { f: last ? { ...(filter ?? {}), id: { greaterThan: last } } : filter });
     } catch (err) {
       if (pageSize <= 25) throw err;
-      pageSize /= 2; continue;                               // retry the same cursor with a smaller page
+      pageSize = Math.max(25, Math.floor(pageSize / 2)); continue;   // retry the same page, smaller
     }
-    ids.push(...d.entitiesConnection.nodes.filter((n) => n.types.some((t) => t.name === typeName)).map((n) => n.id));
-    if (!d.entitiesConnection.pageInfo.hasNextPage) break;
-    after = d.entitiesConnection.pageInfo.endCursor;
+    const rows = d.entities ?? [];
+    ids.push(...rows.filter((n) => n.types.some((t) => t.name === typeName)).map((n) => n.id));
+    if (rows.length < pageSize) break;
+    last = rows[rows.length - 1].id;
   }
   return [...new Set(ids)];
 }
