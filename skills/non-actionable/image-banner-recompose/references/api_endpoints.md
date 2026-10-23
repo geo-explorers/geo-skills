@@ -5,8 +5,7 @@
 **Auth**: Set `FAL_KEY` environment variable. Install: `pip install fal-client --break-system-packages`
 
 ```python
-import fal_client
-os.environ["FAL_KEY"] = "your-key"  # or export FAL_KEY=... in shell
+import fal_client  # reads FAL_KEY from the environment; never put a key in code or chat
 ```
 
 | Use case               | Endpoint                              | Key input params                                           |
@@ -62,6 +61,6 @@ result_url = output[0]
 
 1. `FAL_KEY` set → use fal.ai (`fal-ai/bria/eraser/outpainting`)
 2. `REPLICATE_API_TOKEN` set → use Replicate (`stability-ai/stable-diffusion-inpainting`)
-3. Neither → use Pillow-only strategy from `strategies.md` Strategy D
+3. Neither → the Pillow-only strategy `choose_strategy()` in `strategies.md` picks: `solid_extend` (Strategy A) or `blurred_backdrop` (Strategy B)
 
 Never tell the user "outpainting is not available" — always have a fallback ready.

@@ -19,8 +19,6 @@ metadata:
   version: "0.2.1"
 ---
 
-<!-- Release-flow test, 2026-10-19: this comment exists only to exercise the skill release process end to end. Remove it in the next release. It changes nothing about how the skill works. -->
-
 # image-banner-recompose
 
 Produces a high-quality **2364 × 640 px banner** from any uploaded image by intelligently
@@ -42,8 +40,10 @@ target 3.69:1), background type (solid / gradient / scene / transparent), domina
 and **all text regions** (titles, author names, logos) — flag these as protected zones.
 
 ### Step 3 — Check API keys + source resolution
+Check only **whether** each key is set. Never print a key's value: it would land in the chat log.
 ```bash
-echo "FAL_KEY=${FAL_KEY:-NOT_SET}"; echo "REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN:-NOT_SET}"
+[ -n "$FAL_KEY" ] && echo "FAL_KEY: set" || echo "FAL_KEY: not set"
+[ -n "$REPLICATE_API_TOKEN" ] && echo "REPLICATE_API_TOKEN: set" || echo "REPLICATE_API_TOKEN: not set"
 ```
 Then run `warn_if_lowres()` from `references/strategies.md`. If the source is under ~500px tall,
 tell the user the centred subject will be upscaled and may look soft, and suggest a larger source
