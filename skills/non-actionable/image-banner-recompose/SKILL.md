@@ -16,7 +16,7 @@ compatibility: >
   the claude.ai / Cowork paths /mnt/user-data/uploads, /mnt/user-data/outputs, /home/claude.
 metadata:
   author: armando
-  version: "0.2.1"
+  version: 0.2.2
 ---
 
 # image-banner-recompose
