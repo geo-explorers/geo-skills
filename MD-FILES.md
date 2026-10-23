@@ -29,7 +29,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.2 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
 | `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
-| `skills/non-actionable/image-banner-recompose/SKILL.md` | 0.2.1 | Recompose any image into a 2364×640 Geo banner | no |
+| `skills/non-actionable/image-banner-recompose/SKILL.md` | 0.2.2 | Recompose any image into a 2364×640 Geo banner | no |
 | `skills/non-actionable/daily-report/SKILL.md` | 0.1.0 | The editor's end-of-day Notion update routine | no |
 | `skills/non-actionable/notion-operations/SKILL.md` | 1.0.1 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
 | `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.0 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |

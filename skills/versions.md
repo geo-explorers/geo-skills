@@ -18,6 +18,9 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## non-actionable/
 
+### image-banner-recompose — 0.2.2
+- 2026-10-23 · image-banner-recompose: never print API keys, fix the fallback reference (#75)
+
 ### ontology-advisor — 0.1.2
 - 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)
 

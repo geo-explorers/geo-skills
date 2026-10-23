@@ -3,7 +3,7 @@
   "skills": {
     "actionable/geo-claim-grouping": {
       "version": "0.7.3",
-      "approved_commit": "4f6048e1d135f1e1118231e692d21d0b340d9791",
+      "approved_commit": "2ba1872fc512b1517d4a41bf0ca4479896fab135",
       "content_sha256": "2466f373c6c0b8529bad6811b5a3e5528e946c4047c6d8bccc4b9f054aa516d1"
     },
     "actionable/geo-clean": {
@@ -13,12 +13,12 @@
     },
     "actionable/geo-discovery": {
       "version": "0.1.2",
-      "approved_commit": "4f6048e1d135f1e1118231e692d21d0b340d9791",
+      "approved_commit": "2ba1872fc512b1517d4a41bf0ca4479896fab135",
       "content_sha256": "97236f875fb4c707ceeb03a1e74ade5fd08f686ea69e680937050f56b8cc20f9"
     },
     "actionable/geo-mirror": {
       "version": "0.13.1",
-      "approved_commit": "4f6048e1d135f1e1118231e692d21d0b340d9791",
+      "approved_commit": "2ba1872fc512b1517d4a41bf0ca4479896fab135",
       "content_sha256": "d0358220fe2ab9d5cab0c1ae2a1365d7e24d388288393467e5ec4fce3c361209"
     },
     "actionable/geo-orchestrate": {
@@ -63,13 +63,13 @@
     },
     "non-actionable/geo-query": {
       "version": "0.2.12",
-      "approved_commit": "4f6048e1d135f1e1118231e692d21d0b340d9791",
+      "approved_commit": "2ba1872fc512b1517d4a41bf0ca4479896fab135",
       "content_sha256": "87e10923e35c319af929c32cf59a435d33e2ffc2d54c62e48ae15606cfe6d3e9"
     },
     "non-actionable/image-banner-recompose": {
-      "version": "0.2.1",
-      "approved_commit": "39eedbef4f5e678a742e84baae87ad768959e1ed",
-      "content_sha256": "48041c61b16e222381d246272bc4a0f3d22a0fd127a22edd01be5d24ef9f9243"
+      "version": "0.2.2",
+      "approved_commit": "df727f945275ec9eccbad5cddcfcf794c8951538",
+      "content_sha256": "0400e0afa8fe833cae41850edfc450ca4757258d89d365cbb7d815412df0d8e1"
     },
     "non-actionable/notion-operations": {
       "version": "1.0.1",
@@ -78,7 +78,7 @@
     },
     "non-actionable/ontology-advisor": {
       "version": "0.1.2",
-      "approved_commit": "4f6048e1d135f1e1118231e692d21d0b340d9791",
+      "approved_commit": "2ba1872fc512b1517d4a41bf0ca4479896fab135",
       "content_sha256": "cd06a08fdbb5c50faab0c685b746a965736e431da1b7c0b4d68e44320d82b6eb"
     }
   }
