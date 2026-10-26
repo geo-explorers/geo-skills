@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """bump_skills.py — bump the version of every skill a pull request changed.
 
-The skill-bump workflow (.github/workflows/skill-bump.yml) runs this on each
+The verify check (.github/workflows/verify-skills.yml) runs this first on each
 pull request and pushes the result, so nobody edits version lines by hand.
 
 For each skill whose folder differs from --base:
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 # Loading suggest_release.py must not leave a __pycache__ folder in the checkout:
-# the skill-bump workflow treats any new file as a change.
+# the verify check treats any new file as a change.
 sys.dont_write_bytecode = True
 
 REPO = Path(__file__).resolve().parent.parent

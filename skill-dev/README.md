@@ -10,8 +10,8 @@ Lint it, open a pull request, and let the bot do the versioning:
 python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table
 ```
 
-- **Don't edit `version:` lines, `skills/versions.md` headings or `skills/SKILL-VERSIONS.json` by hand.** The `skill-bump` workflow runs `bump_skills.py` on the pull request and pushes one commit with all of them. Patch by default; label the pull request `bump:minor` or `bump:major` for more.
-- The first `verify` on a skill change is red (`DRIFT` or `UNLISTED`) until the bot's commit lands, about a minute later. That is expected.
+- **Don't edit `version:` lines, `skills/versions.md` headings or `skills/SKILL-VERSIONS.json` by hand.** The required `verify` check runs `bump_skills.py` on the pull request first and pushes one commit with all of them. Patch by default; label the pull request `bump:minor` or `bump:major` for more.
+- Within a minute the bot's commit appears and `verify` checks it; nothing goes red on the way.
 - Merging releases the library automatically (`release` workflow). To see what merging will release: `python3 skill-dev/suggest_release.py --to HEAD --no-fetch`.
 
 The full procedure, including adding a new skill, is in [`../MAINTAINERS.md`](../MAINTAINERS.md). Details below.
@@ -41,7 +41,7 @@ A stale manifest is worse than none, because people check it instead of the file
 
 ## `bump_skills.py` — per-skill version bumps (the bot)
 
-Bumps every skill whose folder differs from a base commit, by one level from its base version, and never lowers a version a person set higher. A new skill keeps its version (`0.1.0` if it has none). For each, it adds the `skills/versions.md` entry and sets the version in `MD-FILES.md`, then regenerates the manifest. A second run changes nothing. The `skill-bump` workflow runs it on every pull request.
+Bumps every skill whose folder differs from a base commit, by one level from its base version, and never lowers a version a person set higher. A new skill keeps its version (`0.1.0` if it has none). For each, it adds the `skills/versions.md` entry and sets the version in `MD-FILES.md`, then regenerates the manifest. A second run changes nothing. The `verify` check runs it on every pull request.
 
 ```bash
 python3 skill-dev/bump_skills.py --base origin/main --level patch --title "What changed" --dry-run
