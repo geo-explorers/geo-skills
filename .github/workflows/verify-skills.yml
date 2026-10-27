@@ -1,43 +1,123 @@
 name: Verify skill integrity
 
-# Fails the build if any shipped skill changed without being re-approved
-# (bump version + changelog + `python3 skill-dev/skill_versions.py generate`),
-# if MD-FILES.md no longer matches the repo's Markdown files, or if shipped code
-# points at the retired Geo endpoint.
+# The REQUIRED check on main. On a pull request from this repository it first
+# bumps the version of every skill the pull request changed, then verifies.
 #
-# This is a REQUIRED status check on main, so it runs on every pull request with
-# no path filter: a required check that is skipped never reports, and the pull
-# request would wait on it forever.
+# 1. Bump (pull requests from this repository only). skill-dev/bump_skills.py sets
+#    each changed skill's version (patch, or the label bump:minor / bump:major),
+#    adds its skills/versions.md entry and MD-FILES.md version, and regenerates
+#    the manifest. If that changed anything, it is pushed as one commit by the bump
+#    app (geo-skills-bump) and this run ends green: the push starts a fresh run,
+#    which verifies the bot's commit. So nothing goes red on the way, and a pull
+#    request can't merge before its bumped commit is verified.
+# 2. Verify. Fails if any shipped skill changed without being re-approved, if
+#    MD-FILES.md no longer matches the repo's Markdown files, if the release or
+#    bump tools misbehave, or if shipped code points at the retired Geo endpoint.
 #
+# The bump app pushes, not this workflow's own token: a push by the built-in
+# github-actions[bot] made GitHub hold the next checks for a maintainer's approval.
+# The app can only write contents in geo-skills and is not on the tag ruleset's
+# bypass list, so its key (repository variable BUMP_APP_ID, secret
+# BUMP_APP_PRIVATE_KEY) gives nothing a person with write access lacks.
+#
+# Pull requests from forks can't be pushed to: their authors bump by hand
+# (MAINTAINERS.md, "Changing a skill"), and until then this check fails.
+#
+# It runs on every pull request with no path filter: a required check that is
+# skipped never reports, and the pull request would wait on it forever.
 # workflow_dispatch: a maintainer can start a run by hand (Actions → Run workflow).
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BUMPS: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
+      - name: Get a one-hour token from the bump app
+        if: env.BUMPS == 'true'
+        id: app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.BUMP_APP_ID }}
+          private-key: ${{ secrets.BUMP_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # the script reads git log/ls-files — needs full history
+          # A pull request from this repository: its branch, so a bump can be pushed to it.
+          ref: ${{ env.BUMPS == 'true' && github.head_ref || '' }}
+          token: ${{ steps.app.outputs.token || github.token }}
+          fetch-depth: 0          # the scripts read git log/ls-files — needs full history
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Bump the changed skills' versions
+        if: env.BUMPS == 'true'
+        id: bump
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          LEVEL: ${{ contains(github.event.pull_request.labels.*.name, 'bump:major') && 'major' || contains(github.event.pull_request.labels.*.name, 'bump:minor') && 'minor' || 'patch' }}
+        run: |
+          base=$(git merge-base "origin/$BASE_REF" HEAD)
+          python3 skill-dev/bump_skills.py --base "$base" --level "$LEVEL" --title "$PR_TITLE" --pr "$PR_NUMBER"
+          if [ -z "$(git status --porcelain -- skills MD-FILES.md)" ]; then
+            exit 0
+          fi
+          python3 skill-dev/skill_versions.py verify
+          python3 skill-dev/check_md_manifest.py || echo "::warning::MD-FILES.md still needs a hand edit (see above)."
+          bot="${APP_SLUG}[bot]"
+          id=$(gh api "users/${APP_SLUG}%5Bbot%5D" --jq .id)
+          git config user.name "$bot"
+          git config user.email "$id+$bot@users.noreply.github.com"
+          git add -A skills MD-FILES.md
+          git commit --quiet -m "Bump skill versions ($LEVEL)"
+          git push --quiet origin "HEAD:refs/heads/$HEAD_REF"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          echo "::notice::Pushed a version bump ($LEVEL). The checks run again on that commit."
+
+      - name: Forks bump by hand
+        if: github.event_name == 'pull_request' && env.BUMPS != 'true'
+        run: |
+          echo "::warning::This pull request comes from a fork, so the bot can't push to it. Bump the changed skills by hand: see MAINTAINERS.md, Changing a skill."
+
       - name: Verify skills match their approved versions
+        if: steps.bump.outputs.pushed != 'true'
         run: python3 skill-dev/skill_versions.py verify
       - name: Verify MD-FILES.md matches the repo
+        if: steps.bump.outputs.pushed != 'true'
         run: python3 skill-dev/check_md_manifest.py
       - name: The release calculator gives the right versions
+        if: steps.bump.outputs.pushed != 'true'
         env:
           REQUIRE_RELEASE_TAGS: "1"
         run: python3 skill-dev/test_suggest_release.py
       - name: The version bump bot behaves
+        if: steps.bump.outputs.pushed != 'true'
         run: python3 skill-dev/test_bump_skills.py
       # The retired host refuses connections; the live one is api-testnet.geobrowser.io.
       - name: No retired Geo endpoint in shipped code
+        if: steps.bump.outputs.pushed != 'true'
         run: |
           if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills lib src scripts; then
             echo "::error::Retired Geo endpoint found above. Use https://api-testnet.geobrowser.io/graphql"

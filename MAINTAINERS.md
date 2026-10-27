@@ -122,16 +122,16 @@ Every change under `skills/` or `skill-dev/` goes through a pull request. Nothin
    ```
 3. **Add a row to `MD-FILES.md`** for any new Markdown file.
 4. **Open the pull request.** If the change is more than a fix, add a label: `bump:minor` for a new capability, `bump:major` for a breaking change to how the skill is used. No label means patch.
-5. **The bot bumps the version.** The `skill-bump` workflow runs `skill-dev/bump_skills.py` and pushes one commit, "Bump skill versions (<level>)", that:
+5. **The bot bumps the version.** The required `verify` check runs `skill-dev/bump_skills.py` first and pushes one commit, "Bump skill versions (<level>)", that:
    - sets each changed skill's `version` to its version on `main` bumped by the level, unless the `SKILL.md` already has a higher one (it never lowers a version);
    - adds a `### <skill> — <version>` entry to `skills/versions.md` with the pull request's title and number;
    - updates the skill's version in `MD-FILES.md`;
    - regenerates `skills/SKILL-VERSIONS.json`.
 
-   Its push, made as the bump app, starts the `verify` check on the bot's commit. The first `verify`, on your push, is red (`DRIFT` or `UNLISTED`) until then: expected. Reword the bot's changelog line to say what changed and why if you like; keep the heading.
+   That run then ends green without checking further, and the push, made as the bump app, starts a fresh `verify` that checks the bot's commit. Nothing goes red on the way, and the pull request can't merge before its bumped commit is verified. Reword the bot's changelog line to say what changed and why if you like; keep the heading.
 6. **Review and merge.** It can merge only when the `verify` check passes and another team member has approved. A new commit on the pull request, including the bot's, cancels earlier approvals. Merging releases the library (see "How releases happen"): run `python3 skill-dev/suggest_release.py --to HEAD --no-fetch` on the branch to see which release that will be.
 
-Changing a label after the bot ran re-runs it. Removing a label never lowers a version the bot already set; lower it by hand if needed. Pull requests from forks can't be pushed to: their authors bump `version`, add the changelog entry, update `MD-FILES.md` and run `python3 skill-dev/skill_versions.py generate` by hand.
+Changing a label after the bot ran re-runs it. Removing a label never lowers a version the bot already set; lower it by hand if needed. Pull requests from forks can't be pushed to, so `verify` fails on them until their authors bump `version`, add the changelog entry, update `MD-FILES.md` and run `python3 skill-dev/skill_versions.py generate` by hand.
 
 What the `verify` check proves: every skill folder matches the content fingerprint recorded for it in `skills/SKILL-VERSIONS.json`, and every Markdown file is listed in the manifest. The fingerprint covers the skill folders only, not the shared code in `src/`, `lib/` and `scripts/`.
 
@@ -191,11 +191,11 @@ The automation acts as one **GitHub App** owned by the `geo-explorers` organisat
 | Release app | Organisation settings → Developer settings → GitHub Apps. Installed on `geo-skills` and `geo-agents` only | Repository permissions: Contents read and write, Pull requests read and write (Metadata read comes with them). No webhook. The only actor allowed to create `v*` tags here, and to merge in `geo-agents` without an approval |
 | `RELEASE_APP_ID` (variable) and `RELEASE_APP_PRIVATE_KEY` (secret) | This repository's environment `release`, and `geo-agents`' environment `skills-sync`. Both environments: deployment branch `main` only | The workflows turn them into a one-hour token with `actions/create-github-app-token`. Here: Contents write on both repositories (tag, release page, notify `geo-agents`). In `geo-agents`: Contents and Pull requests write there only |
 | Tag ruleset | This repository, Settings → Rules → Rulesets | Targets `refs/tags/v*`. Restricts creation, update and deletion. Bypass: the release app only |
-| Labels | This repository | `bump:minor` and `bump:major`, read by the `skill-bump` workflow |
+| Labels | This repository | `bump:minor` and `bump:major`, read by the `verify` check |
 
-The `skill-bump` workflow pushes with a second, smaller app, the **bump app** (`geo-skills-bump`): Contents read and write on `geo-skills` only, not on the tag ruleset's bypass list. Its ID is the repository variable `BUMP_APP_ID` and its key the repository secret `BUMP_APP_PRIVATE_KEY`; pull-request branches need them, so they can't sit in a `main`-only environment, and the app's narrow scope is what keeps that safe. It replaces the workflow's built-in token, whose pushes (as `github-actions[bot]`) made GitHub hold the next checks for a maintainer's approval.
+The `verify` check pushes its bumps with a second, smaller app, the **bump app** (`geo-skills-bump`): Contents read and write on `geo-skills` only, not on the tag ruleset's bypass list. Its ID is the repository variable `BUMP_APP_ID` and its key the repository secret `BUMP_APP_PRIVATE_KEY`; pull-request branches need them, so they can't sit in a `main`-only environment, and the app's narrow scope is what keeps that safe. It replaces the workflow's built-in token, whose pushes (as `github-actions[bot]`) made GitHub hold the next checks for a maintainer's approval.
 
-**Rotating the private key.** The key does not expire, so rotate it once a year, or at once if it may have leaked: in the app's settings, generate a new private key, paste it into both environment secrets, check that the next `release` or `sync-skills-release` run is green, then delete the old key in the app's settings. A deleted or wrong key shows as a red run at the "Get a one-hour token" step; after fixing it, re-run that run. The bump app's key works the same way: it lives in the repository secret `BUMP_APP_PRIVATE_KEY`, and a bad key shows as a red `skill-bump` run.
+**Rotating the private key.** The key does not expire, so rotate it once a year, or at once if it may have leaked: in the app's settings, generate a new private key, paste it into both environment secrets, check that the next `release` or `sync-skills-release` run is green, then delete the old key in the app's settings. A deleted or wrong key shows as a red run at the "Get a one-hour token" step; after fixing it, re-run that run. The bump app's key works the same way: it lives in the repository secret `BUMP_APP_PRIVATE_KEY`, and a bad key shows as a red `verify` run on pull requests.
 
 ## Branch protection on `main`
 
