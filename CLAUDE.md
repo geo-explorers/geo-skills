@@ -17,7 +17,7 @@ If a request is ambiguous, ask which skill — don't guess and improvise.
 
 ## Agents live in `geo-agents`
 
-The agents, the Agents flow workflow guide and the Notion tracker ids moved to [geo-explorers/geo-agents](https://github.com/geo-explorers/geo-agents). If the task involves **creating, editing or invoking an agent**, or any work in the **Agents flow** Notion teamspace, do it from a checkout of `geo-agents`, and read its `CLAUDE.md` and `workflow/AGENT-WORKFLOW.md` first. This repository holds only the skills, the shared code they call, and the tools that check them.
+The agents, the Agents flow workflow guide and the Notion tracker ids moved to [geo-explorers/geo-agents](https://github.com/geo-explorers/geo-agents). If the task involves **creating, editing or invoking an agent**, or any work in the **Agents flow** Notion teamspace, do it from a checkout of `geo-agents`, and read its `CLAUDE.md` and `workflow/AGENT-WORKFLOW.md` first. This repository holds only the skills and the tools that build and check them. Each skill folder is self-contained: everything it runs is in its own `scripts/`, so geo-agents can run it with nothing else from here.
 
 Two rules from that guide that are easy to get wrong:
 - **Log the task BEFORE starting work**, in the Work tracker, with `Projects` set to **Agent flows** — every view filters on it, so a task without it is invisible to the team.

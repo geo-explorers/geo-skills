@@ -3,7 +3,7 @@ name: geo-press-review
 description: Compare external press coverage (Google News / web) against what's published on Geo, and tell editors what to publish next. Classifies stories as already-published or not-yet-covered, ranked and justified. Also does source discovery for a topic+date. Read-only — it compares and recommends, never publishes. Triggers on "press review", "what's missing on Geo", "compare press coverage", "what should we publish", "is this covered", "find sources for", "coverage gaps", "timeline for", "what news did we miss".
 metadata:
   author: geobrowser
-  version: 0.5.3
+  version: 0.5.4
 ---
 
 # Geo Knowledge Graph — Press Review
@@ -54,7 +54,7 @@ In both, the **Headline cell is a clickable markdown link** to the story's prima
 Run the coverage map to get everything Geo has published in the window:
 
 ```bash
-bun run scripts/press-review-coverage-map.ts --space AI --days 7 --json geo-coverage.json
+bun run .claude/skills/geo-press-review/scripts/press-review-coverage-map.ts --space AI --days 7 --json geo-coverage.json
 ```
 
 This produces `geo-coverage.json` — every News story with name, publish date, topics, sources (by outlet), and claim count. This is the "what we already have" side. It also flags **went-quiet topics** and **single-source stories** purely from Geo data (useful even before the external comparison).
@@ -171,5 +171,5 @@ The review itself is safe by construction — read + compare + rank only.
 
 ## More
 
-- `scripts/press-review-coverage-map.ts` — the Geo-side coverage map (Half 1).
+- `.claude/skills/geo-press-review/scripts/press-review-coverage-map.ts` — the Geo-side coverage map (Half 1).
 - `geo-query` / `geo-orchestrate` / `geo-publish` — the skills this one reads from and hands off to.

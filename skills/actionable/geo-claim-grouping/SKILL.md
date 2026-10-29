@@ -2,8 +2,10 @@
 name: geo-claim-grouping
 description: Group Claim entities in Geo via the team's two-step process — step 1 links every adjudicated pair with Related claims (the initial grouping), step 2 assigns established groups to their corresponding brackets (Duplicate claims, Similar claims, Supporting/Opposing arguments) under the strict bracket definitions. Runs the bundled read-only discovery script to generate scored candidate claim pairs for a space, a page/tab of claims, or one seed claim — optionally pooling other spaces for cross-space matches — adjudicates every pair, dry-runs an ops script reading an editor-approved decisions file, and publishes held-for-review proposals only on an explicit publish. Triggers on "claim grouping", "group claims", "claim brackets", "related claims", "duplicate claims", "similar claims", "group related claims", "link similar claims", "assign similar claims", "claims like this one", "claim similarity pass", "claim relations pass", "which claims are similar to".
 metadata:
-  version: 0.7.3
+  version: 0.7.4
 ---
+
+**Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-claim-grouping/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-claim-grouping/scripts/lib/<file>.ts`.
 
 # Geo Knowledge Graph — Claim Grouping (Related / Duplicate / Similar / Arguments)
 
@@ -37,9 +39,9 @@ Editor-facing skill for grouping **Claim** entities (`96f859efa1ca4b229372c86ad5
 
 ## Prerequisites — verify before first run
 
-1. **`geo-skills` repo cloned** locally; the skill runs FROM the repo root and imports `src/functions.ts` helpers.
+1. **Run from the workspace root** (the geo-agents folder). The helpers are in this skill's `scripts/lib/functions.ts`.
 2. **Bun installed** (`bun --version` works) and **`bun install` already run** (`node_modules/` exists).
-3. **Repo migrated to the 2026-07 Geo infrastructure**: `@geoprotocol/geo-sdk` ≥ 0.20.0 and endpoints derived from the SDK config — quick check: `grep -q 'GeoTestnetConfig' src/functions.ts && echo migrated`. If the check fails, STOP — migrating `src/` is repo work, never something to patch inside a generated script.
+3. **Repo migrated to the 2026-07 Geo infrastructure**: `@geoprotocol/geo-sdk` ≥ 0.20.0 and endpoints derived from the SDK config — quick check: `grep -q 'GeoTestnetConfig' .claude/skills/geo-claim-grouping/scripts/lib/functions.ts && echo migrated`. If the check fails, STOP — migrating the helpers is maintainer work, never something to patch inside a generated script.
 4. **`.env` filled in**: `PK_SW=` and `DEMO_SPACE_ID=` set (publish-time only; discovery + dry-run never touch the wallet). Never `cat .env` — verify with `test -f .env && grep -q '^PK_SW=' .env && echo ok`.
 5. **Editor access to the target space** — checked live by Gate 0 via `getPublishableSpaceIds`. Non-editor spaces are still analyzable; their ops ship as a **fix package** (`scripts/fix-packages/<slug>/<date>/ops.json` + `report.txt`), never a forced publish. The Root (Geo) space is always fix-package territory for property-schema edits.
 
@@ -66,8 +68,8 @@ If any prerequisite is missing, STOP and ask the editor to fix it. Do not work a
 ### Stage A — Discovery (bundled script, read-only, no `go` needed)
 
 ```
-bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --space <spaceId> [--pool crypto,wa,health] [--scope-file <ids.json>] [--cap 80] [--out <dir>] [--resume]
-bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --seed <claimId>
+bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --space <spaceId> [--pool crypto,wa,health] [--scope-file <ids.json>] [--cap 80] [--out <dir>] [--resume]
+bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --seed <claimId>
 ```
 
 Pulls the target space's Claim corpus + signal edges (citation Sources, Notable-claims story membership, Topics, existing Related/Similar edges), pre-clusters candidate pairs (text-first + structural recall), scores them, and writes `candidates.json` + `summary.json` + a log to `scripts/<date>-claim-grouping-<slug>/`. Everything adjudication needs is inline in `candidates.json` — no re-querying. Query shapes, scoring constants, and API quirks: [`references/queries-and-signals.md`](references/queries-and-signals.md).
@@ -163,8 +165,8 @@ The two most load-bearing calls:
 ## Script generation rules (Stage D)
 
 - File: `scripts/<YYYY-MM-DD>-claim-grouping-<slug>.ts`; artifacts into the campaign dir `scripts/<date>-claim-grouping-<slug>/`. One file, one campaign.
-- Copy the annotated template from [`references/ops-script-template.md`](references/ops-script-template.md) — imports (`Graph` from the SDK; `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds` from `src/functions.ts`), runtime read of `decisions.json`, the per-pair check sequence (liveness → existing edge in the SAME direction, HARD RULE 7 → `relation(id:)` collision), `Graph.createRelation({ id, fromEntity, toEntity, type }).ops`, `printOps` + `decisions.dryrun.json`, `DRY_RUN` guard, publish tail with proposal URL.
-- Reuse, don't reimplement: `src/functions.ts` (`gql` retries 5xx/429/transients up to 50×; `publishOps` resolves personal-vs-DAO routing and returns the proposalId).
+- Copy the annotated template from [`references/ops-script-template.md`](references/ops-script-template.md) — imports (`Graph` from the SDK; `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds` from `scripts/lib/functions.ts`), runtime read of `decisions.json`, the per-pair check sequence (liveness → existing edge in the SAME direction, HARD RULE 7 → `relation(id:)` collision), `Graph.createRelation({ id, fromEntity, toEntity, type }).ops`, `printOps` + `decisions.dryrun.json`, `DRY_RUN` guard, publish tail with proposal URL.
+- Reuse, don't reimplement: `scripts/lib/functions.ts` (`gql` retries 5xx/429/transients up to 50×; `publishOps` resolves personal-vs-DAO routing and returns the proposalId).
 - No other op kinds, ever (HARD RULE 10). Rerun of the dry-run must be byte-identical (zero drift) before `publish` is offered.
 
 ## Dry-run report — required sections
@@ -187,5 +189,5 @@ Post after every dry-run (full IDs + geobrowser links, HARD RULE 11): staged edg
 - Duplicate merges + stale-edge cleanup: [`../geo-clean/SKILL.md`](../geo-clean/SKILL.md)
 - Argument-relation follow-ups + publish mechanics: [`../geo-publish/SKILL.md`](../geo-publish/SKILL.md)
 - Editor-facing routing front door: [`../geo-orchestrate/SKILL.md`](../geo-orchestrate/SKILL.md)
-- Query patterns + API performance: [`../../non-actionable/geo-query/SKILL.md`](../../non-actionable/geo-query/SKILL.md)
-- Shared helpers: `../../../src/functions.ts`, `../../../src/constants.ts`; campaign pattern library: `../../../scripts/`
+- Query patterns + API performance: [`../geo-query/SKILL.md`](../geo-query/SKILL.md)
+- Shared helpers: this skill's `scripts/lib/functions.ts` and `scripts/lib/constants.ts` (from `scripts/`: `../.claude/skills/geo-claim-grouping/scripts/lib/<file>.ts`); campaign pattern library: earlier dated scripts in `scripts/` at the workspace root

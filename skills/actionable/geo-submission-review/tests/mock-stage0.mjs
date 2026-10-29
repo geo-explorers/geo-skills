@@ -19,7 +19,7 @@ globalThis.fetch = async (url, init) => {
     const here = path.dirname(fileURLToPath(import.meta.url));
     let sdk;
     try { sdk = await import('@geoprotocol/grc-20'); }
-    catch { sdk = await import(pathToFileURL(path.resolve(process.env.GEO_CM_DIR || path.resolve(here, '../../../content-management'), 'node_modules/@geoprotocol/grc-20/dist/index.js'))); }
+    catch { sdk = await import(pathToFileURL(path.resolve(process.env.GEO_CM_DIR || process.cwd(), 'node_modules/@geoprotocol/grc-20/dist/index.js'))); }
     const id = hex => new Uint8Array(Buffer.from(hex, 'hex'));
     const edit = new sdk.EditBuilder(id(proposal)).setName('Fixture news').setCreatedAt(1n)
       .createEntity(id(entity), b => b.text(id(nameProp), 'Fixture story').text(id('44444444444444444444444444444444'), 'Full long submitted text. '.repeat(40)))

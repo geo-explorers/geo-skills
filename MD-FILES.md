@@ -25,21 +25,21 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 
 | Skill | Version | Contents | Key needed |
 |---|---|---|---|
-| `skills/non-actionable/geo-query/SKILL.md` | 0.2.12 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
+| `skills/non-actionable/geo-query/SKILL.md` | 0.2.13 | Query the graph over GraphQL: lookups, type/space scoping, relations, schema discovery, performance rules, canonical space IDs | no |
 | `skills/non-actionable/ontology-advisor/SKILL.md` | 0.1.2 | Modelling advice: reuse vs new type, property choices, relation vs value, duplicate and drift checks | no |
-| `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.3 | Compare press coverage with Geo and recommend what to publish next | no |
+| `skills/non-actionable/geo-press-review/SKILL.md` | 0.5.4 | Compare press coverage with Geo and recommend what to publish next | no |
 | `skills/non-actionable/geo-describe/SKILL.md` | 0.2.0 | Verified, original entity descriptions at scale, with copyright and accuracy gates | no |
 | `skills/non-actionable/image-banner-recompose/SKILL.md` | 0.2.2 | Recompose any image into a 2364×640 Geo banner | no |
 | `skills/non-actionable/daily-report/SKILL.md` | 0.1.0 | The editor's end-of-day Notion update routine | no |
-| `skills/non-actionable/notion-operations/SKILL.md` | 1.0.1 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
-| `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.0 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |
-| `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.1 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
-| `skills/actionable/geo-submission-review/SKILL.md` | 0.7.4 | Group and review bounty submissions, publish verified datasets reports, and preserve full Notion review evidence with concise introductions and human editor feedback | **yes** (report publication) |
-| `skills/actionable/geo-publish/SKILL.md` | 0.12.1 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
-| `skills/actionable/geo-clean/SKILL.md` | 0.5.2 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
-| `skills/actionable/geo-mirror/SKILL.md` | 0.13.1 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
-| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.3 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
-| `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.1 | Turn natural-language intent into a query plan, publish plan and script | **yes** |
+| `skills/non-actionable/notion-operations/SKILL.md` | 1.0.2 | How to read and write Notion correctly from this toolkit: which identity to use, API limits and the traps | no |
+| `skills/non-actionable/geo-claim-grouping-notion/SKILL.md` | 0.2.1 | Write claim-grouping results into a Notion Claims mirror as review columns instead of publishing to Geo | no |
+| `skills/non-actionable/geo-mirror-and-group/SKILL.md` | 1.0.2 | Run the whole Geo → Notion → claim-grouping pipeline from one request | no |
+| `skills/actionable/geo-submission-review/SKILL.md` | 0.7.5 | Group and review bounty submissions, publish verified datasets reports, and preserve full Notion review evidence with concise introductions and human editor feedback | **yes** (report publication) |
+| `skills/actionable/geo-publish/SKILL.md` | 0.12.2 | Create and update entities and relations (entity deletes go to geo-clean). Mandatory gates (ontology/type, duplicate, schema, relation-target, type-required) and the two-phase dry-run report → publish | **yes** |
+| `skills/actionable/geo-clean/SKILL.md` | 0.5.3 | Merge duplicates, delete orphans, move entities, fix data types, with anchored-entity protection | **yes** |
+| `skills/actionable/geo-mirror/SKILL.md` | 0.13.2 | Geo ⇄ Notion. Part 1 mirrors any entity type into Notion; Part 2 publishes changes back from any table with a `Geo ID` column | **yes** (Part 2) |
+| `skills/actionable/geo-claim-grouping/SKILL.md` | 0.7.4 | Group claims: adjudicate Similar/Duplicate relations and publish the decisions | **yes** |
+| `skills/actionable/geo-orchestrate/SKILL.md` | 0.2.2 | Turn natural-language intent into a query plan, publish plan and script | **yes** |
 | `skills/actionable/geo-discovery/SKILL.md` | 0.1.2 | Gap-discovery passes over a space, published as Gap finding entities | **yes** |
 
 ### Skill reference files — loaded by their own skill only
@@ -67,6 +67,8 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/notion-operations/references/toolkit-scripts.md` | The repo's Notion scripts and when to use each |
 | `skills/non-actionable/geo-claim-grouping-notion/references/column-contract.md` | Which Notion columns the grouping results are written into |
 | `skills/non-actionable/ontology-advisor/README.md` | How to run the ontology-advisor scripts |
+| `skills/actionable/geo-publish/references/knowledge-graph-ontology.md` | Copy of `skill-dev/shared/knowledge-graph-ontology.md`, the ontology specification |
+| `skills/non-actionable/geo-query/references/knowledge-graph-ontology.md` | Copy of `skill-dev/shared/knowledge-graph-ontology.md`, the ontology specification |
 
 ### Submission review references and assets
 
@@ -88,7 +90,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | File | Contents | Read by | Trigger |
 |---|---|---|---|
 | `skills/non-actionable/ontology-advisor/references/ONTOLOGY.md` | The full Geo ontology guide: principles, rules, types vs properties vs relations, worked judgments. The prior for every modelling decision | Content, data and quality agents | On demand, and by ontology-advisor |
-| `knowledge-graph-ontology.md` | The ontology specification: entities, properties, relations, data types, spaces. Structural reference behind the SDK | Data and schema agents | On demand |
+| `skill-dev/shared/knowledge-graph-ontology.md` | The ontology specification: entities, properties, relations, data types, spaces. Structural reference behind the SDK. The source of the copies in geo-publish and geo-query (`python3 skill-dev/sync_shared.py`) | Data and schema agents, through those copies | On demand |
 | `skill-dev/skill-quality-check/references/skill-quality-standard.md` | The skill authoring and validation standard the linter enforces | Anyone writing or reviewing a skill | On demand |
 
 ## 4. Maintainer documents — not agent instructions
@@ -111,4 +113,4 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 - **Changing a skill:** the required `verify` check bumps `version` in its `SKILL.md`, adds the `skills/versions.md` entry, updates the version above and regenerates `skills/SKILL-VERSIONS.json`, in the pull request. A new skill's rows here are still added by hand.
 - **Before trusting an install:** compare the installed `SKILL.md` version with this file. A mismatch means the install is stale — run `bash skill-dev/sync-skills.sh` and restart the host. Two agents running different versions of the same skill will overwrite each other's work.
 
-*Counts on 19 October 2026: **58** tracked `.md` files — 2 entry points, 16 skills, 31 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*
+*Counts on 29 October 2026: **60** tracked `.md` files — 2 entry points, 16 skills, 33 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*

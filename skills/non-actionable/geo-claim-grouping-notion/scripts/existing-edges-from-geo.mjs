@@ -12,7 +12,7 @@
 // READ-ONLY on Geo (public GraphQL, no wallet, no env needed).
 //
 // Usage:
-//   node skills/non-actionable/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs \
+//   node .claude/skills/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs \
 //     --roster scripts/<campaign>/roster.json [--out scripts/<campaign>/existing-edges.json] \
 //     [--endpoint https://api-testnet.geobrowser.io/graphql]
 //
@@ -20,7 +20,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-const USAGE = `usage: node skills/non-actionable/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs \\
+const USAGE = `usage: node .claude/skills/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs \\
   --roster <campaign>/roster.json [--out <campaign>/existing-edges.json] [--endpoint <graphql url>]
 
   --roster    roster.json from roster-from-notion.mjs (only its ids are used)
@@ -50,7 +50,7 @@ const roster = JSON.parse(readFileSync(rosterFile, 'utf8'));
 if (!Array.isArray(roster.ids)) { console.error(`${rosterFile}: expected { ids: [...] } from roster-from-notion.mjs`); process.exit(2); }
 const inRoster = new Set(roster.ids.map((s) => String(s).toLowerCase()));
 
-// ── GraphQL client: lib/gql.mjs semantics (2 retries on 5xx/429/network/transient) ──
+// ── GraphQL client: geo-query's scripts/gql.mjs semantics (2 retries on 5xx/429/network/transient) ──
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function gql(query, variables, retries = 2) {
   let lastErr;

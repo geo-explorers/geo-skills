@@ -59,7 +59,7 @@ The dated ops script is the ONLY thing this skill writes into `scripts/` — and
  */
 import { Graph, type Op } from "@geoprotocol/geo-sdk";
 import * as fs from "node:fs";
-import { gql, publishOps, printOps, getPublishableSpaceIds } from "../src/functions.ts";
+import { gql, publishOps, printOps, getPublishableSpaceIds } from "../.claude/skills/geo-claim-grouping/scripts/lib/functions.ts";
 
 const DRY_RUN = true; // flip ONLY after `publish`, with: // AUTHORIZED <date>: editor replied publish
 const PROPS: Record<string, string> = {

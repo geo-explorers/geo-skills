@@ -6,8 +6,8 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {reportDraft,prepareReportDraft,recordDelivery,emptyState,hash,reviewContentHash} from '../scripts/review-core.mjs';
 import {buildReportOps} from '../scripts/report-ops.mjs';
-const require=createRequire(path.join(process.env.GEO_CM_DIR,'package.json'));
-const {Graph}=await import(require.resolve('@geoprotocol/geo-sdk'));
+let sdk;try{sdk=await import('@geoprotocol/geo-sdk');}catch{const r=createRequire(path.join(process.env.GEO_CM_DIR,'package.json'));sdk=await import(r.resolve('@geoprotocol/geo-sdk'));}
+const {Graph}=sdk;
 const id=n=>n.toString(16).padStart(32,'0'),original='Full statement with qualifiers. '.repeat(50);
 const file=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'intro-gates-')),'verified.json');
 fs.writeFileSync(file,JSON.stringify({complete:true,state:'verified'}));

@@ -109,7 +109,7 @@ A **skill** is a capability (any agent can load and follow one). An **agent** is
 
 ## Shared code reference (engineering)
 
-The functions below live in `src/entity_ops.ts` and are what the **geo-clean** skill uses for deletes, ID changes, moves and merges. **Do not call them by hand:** every delete, merge or move goes through geo-clean, which runs the orphan check, the dry run and the human confirmation first (hard rule 3 in `CLAUDE.md`).
+The functions below live in `entity_ops.ts` (source: `skill-dev/shared/`, copied into geo-clean and geo-orchestrate's `scripts/lib/`) and are what the **geo-clean** skill uses for deletes, ID changes, moves and merges. **Do not call them by hand:** every delete, merge or move goes through geo-clean, which runs the orphan check, the dry run and the human confirmation first (hard rule 3 in `CLAUDE.md`).
 
 ### 1. Delete Entity
 
@@ -192,19 +192,15 @@ skills/
   actionable/               # Skills that write to Geo (need GEO_PRIVATE_KEY)
   non-actionable/           # Skills that never write to Geo (no key); some write to Notion
   SKILL-VERSIONS.json       # Approved fingerprint of every skill, checked by CI
-skill-dev/                  # Linter, manifest tools, local install script
-lib/gql.mjs                 # Canonical zero-dependency GraphQL client
-src/
-  entity_ops.ts             # Core operation logic (delete, move, merge, migrate), used by geo-clean
-  constants.ts              # Ontology IDs (types, properties, data types, views)
-  functions.ts              # Shared helpers (GraphQL client, publishing, ops serialization)
-scripts/                    # Shared scripts that skills call
-validate_migration.ts       # Post-merge verification, used by geo-clean
-knowledge-graph-ontology.md # Full ontology specification
+  <tier>/<skill>/scripts/    # Everything the skill runs; shared helpers are copied into scripts/lib/
+skill-dev/                  # Linter, manifest tools, release tools, local install script
+  shared/                   # Single source of the helpers several skills use (functions.ts,
+                            #   constants.ts, entity_ops.ts, knowledge-graph-ontology.md);
+                            #   sync_shared.py copies them into each skill, CI checks the copies
 ```
 
 ## References
 
 - [GRC-20 Serialization Spec](https://github.com/geobrowser/grc-20/blob/main/spec.md)
-- [Knowledge Graph Ontology](knowledge-graph-ontology.md)
+- [Knowledge Graph Ontology](skill-dev/shared/knowledge-graph-ontology.md)
 - [Agents Hub space](https://www.geobrowser.io/space/ddfd01098a71083119eb130a01a6d4c5) — the on-Geo skill registry (confirmed tags + usage guides)

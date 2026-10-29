@@ -2,7 +2,7 @@
 name: geo-mirror
 description: Mirror ANY Geo entity type from ANY space into Notion as linked databases, and (Part 2) sync reviewed Notion edits back to Geo. Type-generic — News stories, podcast Episodes, Events, People, etc. — one Notion database per entity type (primary + each related type), keyed by Geo ID so re-runs update in place. Read-only on Geo in Part 1. Triggers on "mirror to notion", "geo to notion", "export space to notion", "sync geo into notion", "mirror podcast into notion", "mirror episodes/events into notion".
 metadata:
-  version: 0.13.1
+  version: 0.13.2
   author: geobrowser
 ---
 
@@ -78,12 +78,12 @@ into the Notion page *bodies* instead of columns, and had to be redone.
 
 ```bash
 # 1. read the page: lists every collection, its item count, its type mix, and writes one ids file each
-node skills/actionable/geo-mirror/scripts/extract-page-collections.mjs <PAGE_ID> --space <SPACE_ID> --out-dir /tmp/pagemirror
+node .claude/skills/geo-mirror/scripts/extract-page-collections.mjs <PAGE_ID> --space <SPACE_ID> --out-dir /tmp/pagemirror
 # it prints the exact next two commands per collection. Show the editor the counts first.
 # 2. extract one collection (flags as printed), then 3. mirror it
-node skills/actionable/geo-mirror/scripts/extract-space.mjs <SPACE_ID> --ids-file /tmp/pagemirror/<name>.ids.json \
+node .claude/skills/geo-mirror/scripts/extract-space.mjs <SPACE_ID> --ids-file /tmp/pagemirror/<name>.ids.json \
   --any-type --any-space --label "<collection name>" --out /tmp/pagemirror/<name>.extract.json
-node --env-file=.env skills/actionable/geo-mirror/scripts/mirror-to-notion.mjs /tmp/pagemirror/<name>.extract.json --parent <NOTION_PAGE_ID> --dry-run
+node --env-file=.env .claude/skills/geo-mirror/scripts/mirror-to-notion.mjs /tmp/pagemirror/<name>.extract.json --parent <NOTION_PAGE_ID> --dry-run
 ```
 
 Three flags exist only for this job:

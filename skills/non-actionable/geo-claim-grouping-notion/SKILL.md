@@ -2,7 +2,7 @@
 name: geo-claim-grouping-notion
 description: Write claim-grouping results into a Notion Claims mirror as review columns instead of Geo proposals. Runs geo-claim-grouping's discovery and adjudication unmodified — scoped to the claims that are in the mirror — then fills five self-relation columns on the Claims database (Proposed exact duplicates, Proposed semantic duplicates, Proposed related claims, Proposed supporting / opposing arguments) plus Proposed grouping notes with a hyperlinked line per counterpart. Read-only on Geo; it never publishes. Use when an editor wants exact duplicates, semantic duplicates, related, supporting or opposing claims proposed in Notion for review, when a Claims mirror needs grouping columns, or as the step after geo-mirror. Triggers on "claim grouping to Notion", "write claim groups into Notion", "propose exact or semantic duplicates and related claims in the Claims database", "grouping review columns", "notion claim grouping". Not for publishing to Geo (geo-claim-grouping) or building the mirror (geo-mirror).
 metadata:
-  version: "0.2.0"
+  version: 0.2.1
   author: mantas
 ---
 
@@ -64,11 +64,10 @@ Topics mirror once produced a clean 70-id "claims" roster that every later step 
 - A Claims mirror database shared with the Notion integration, with a title column and a
   `Geo ID` rich_text column (a `Geo URL` column is used for links and to infer the space).
 - `NOTION_TOKEN` in `.env` (scripts load it with `--env-file`; it is never printed).
-- `node_modules` installed (`npm ci` or `bun install`) — the discovery script imports the Geo SDK
-  through `src/functions.ts`. Node ≥ 22 runs that `.ts` file directly (type stripping); `bun run
+- `node_modules` installed (`bun install`) — the discovery script imports the Geo SDK
+  through geo-claim-grouping's `scripts/lib/functions.ts`. Node ≥ 22 runs that `.ts` file directly (type stripping); `bun run
   --env-file=.env` works too.
-- Run everything from the repo root: the parent's discovery resolves `../../../../src/functions.ts`
-  from its own folder.
+- Run everything from the workspace root (the geo-agents folder).
 
 ## NOTION gates (run BEFORE any Notion write)
 
@@ -115,7 +114,7 @@ committed. Placeholders: `<DB>` = Claims database id or URL, `<C>` = campaign di
 
 **1 · Roster from the mirror** (read-only; `ids` is the `--scope-file` shape):
 ```bash
-node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/roster-from-notion.mjs --db <DB> --out <C>/roster.json
+node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/roster-from-notion.mjs --db <DB> --out <C>/roster.json
 ```
 It prints rows read, ids kept, the space, the **type check** (`N/N are type …`), duplicate Geo IDs
 (excluded) and rows without an id. The type check is a read-only Geo call — no wallet, no env — and
@@ -123,7 +122,7 @@ its result is recorded in `roster.json` under `typeCheck`.
 
 **2 · Discovery — geo-claim-grouping's script, unmodified, scoped** (read-only on Geo):
 ```bash
-node --env-file=.env skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts \
+node --env-file=.env .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts \
   --space <spaceId from roster.json> --scope-file <C>/roster.json --cap 2000 --no-semantic --out <C>
 ```
 `--scope-file` keeps every pair that touches **any** roster claim, so the counterpart can be any
@@ -140,7 +139,7 @@ most of the recall and the second pass matters less.
 
 **3 · Scope to the roster** (pure file transform):
 ```bash
-node skills/non-actionable/geo-claim-grouping-notion/scripts/scope-candidates.mjs --candidates <C>/candidates.json --roster <C>/roster.json --top 80
+node .claude/skills/geo-claim-grouping-notion/scripts/scope-candidates.mjs --candidates <C>/candidates.json --roster <C>/roster.json --top 80
 ```
 **`--top` defaults to 80 and samples.** With more kept pairs than the cap it prints `CAPPED` and
 proceeds, so the adjudication becomes a sample rather than a pass. Set `--top` above the kept-pair
@@ -151,22 +150,22 @@ Writes `<C>/candidates.scoped.json` — the file to adjudicate — and reports w
 `scope.missing` ids (roster claims the Geo corpus did not contain).
 
 **4 · Adjudicate — exactly as geo-claim-grouping does.** Read the parent's rubric
-([`../../actionable/geo-claim-grouping/references/adjudication-rubric.md`](../../actionable/geo-claim-grouping/references/adjudication-rubric.md)),
+([`../geo-claim-grouping/references/adjudication-rubric.md`](../geo-claim-grouping/references/adjudication-rubric.md)),
 adjudicate every pair in `candidates.scoped.json`, and write
 `<C>/decisions.json` (step 1) and `<C>/brackets.json` (step 2) in the parent's schemas, with the
 usual byproducts. **Stop before the parent's Stage C** (no template, no `go`, no ops script).
 
 **5 · Edges already on Geo, then dry-run the sink:**
 ```bash
-node skills/non-actionable/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs --roster <C>/roster.json
-node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs --db <DB> --campaign <C> --roster <C>/roster.json
+node .claude/skills/geo-claim-grouping-notion/scripts/existing-edges-from-geo.mjs --roster <C>/roster.json
+node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs --db <DB> --campaign <C> --roster <C>/roster.json
 ```
 Post the report (below) and ask: *"Reply **publish** to write these columns to `<DB title>`, or
 **stop**."* Nothing has been written yet.
 
 **6 · Publish and read back** (only after the editor replied `publish`):
 ```bash
-node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs --db <DB> --campaign <C> --roster <C>/roster.json --publish
+node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs --db <DB> --campaign <C> --roster <C>/roster.json --publish
 ```
 Creates the missing columns, patches only the rows that change, re-reads every planned row and
 prints `read-back: N rows checked, 0 remaining differences ✓`. Hand the editor the database link
@@ -219,12 +218,12 @@ not verify. Never leave it empty to look clean — it prints `nothing` only when
 ## More / hand-offs
 
 - geo-claim-grouping — discovery script, rubric, decisions/brackets schemas, the Geo publish path:
-  [`../../actionable/geo-claim-grouping/SKILL.md`](../../actionable/geo-claim-grouping/SKILL.md),
-  [`../../actionable/geo-claim-grouping/references/adjudication-rubric.md`](../../actionable/geo-claim-grouping/references/adjudication-rubric.md),
-  [`../../actionable/geo-claim-grouping/references/ops-script-template.md`](../../actionable/geo-claim-grouping/references/ops-script-template.md)
+  [`../geo-claim-grouping/SKILL.md`](../geo-claim-grouping/SKILL.md),
+  [`../geo-claim-grouping/references/adjudication-rubric.md`](../geo-claim-grouping/references/adjudication-rubric.md),
+  [`../geo-claim-grouping/references/ops-script-template.md`](../geo-claim-grouping/references/ops-script-template.md)
 - geo-mirror — building the mirror, the Notion gates, `bulk-set-property.mjs`:
-  [`../../actionable/geo-mirror/SKILL.md`](../../actionable/geo-mirror/SKILL.md)
-- geo-clean — merging duplicates: [`../../actionable/geo-clean/SKILL.md`](../../actionable/geo-clean/SKILL.md)
+  [`../geo-mirror/SKILL.md`](../geo-mirror/SKILL.md)
+- geo-clean — merging duplicates: [`../geo-clean/SKILL.md`](../geo-clean/SKILL.md)
 - Bundled: `references/column-contract.md` (the contract), `scripts/roster-from-notion.mjs`,
   `scripts/scope-candidates.mjs`, `scripts/existing-edges-from-geo.mjs`,
   `scripts/write-grouping-to-notion.mjs` (each prints `--help`).

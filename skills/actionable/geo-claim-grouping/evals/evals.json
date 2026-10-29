@@ -7,7 +7,7 @@
       "expected_output": "Step 1 runs first: discovery via the bundled discover_candidates.ts, adjudication of every pair (verdict + confidence + reason), template + `go`, dry-run, and a held-for-review Related-claims proposal. Step 2 (brackets) is refused until the step-1 Related grouping for the batch is published/approved (or explicitly waived).",
       "files": [],
       "assertions": [
-        "Discovery runs via skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts, not re-implemented inline",
+        "Discovery runs via .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts, not re-implemented inline",
         "Step-1 ops create ONLY Related claims (504e5776788844f6a77dba3ee811d8f0) edges, mirrored both directions, property-namespaced ids (typeId8+from12+to12, entity typeId8+to12+from12)",
         "Step 2 does not run before step 1 is published/approved for the batch, unless the editor explicitly waives the order",
         "The Discovery + Gates + Plan template is posted and the skill waits for `go` before any Write to scripts/ or bun run of an ops script",

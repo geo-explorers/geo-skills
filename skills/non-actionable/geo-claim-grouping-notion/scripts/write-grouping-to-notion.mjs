@@ -20,7 +20,7 @@
 //
 // Env:   NOTION_TOKEN=ntn_...   (loaded with --env-file, never printed)
 // Usage:
-//   node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs \
+//   node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs \
 //     --db <DB_ID|URL> --campaign scripts/<campaign> --roster scripts/<campaign>/roster.json \
 //     [--existing scripts/<campaign>/existing-edges.json] [--floor high|medium] [--prune] \
 //     [--rate 3] [--concurrency 4] [--allow-no-geo-check] [--publish]
@@ -29,7 +29,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const USAGE = `usage: node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs \\
+const USAGE = `usage: node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs \\
   --db <DB_ID|URL> --campaign <dir> --roster <dir>/roster.json [--existing <dir>/existing-edges.json] \\
   [--floor high|medium] [--prune] [--rate 3] [--concurrency 4] [--allow-no-geo-check] [--publish]
 

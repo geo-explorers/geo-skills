@@ -30,7 +30,7 @@
       "expected_output": "Recognizes the result set exceeds the pagination caps and reads it in id order (orderBy: ID_ASC, then filter id greaterThan the last id), 1000 per page.",
       "files": [],
       "assertions": [
-        "Reads in id order: orderBy: ID_ASC with filter: { id: { greaterThan: <last id> } }, or paginate(Q.ENTITIES_BY_TYPE_PAGE, …) from lib/gql.mjs",
+        "Reads in id order: orderBy: ID_ASC with filter: { id: { greaterThan: <last id> } }, or paginate(Q.ENTITIES_BY_TYPE_PAGE, …) from scripts/gql.mjs",
         "Does not paginate past offset 1000 on ANY shape (offset caps apply to Connections too) and keeps first <= 1000",
         "Stops when a page returns fewer rows than first, and does not use cursor (after/endCursor) pages"
       ]

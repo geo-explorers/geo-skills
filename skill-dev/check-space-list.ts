@@ -4,7 +4,7 @@
  *
  * Fixes the root cause of "duplicate detection only finds dupes after pushing
  * several times": the finder scans the HARDCODED `SPACES` list in
- * src/constants.ts, and that list has DRIFTED from the spaces that actually
+ * skill-dev/shared/constants.ts, and that list has DRIFTED from the spaces that actually
  * exist on Geo. A renamed or re-IDed space means the finder silently scans the
  * wrong place (or nothing) and never sees the duplicates living there.
  *
@@ -19,12 +19,12 @@
  *
  * It WRITES NOTHING. No wallet, no .env. Pure diagnostic.
  *
- * Run:  bun run scripts/check-space-list.ts
- *       bun run scripts/check-space-list.ts --all   # also dump all named DAO spaces
+ * Run:  bun run skill-dev/check-space-list.ts
+ *       bun run skill-dev/check-space-list.ts --all   # also dump all named DAO spaces
  */
 
-import { gql } from '../src/functions.js';
-import { SPACES } from '../src/constants.js';
+import { gql } from './shared/functions.ts';
+import { SPACES } from './shared/constants.ts';
 
 interface LiveSpace { id: string; type: string; name: string | null; }
 
@@ -119,7 +119,7 @@ async function main() {
 
   if (drift > 0) {
     console.log('─'.repeat(78));
-    console.log('Suggested corrected SPACES array (review before pasting into src/constants.ts):');
+    console.log('Suggested corrected SPACES array (review before pasting into skill-dev/shared/constants.ts):');
     console.log('─'.repeat(78));
     console.log('export const SPACES = [');
     for (const s of corrected) {

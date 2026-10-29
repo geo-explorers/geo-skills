@@ -16,16 +16,16 @@
 // live returns nothing and every rule trivially passes. To validate a completed
 // merge, capture the source's pre-merge state first:
 //
-//   1) BEFORE merge:  bun run validate_migration.ts <src> <tgt> --save-snapshot snap.json
+//   1) BEFORE merge:  bun run .claude/skills/geo-clean/scripts/validate_migration.ts <src> <tgt> --save-snapshot snap.json
 //   2) run + publish the merge
-//   3) AFTER merge:   bun run validate_migration.ts <src> <tgt> --snapshot snap.json
+//   3) AFTER merge:   bun run .claude/skills/geo-clean/scripts/validate_migration.ts <src> <tgt> --snapshot snap.json
 //
 // Run live (no snapshot) as a PRE-flight: it lists exactly what the target is still
 // missing — i.e. what the merge must migrate (so a live run pre-merge is expected
 // to FAIL until the merge has happened).
 //
 // Usage:
-//   bun run validate_migration.ts <sourceId[,sourceId...]> <targetId> [options]
+//   bun run .claude/skills/geo-clean/scripts/validate_migration.ts <sourceId[,sourceId...]> <targetId> [options]
 // Options:
 //   --source-space <id>   only consider source data authored in this space
 //   --target-space <id>   only consider target data authored in this space
@@ -37,7 +37,7 @@
 //                         governance bookkeeping values that should not migrate)
 //   --json                emit a machine-readable JSON report
 
-import { gql } from './src/functions.ts';
+import { gql } from './lib/functions.ts';
 import { readFileSync, writeFileSync } from 'fs';
 
 // ─── CLI parsing ──────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ const sourceIds = (positional[0] ?? '').split(',').map(s => s.trim()).filter(Boo
 const targetId = positional[1];
 
 if (sourceIds.length === 0 || !targetId) {
-  console.error('Usage: bun run validate_migration.ts <sourceId[,sourceId...]> <targetId> [options]');
+  console.error('Usage: bun run .claude/skills/geo-clean/scripts/validate_migration.ts <sourceId[,sourceId...]> <targetId> [options]');
   console.error('  --source-space <id> --target-space <id> --snapshot <file> --save-snapshot <file>');
   console.error('  --match-space --strict-position --json');
   process.exit(2);

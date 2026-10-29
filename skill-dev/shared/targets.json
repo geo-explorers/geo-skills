@@ -1,0 +1,18 @@
+{
+  "functions.ts": {
+    "to": "scripts/lib/functions.ts",
+    "skills": ["geo-publish", "geo-clean", "geo-orchestrate", "geo-claim-grouping", "geo-mirror"]
+  },
+  "constants.ts": {
+    "to": "scripts/lib/constants.ts",
+    "skills": ["geo-publish", "geo-clean", "geo-orchestrate", "geo-claim-grouping", "geo-mirror", "geo-query"]
+  },
+  "entity_ops.ts": {
+    "to": "scripts/lib/entity_ops.ts",
+    "skills": ["geo-clean", "geo-orchestrate"]
+  },
+  "knowledge-graph-ontology.md": {
+    "to": "references/knowledge-graph-ontology.md",
+    "skills": ["geo-publish", "geo-query"]
+  }
+}

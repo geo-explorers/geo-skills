@@ -28,6 +28,17 @@ python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/non-actionab
 
 The full rule set is in `skill-quality-check/references/skill-quality-standard.md` — treat it as the standard for skill development in this repo.
 
+## `sync_shared.py` — shared helpers copied into each skill
+
+Every skill folder is self-contained, so a few helpers live in several skills at once: `functions.ts`, `constants.ts` and `entity_ops.ts` in `scripts/lib/`, and `knowledge-graph-ontology.md` in `references/`. Their single source is `shared/`; `shared/targets.json` says which skill gets which file. Edit the source, never a copy, then:
+
+```bash
+python3 skill-dev/sync_shared.py          # update every copy
+python3 skill-dev/sync_shared.py --check  # what CI runs: exit 1 if a copy differs
+```
+
+`check-space-list.ts` checks that the space list in `shared/constants.ts` still matches Geo: `bun run skill-dev/check-space-list.ts`.
+
 ## `check_md_manifest.py` — Markdown manifest verification
 
 Checks `MD-FILES.md` against the repo: every tracked `.md` is listed, no listed file has been deleted, and each `SKILL.md` version matches the one recorded. Runs in CI on changes under `skills/` or `agents/`.

@@ -4,6 +4,15 @@
 
 This document describes the in-knowledge-graph ontology: the canonical entities, relations, and conventions used to represent schemas and content inside the graph. It complements the serialization specification, which defines how knowledge graph data is encoded and transmitted. This spec focuses on *what* we model in-graph; the serialization spec focuses on *how* that model is stored and exchanged.
 
+## Contents
+
+- 1. Types, Properties, and Schemas
+- 2. Blocks (as Relations)
+- 3. Images (Entities + Relations)
+- 5. System Properties
+- 6. Topics and Representing a Space
+- 7. Actors and Profiles (WIP)
+
 Serialization spec: https://github.com/geobrowser/grc-20/blob/main/spec.md
 
 ## 1. Types, Properties, and Schemas
