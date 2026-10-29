@@ -2,7 +2,7 @@
 name: geo-claim-grouping
 description: Group Claim entities in Geo via the team's two-step process — step 1 links every adjudicated pair with Related claims (the initial grouping), step 2 assigns established groups to their corresponding brackets (Duplicate claims, Similar claims, Supporting/Opposing arguments) under the strict bracket definitions. Runs the bundled read-only discovery script to generate scored candidate claim pairs for a space, a page/tab of claims, or one seed claim — optionally pooling other spaces for cross-space matches — adjudicates every pair, dry-runs an ops script reading an editor-approved decisions file, and publishes held-for-review proposals only on an explicit publish. Triggers on "claim grouping", "group claims", "claim brackets", "related claims", "duplicate claims", "similar claims", "group related claims", "link similar claims", "assign similar claims", "claims like this one", "claim similarity pass", "claim relations pass", "which claims are similar to".
 metadata:
-  version: 0.7.3
+  version: 0.7.4
 ---
 
 **Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-claim-grouping/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-claim-grouping/scripts/lib/<file>.ts`.

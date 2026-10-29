@@ -2,7 +2,7 @@
 name: geo-claim-grouping-notion
 description: Write claim-grouping results into a Notion Claims mirror as review columns instead of Geo proposals. Runs geo-claim-grouping's discovery and adjudication unmodified — scoped to the claims that are in the mirror — then fills five self-relation columns on the Claims database (Proposed exact duplicates, Proposed semantic duplicates, Proposed related claims, Proposed supporting / opposing arguments) plus Proposed grouping notes with a hyperlinked line per counterpart. Read-only on Geo; it never publishes. Use when an editor wants exact duplicates, semantic duplicates, related, supporting or opposing claims proposed in Notion for review, when a Claims mirror needs grouping columns, or as the step after geo-mirror. Triggers on "claim grouping to Notion", "write claim groups into Notion", "propose exact or semantic duplicates and related claims in the Claims database", "grouping review columns", "notion claim grouping". Not for publishing to Geo (geo-claim-grouping) or building the mirror (geo-mirror).
 metadata:
-  version: "0.2.0"
+  version: 0.2.1
   author: mantas
 ---
 

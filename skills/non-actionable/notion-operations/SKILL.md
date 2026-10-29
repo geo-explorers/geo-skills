@@ -2,7 +2,7 @@
 name: notion-operations
 description: How to read and write Notion correctly from this toolkit — which of the two identities to use, how to write hundreds of rows without silent loss, and the traps that fail quietly rather than loudly. Use before any Notion work that goes beyond reading one page: building or refreshing a mirror, writing columns onto a mirrored database, bulk-updating rows, inspecting or changing a database schema, or diagnosing "the page exists but the script 404s". Also use when a Notion result looks wrong but nothing errored. Not a replacement for geo-mirror or geo-claim-grouping-notion — those own their own procedures; this is the shared substrate underneath them.
 metadata:
-  version: "1.0.1"
+  version: 1.0.2
   author: mantas
   updated: "2026-09-17"
 ---

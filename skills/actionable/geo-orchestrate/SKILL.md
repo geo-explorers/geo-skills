@@ -3,7 +3,7 @@ name: geo-orchestrate
 description: Editor-facing entry point for Geo workflows. Translates natural-language intent ("find X and merge into Y", "assign Topics to all Claims about Bitcoin", "publish a podcast episode", "deduplicate Persons", "add Web URL to every Project") into a query plan + a publish plan, generates a runnable script, dry-runs it, confirms with the editor, then publishes. Triggers on "I want to", "find and merge", "deduplicate", "assign", "bulk update", "for all entities of type", "edit Geo", "fix", "clean up", "merge duplicates".
 metadata:
   author: geobrowser
-  version: 0.2.1
+  version: 0.2.2
 ---
 
 **Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-orchestrate/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-orchestrate/scripts/lib/<file>.ts`.

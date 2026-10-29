@@ -18,6 +18,21 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 
 ## non-actionable/
 
+### notion-operations — 1.0.2
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-query — 0.2.13
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-press-review — 0.5.4
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-mirror-and-group — 1.0.2
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-claim-grouping-notion — 0.2.1
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
 ### image-banner-recompose — 0.2.2
 - 2026-10-23 · image-banner-recompose: never print API keys, fix the fallback reference (#75)
 
@@ -113,6 +128,24 @@ Per-skill version history. Pairs with `SKILL-VERSIONS.json` (machine-checkable i
 - 2026-09-14 · **Initial.** Notion sink for geo-claim-grouping: run the parent skill's Stage A discovery (unmodified, scoped to the mirror via `--scope-file`) and Stage B adjudication, then write the results into the Notion Claims mirror as review columns instead of Geo proposals — `Proposed exact duplicates`, `Proposed semantic duplicates`, `Proposed related claims`, `Proposed supporting / opposing arguments` (self-relations, one-way, Geo direction semantics copied from the ops template) + `Proposed grouping notes` (one hyperlinked line per counterpart with tag · confidence · reason). Four zero-dep Node scripts: `roster-from-notion.mjs` (Claims DB → roster = `--scope-file` shape), `scope-candidates.mjs` (keep only pairs with BOTH sides in the mirror — discovery keeps either-side matches), `existing-edges-from-geo.mjs` (Root Related/Duplicate/Similar/Supporting/Opposing edges between roster claims — discovery's `alreadyRelatedClaims` is the legacy Crypto property), `write-grouping-to-notion.mjs` (schema-agnostic sink: needs only `Geo ID` + title; creates its six columns, never re-types or touches any other column; skips edges already on Geo per direction; diff-first; additive by default, `--prune` opt-in; dry-run default with a mandatory six-section report incl. "Needs your eyes"; `--publish` then read-back must report 0 remaining). Non-actionable: never writes Geo. Verified live read-only on the Relationships test mirror (186 rows) and on a fixture campaign covering every bracket/direction/skip class.
 
 ## actionable/
+
+### geo-submission-review — 0.7.5
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-publish — 0.12.2
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-orchestrate — 0.2.2
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-mirror — 0.13.2
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-clean — 0.5.3
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
+
+### geo-claim-grouping — 0.7.4
+- 2026-10-29 · Make every skill self-contained so it runs from geo-agents (#77)
 
 ### geo-mirror — 0.13.1
 - 2026-10-22 · Fix Geo API timeouts: read long lists in id order, retire the dead host, update search docs (#73)

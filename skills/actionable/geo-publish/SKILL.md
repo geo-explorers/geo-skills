@@ -3,7 +3,7 @@ name: geo-publish
 description: Publish entities and relations to the Geo knowledge graph via the GRC-20 SDK. Runs mandatory safeguards (ontology/correct-type check via ontology-advisor + semantic-duplicate check + schema check + type-required check + two-phase dry-run/confirm) before any write. Use when creating or updating entities and relations; entity deletes, merges and clean-ups go to geo-clean. Triggers on "publish", "create entity", "add person", "add to geo", "add to my space", "submit proposal", "create relation", "update entity".
 metadata:
   author: geobrowser
-  version: 0.12.1
+  version: 0.12.2
 ---
 
 **Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-publish/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-publish/scripts/lib/<file>.ts`.

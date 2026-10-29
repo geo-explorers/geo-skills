@@ -2,7 +2,7 @@
 name: geo-clean
 description: Clean the Geo knowledge graph — find and merge duplicates, find entities without types, delete orphans, move/copy entities between spaces, fix data types, find blank properties, fix stale relations, delete space data. Runs safeguards (deterministic canonical selection, both-scored escalation, untouchable-space protection, voting-data exclusion, system-entity exclusion (governance proposals / space bookkeeping / rankings), ranked-entity review escalation, anchored-entity (page/avatar/cover) protection, dry-run expiry, orphan check, dry-run, explicit publish confirmation) before any destructive op. Triggers on "find duplicates", "merge", "deduplicate", "delete orphan", "delete entity", "move entity", "copy entity", "delete space data", "fix data type", "find blank properties", "fix stale relations", "clean", "cleanup".
 metadata:
-  version: "0.5.2"
+  version: 0.5.3
 ---
 
 **Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-clean/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-clean/scripts/lib/<file>.ts`.
