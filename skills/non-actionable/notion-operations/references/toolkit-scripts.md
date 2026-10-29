@@ -9,12 +9,12 @@ root — imports resolve relative to it. Load env only through Node's flag
 
 | Script | Direction | Writes Notion? |
 |---|---|---|
-| `scripts/notion-read.mjs` | read | no |
-| `skills/actionable/geo-mirror/scripts/mirror-to-notion.mjs` | Geo → Notion | **yes** |
-| `skills/actionable/geo-mirror/scripts/diff-notion-vs-geo.mjs` | Notion → plan | no |
-| `skills/actionable/geo-mirror/scripts/bulk-set-property.mjs` | Notion → Notion | **yes** |
-| `skills/non-actionable/geo-claim-grouping-notion/scripts/roster-from-notion.mjs` | read | no |
-| `skills/non-actionable/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs` | Notion → Notion | **yes** |
+| `.claude/skills/notion-operations/scripts/notion-read.mjs` | read | no |
+| `.claude/skills/geo-mirror/scripts/mirror-to-notion.mjs` | Geo → Notion | **yes** |
+| `.claude/skills/geo-mirror/scripts/diff-notion-vs-geo.mjs` | Notion → plan | no |
+| `.claude/skills/geo-mirror/scripts/bulk-set-property.mjs` | Notion → Notion | **yes** |
+| `.claude/skills/geo-claim-grouping-notion/scripts/roster-from-notion.mjs` | read | no |
+| `.claude/skills/geo-claim-grouping-notion/scripts/write-grouping-to-notion.mjs` | Notion → Notion | **yes** |
 
 `notion-read.mjs` is the orientation tool: `whoami` confirms the token and prints the
 integration and workspace, `inventory` lists everything the integration can see, `schema`

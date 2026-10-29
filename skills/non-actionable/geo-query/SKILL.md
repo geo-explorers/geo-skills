@@ -41,7 +41,7 @@ Use this skill when the user wants to:
 - **Type:** a category (`Person`, `Article`, …). Types define a schema of default properties that every entity of that type inherits.
 - **Space:** an independent community/topic scope. An entity can live in multiple spaces; each has its own perspective.
 
-Full conceptual details: see `../../../knowledge-graph-ontology.md`.
+Full conceptual details: see [`references/knowledge-graph-ontology.md`](references/knowledge-graph-ontology.md).
 
 ## List query: `entities` vs `entitiesConnection`
 
@@ -542,14 +542,14 @@ When the user names a canonical or dataset space, scope with the **exact ID from
 
 If the user names a space **not** in this table, resolve it live — but **confirm the resolved `id` + `page.name` match exactly** before scoping, and STOP on a fuzzy/substituted match. (These same IDs, plus the dataset/exclusion sets, live in `../../../src/constants.ts` for the actionable skills.)
 
-More type, property, and space IDs live in `../../../src/constants.ts` and `../../../knowledge-graph-ontology.md`.
+More type, property, and space IDs live in `scripts/lib/constants.ts` and `references/knowledge-graph-ontology.md`.
 
 ## Canonical client — use this, not hand-rolled curl
 
-`tooling/geo-skills/lib/gql.mjs` is the canonical read client (zero-dependency, Node 18+/Bun, endpoint baked in, 2 retries with backoff on 5xx/429/network + transient GraphQL errors, and it **throws with the full GraphQL error text** — it never swallows errors into an empty `data`, the classic false-"entity not found" bug). Prefer it over ad-hoc `curl`/`fetch` in every script and one-off:
+`.claude/skills/geo-query/scripts/gql.mjs` is the canonical read client (zero-dependency, Node 18+/Bun, endpoint baked in, 2 retries with backoff on 5xx/429/network + transient GraphQL errors, and it **throws with the full GraphQL error text** — it never swallows errors into an empty `data`, the classic false-"entity not found" bug). Prefer it over ad-hoc `curl`/`fetch` in every script and one-off:
 
 ```js
-import { query, Q, paginate } from "../lib/gql.mjs"; // adjust relative path
+import { query, Q, paginate } from "../.claude/skills/geo-query/scripts/gql.mjs"; // from a script in scripts/
 
 const data = await query(Q.ENTITY_BY_ID, { id: "ENTITY_ID" });
 const all = await paginate(Q.ENTITIES_BY_TYPE_PAGE, { typeId: "TYPE_ID", spaceId: "SPACE_ID" });
@@ -557,11 +557,11 @@ const all = await paginate(Q.ENTITIES_BY_TYPE_PAGE, { typeId: "TYPE_ID", spaceId
 
 Exported templates (field shapes verified live): `Q.ENTITY_BY_ID`, `Q.ENTITIES_BY_TYPE`, `Q.ENTITIES_BY_TYPE_PAGE`, `Q.BACKLINKS`, `Q.PROPOSALS`. `paginate()` reads a flat `entities` list in id order; your own query works too if it declares `$first` and `$filter` and uses `orderBy: ID_ASC`.
 
-One-off from the shell — `lib/gql-cli.mjs` (prints JSON, exits 1 with the GraphQL error text on failure):
+One-off from the shell — `.claude/skills/geo-query/scripts/gql-cli.mjs` (prints JSON, exits 1 with the GraphQL error text on failure):
 
 ```bash
-bun lib/gql-cli.mjs '{ entities(typeId: "7ed45f2bc48b419e8e4664d5ff680b0d", first: 3) { id name } }'
-bun lib/gql-cli.mjs 'query($id: UUID!) { entity(id: $id) { name spaceIds } }' '{"id":"ENTITY_ID"}'
+bun .claude/skills/geo-query/scripts/gql-cli.mjs '{ entities(typeId: "7ed45f2bc48b419e8e4664d5ff680b0d", first: 3) { id name } }'
+bun .claude/skills/geo-query/scripts/gql-cli.mjs 'query($id: UUID!) { entity(id: $id) { name spaceIds } }' '{"id":"ENTITY_ID"}'
 ```
 
 ### Fields that DON'T exist (recurring mistakes)
@@ -603,8 +603,7 @@ No Node/Bun? `curl -s --compressed <endpoint> -H 'Content-Type: application/json
 
 ## More
 
-- `../../../knowledge-graph-ontology.md` — full ontology spec (types, properties, data types, blocks).
-- `../../../src/constants.ts` — well-known type/property/space IDs and the ranked SPACES list.
-- `../../../lib/gql.mjs` + `../../../lib/gql-cli.mjs` — the canonical client + CLI (see "Canonical client" above).
-- `../../../src/functions.ts` — older reference `gql()` client with retry/backoff and pagination (SDK-coupled; prefer `lib/gql.mjs`).
+- `references/knowledge-graph-ontology.md` — full ontology spec (types, properties, data types, blocks).
+- `scripts/lib/constants.ts` — well-known type/property/space IDs and the ranked SPACES list.
+- `scripts/gql.mjs` + `scripts/gql-cli.mjs` — the canonical client + CLI (see "Canonical client" above).
 - Sibling skills: `geo-publish` / `geo-orchestrate` (writes this hands off to), `geo-press-review` (built on these reads).

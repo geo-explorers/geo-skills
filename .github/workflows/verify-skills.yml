@@ -104,6 +104,9 @@ jobs:
       - name: Verify skills match their approved versions
         if: steps.bump.outputs.pushed != 'true'
         run: python3 skill-dev/skill_versions.py verify
+      - name: Every shared helper copy matches skill-dev/shared
+        if: steps.bump.outputs.pushed != 'true'
+        run: python3 skill-dev/sync_shared.py --check
       - name: Verify MD-FILES.md matches the repo
         if: steps.bump.outputs.pushed != 'true'
         run: python3 skill-dev/check_md_manifest.py
@@ -119,7 +122,7 @@ jobs:
       - name: No retired Geo endpoint in shipped code
         if: steps.bump.outputs.pushed != 'true'
         run: |
-          if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills lib src scripts; then
+          if git grep -n -F 'https://testnet-api.geobrowser.io' -- skills skill-dev/shared; then
             echo "::error::Retired Geo endpoint found above. Use https://api-testnet.geobrowser.io/graphql"
             exit 1
           fi

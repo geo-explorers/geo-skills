@@ -10,8 +10,8 @@
 // It does NOT adjudicate — that is model judgement, and it sits between `prepare` and
 // `finish`. It NEVER writes to Geo, and it never passes the sink's --publish.
 //
-// Usage (from the repo root):
-//   node --env-file=.env skills/non-actionable/geo-mirror-and-group/scripts/run-pipeline.mjs \
+// Usage (from the workspace root):
+//   node --env-file=.env .claude/skills/geo-mirror-and-group/scripts/run-pipeline.mjs \
 //     --space <32hex> --parent <notionPageId> [--type <32hex>] [--campaign <dir>] \
 //     [--ids-file <p> | --limit N | --since YYYY-MM-DD | --related <id> | --all] \
 //     [--stage probe|mirror|prepare|finish] [--semantic auto|on|off] [--link "..."]
@@ -19,13 +19,14 @@
 // Exit codes: 0 ok · 1 a stage failed · 2 usage error
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const CLAIM_TYPE = '96f859efa1ca4b229372c86ad58b694b';
 const ENDPOINT = 'https://api-testnet.geobrowser.io/graphql';
 const HEX32 = /^[0-9a-f]{32}$/;
 const USAGE = [
-  'usage: node --env-file=.env skills/non-actionable/geo-mirror-and-group/scripts/run-pipeline.mjs \\',
+  'usage: node --env-file=.env .claude/skills/geo-mirror-and-group/scripts/run-pipeline.mjs \\',
   '  --space <32hex> --parent <notionPageId> [--type <32hex>] [--campaign <dir>]',
   '  [--ids-file <p> | --limit N | --since YYYY-MM-DD [--until ...] | --related <id> | --all]',
   '  [--stage probe|mirror|prepare|finish]   default: probe',
@@ -58,7 +59,13 @@ const statePath = join(campaign, 'pipeline.json');
 const state = existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')) : { space, typeId, parent, campaign, stages: {} };
 const save = () => writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n');
 
-const S = (...p) => join('skills', ...p);
+// The sibling skills sit next to this one: flat in geo-agents (.claude/skills/<name>),
+// one tier folder deeper in the geo-skills source tree (skills/<tier>/<name>).
+const SKILLS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const S = (tier, name, ...p) => {
+  const flat = join(SKILLS_ROOT, name);
+  return join(existsSync(flat) ? flat : join(SKILLS_ROOT, '..', tier, name), ...p);
+};
 function run(label, file, args) {
   console.log(`\n▸ ${label}`);
   console.log(`  node ${file} ${args.join(' ')}`);

@@ -13,7 +13,7 @@
 //
 // Env:   NOTION_TOKEN=ntn_...   (loaded with --env-file, never printed)
 // Usage:
-//   node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/roster-from-notion.mjs \
+//   node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/roster-from-notion.mjs \
 //     --db <DB_ID|URL> --out scripts/<campaign>/roster.json [--space <32hex>] \
 //     [--geo-id-column "Geo ID"] [--url-column "Geo URL"] [--rate 3]
 //
@@ -21,7 +21,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-const USAGE = `usage: node --env-file=.env skills/non-actionable/geo-claim-grouping-notion/scripts/roster-from-notion.mjs \\
+const USAGE = `usage: node --env-file=.env .claude/skills/geo-claim-grouping-notion/scripts/roster-from-notion.mjs \\
   --db <DB_ID|URL> --out <campaign>/roster.json [--space <32hex>] [--geo-id-column "Geo ID"] [--url-column "Geo URL"] [--rate 3]
 
   --db             the Claims mirror database (id or Notion URL); must be shared with the integration

@@ -6,6 +6,8 @@ metadata:
   version: 0.12.1
 ---
 
+**Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-publish/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-publish/scripts/lib/<file>.ts`.
+
 # Geo Knowledge Graph — Publishing
 
 Create and update entities and relations in Geo using `@geoprotocol/geo-sdk`. **Deleting an entity, merging, or any bulk removal goes through `geo-clean`**, which runs an orphan check and a human confirmation first. Portable (works in any local-execution agent: Claude Code, Codex CLI/Desktop, Claude cowork). **Browser-only assistants cannot publish** — they have no local runtime; send them to `geo-query` for reads.
@@ -28,7 +30,7 @@ ls -a .env .env.geo-publish 2>/dev/null | grep -q . && echo "env file present" |
 
 **Interpreting the result — this is a soft check, not a gate:**
 - `env file present` → **treat the key as configured. Proceed. Say nothing about it.**
-- Nothing listed → you are probably in the wrong directory (the output prints `cwd`). Check the repo root before concluding anything.
+- Nothing listed → you are probably in the wrong directory (the output prints `cwd`). Check you are in the workspace root (the geo-agents folder) before concluding anything.
 - Command blocked/refused → **that is NOT evidence of a missing key. Proceed.**
 
 **HARD: never ask the user about the private key more than once per session, and never at the publish gate.** If the user has said the key is set — at any point, in any wording — that is authoritative and final; do not re-verify, do not re-ask, do not mention it again. The authoritative check is the publish itself: if the key were genuinely absent, the script fails immediately with an explicit `GEO_PRIVATE_KEY not found…` error naming the cwd. A false "missing key" prompt costs the editor real time and trust; a genuinely missing key costs one clear error message. **Bias hard toward proceeding.**
@@ -133,7 +135,7 @@ Reply **"go"** to authorize writing + dry-running the script.
 - an **x.com / twitter.com** link → **`Tweet`** (carries the post text, **Author**, **Topics**), **not** a bare **`Post`**;
 - a **reddit** link → **`Post`**; a **news article** → **`Article`** (Web URL, Publish datetime, Publisher); a **wikipedia/bio** → **`Person`**.
 
-Put the result in the Discovery block's **Type (per ontology-advisor)** line and check it in **Gate 0**; surface the chosen type + expected properties in the dry-run so the editor sees "this will be a Tweet with text/author/topics" before publishing. **For a pasted URL, use inject mode** (`lib/inject.ts`) — the injector applies the correct type + enrichment automatically, and Gate 0 just confirms it; the ontology consult is the safety net for hand-built entities and anything the injector doesn't cover.
+Put the result in the Discovery block's **Type (per ontology-advisor)** line and check it in **Gate 0**; surface the chosen type + expected properties in the dry-run so the editor sees "this will be a Tweet with text/author/topics" before publishing. **For a pasted URL, use inject mode** (`scripts/lib/inject.ts`) — the injector applies the correct type + enrichment automatically, and Gate 0 just confirms it; the ontology consult is the safety net for hand-built entities and anything the injector doesn't cover.
 
 GraphQL against `https://api-testnet.geobrowser.io/graphql` (no auth). Delegate to `geo-query` if loaded.
 
@@ -237,8 +239,8 @@ const SPACE = process.env.DEMO_SPACE_ID!;        // target = your personal space
 
 // Network: endpoints + chain id (55516) + contract addresses ALL come from the SDK's
 // GeoTestnetConfig — never hardcode them (the announced vanity URLs aren't all live yet;
-// `bun install` picks up final URLs automatically). Repo users can import NETWORK/geo
-// from ../src/functions.js instead of re-deriving here.
+// `bun install` picks up final URLs automatically). Or import NETWORK/geo
+// from ../.claude/skills/geo-publish/scripts/lib/functions.ts instead of re-deriving here.
 const geo = createGeoClient({ network: GeoTestnetConfig });
 
 const allOps: Op[] = [];
@@ -274,7 +276,7 @@ else {
 }
 ```
 
-(Repo users may instead import `publishOps`/`printOps` from `../src/functions.js` — that path uses `PK_SW`/`DEMO_SPACE_ID` and handles personal-vs-DAO automatically.)
+(Generated scripts may instead import `publishOps`/`printOps` from `../.claude/skills/geo-publish/scripts/lib/functions.ts` — that path uses `PK_SW`/`DEMO_SPACE_ID` and handles personal-vs-DAO automatically.)
 
 ### Gate-4 helper — mandatory in every generated script
 
@@ -284,9 +286,9 @@ Block entities pass automatically (the block recipes always set their types; rec
 
 ## Bulk / dataset publishing — data goes in the file, not the script
 
-**Spreadsheet source? Convert to CSV first — the publish path reads CSV/JSON, not `.xlsx`/`.xls`/Sheets/Notion.** You publish from the `geo-skills` repo, so the converter is right there:
+**Spreadsheet source? Convert to CSV first — the publish path reads CSV/JSON, not `.xlsx`/`.xls`/Sheets/Notion.** The converter ships with this skill:
 ```bash
-node src/xlsx-to-csv.cjs <file.xlsx>      # → <file>.csv  (uses `xlsx`; already installed via bun install)
+node .claude/skills/geo-publish/scripts/xlsx-to-csv.cjs <file.xlsx>      # → <file>.csv  (uses `xlsx`; already installed via bun install)
 ```
 Then publish that CSV. (No repo handy, or one quick file? Export to CSV by hand — Excel: Save As → CSV · Google Sheets: Download → CSV · Notion database: Export → CSV, since Notion only exports PDF/HTML/CSV.) Either way, **keep every column header verbatim** — headers are the schema-mapping keys.
 
@@ -547,8 +549,8 @@ When the editor **pastes a URL instead of giving entity fields** ("publish this 
 1. **Detect type** from the URL, or pass it: `tweet` (x.com), `post` (reddit), `person` (wikipedia/linkedin), else `news-story-single` (any article — the worker auto-discovers more sources). `detectInjectType()` does this.
 2. **Inject + poll + decode** with the helper — the worker `space` here is EXTRACTION context (`crypto|ai|world-affairs|health`), **not** the publish target:
    ```ts
-   import { injectAndDecode } from '../lib/inject.ts';
-   import { publishOps } from '../src/functions.ts';
+   import { injectAndDecode } from '../.claude/skills/geo-publish/scripts/lib/inject.ts';
+   import { publishOps } from '../.claude/skills/geo-publish/scripts/lib/functions.ts';
    const r = await injectAndDecode(url, { space: 'world-affairs',
      onPoll: (i, s) => process.stdout.write(`\r  poll ${i}: ${s}   `) });
    ```
@@ -560,7 +562,7 @@ When the editor **pastes a URL instead of giving entity fields** ("publish this 
    const tx = await publishOps(r.ops, r.name, /* publish-space-id or omit → DEMO_SPACE_ID */);
    ```
 
-Run on **Node, not Bun** (`node --env-file=.env scripts/<file>.ts`) — Bun's fetch hits a bug on the geo API host that `publishOps` calls. `scripts/inject-publish-example.ts` is a worked end-to-end example.
+Run on **Node, not Bun** (`node --env-file=.env scripts/<file>.ts`) — Bun's fetch hits a bug on the geo API host that `publishOps` calls. `.claude/skills/geo-publish/scripts/inject-publish-example.ts` is a worked end-to-end example.
 
 ## What this skill does NOT do
 
@@ -574,4 +576,4 @@ Run on **Node, not Bun** (`node --env-file=.env scripts/<file>.ts`) — Bun's fe
 ## More
 
 - `geo-query` — discovery/reads. `geo-clean` — entity deletes, merges, clean-up. `geo-orchestrate` — multi-step intent → this skill.
-- Schema spec: `knowledge-graph-ontology.md`. SDK: `@geoprotocol/geo-sdk`.
+- Schema spec: [`references/knowledge-graph-ontology.md`](references/knowledge-graph-ontology.md). SDK: `@geoprotocol/geo-sdk`.

@@ -6,16 +6,14 @@
  * pairs to candidates.json for in-conversation adjudication (Stage B).
  *
  * READ-ONLY: gql() pulls only — no wallet, no ops, no writes to Geo.
- * Runs from the REPO ROOT (both the tracked skill copy and the deployed
- * .claude/skills copy sit 4 levels below root, so the ../../../../ import
- * resolves from either):
- *   bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --space <32hex> [--cap 80]
+ * Runs from the workspace root:
+ *   bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --space <32hex> [--cap 80]
  *
  * Scoring constants are documented in ../references/queries-and-signals.md —
  * ported from the adjudication-validated P7 pass (2026-07-09 crypto sweep),
  * plus structural terms for the verified high-coverage signals.
  */
-import { gql } from "../../../../src/functions.ts";
+import { gql } from "./lib/functions.ts";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -68,10 +66,10 @@ const STOP = new Set(("the a an of in on for to and or as at by with from into o
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 const USAGE = `discover_candidates.ts — read-only Similar-claims candidate generator (geo-claim-grouping skill)
 
-USAGE (from the repo root):
-  bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --space <32hex> [options]
-  bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --seed <claimId32hex> [options]
-  bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --all-spaces [options]
+USAGE (from the workspace root):
+  bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --space <32hex> [options]
+  bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --seed <claimId32hex> [options]
+  bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --all-spaces [options]
 
 MODES (exactly one required):
   --space <id>      scan one space's Claim corpus for candidate pairs
@@ -93,8 +91,8 @@ OPTIONS:
   --help            this text
 
 EXAMPLES:
-  bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --space c9f267dcb0d270718c2a3c45a64afd32 --cap 80
-  bun run skills/actionable/geo-claim-grouping/scripts/discover_candidates.ts --seed 0002373da9bc4f3c8b6c9fbd13f6f52f
+  bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --space c9f267dcb0d270718c2a3c45a64afd32 --cap 80
+  bun run .claude/skills/geo-claim-grouping/scripts/discover_candidates.ts --seed 0002373da9bc4f3c8b6c9fbd13f6f52f
 
 Artifacts: candidates.json (adjudication input — everything inline), summary.json,
 claims-<spaceId>.json + signals-<spaceId>.json (checkpoints), discovery-run.log.`;

@@ -67,6 +67,8 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | `skills/non-actionable/notion-operations/references/toolkit-scripts.md` | The repo's Notion scripts and when to use each |
 | `skills/non-actionable/geo-claim-grouping-notion/references/column-contract.md` | Which Notion columns the grouping results are written into |
 | `skills/non-actionable/ontology-advisor/README.md` | How to run the ontology-advisor scripts |
+| `skills/actionable/geo-publish/references/knowledge-graph-ontology.md` | Copy of `skill-dev/shared/knowledge-graph-ontology.md`, the ontology specification |
+| `skills/non-actionable/geo-query/references/knowledge-graph-ontology.md` | Copy of `skill-dev/shared/knowledge-graph-ontology.md`, the ontology specification |
 
 ### Submission review references and assets
 
@@ -88,7 +90,7 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 | File | Contents | Read by | Trigger |
 |---|---|---|---|
 | `skills/non-actionable/ontology-advisor/references/ONTOLOGY.md` | The full Geo ontology guide: principles, rules, types vs properties vs relations, worked judgments. The prior for every modelling decision | Content, data and quality agents | On demand, and by ontology-advisor |
-| `knowledge-graph-ontology.md` | The ontology specification: entities, properties, relations, data types, spaces. Structural reference behind the SDK | Data and schema agents | On demand |
+| `skill-dev/shared/knowledge-graph-ontology.md` | The ontology specification: entities, properties, relations, data types, spaces. Structural reference behind the SDK. The source of the copies in geo-publish and geo-query (`python3 skill-dev/sync_shared.py`) | Data and schema agents, through those copies | On demand |
 | `skill-dev/skill-quality-check/references/skill-quality-standard.md` | The skill authoring and validation standard the linter enforces | Anyone writing or reviewing a skill | On demand |
 
 ## 4. Maintainer documents — not agent instructions
@@ -111,4 +113,4 @@ Each skill is one `SKILL.md` with YAML frontmatter (`name`, `version`, `descript
 - **Changing a skill:** the required `verify` check bumps `version` in its `SKILL.md`, adds the `skills/versions.md` entry, updates the version above and regenerates `skills/SKILL-VERSIONS.json`, in the pull request. A new skill's rows here are still added by hand.
 - **Before trusting an install:** compare the installed `SKILL.md` version with this file. A mismatch means the install is stale — run `bash skill-dev/sync-skills.sh` and restart the host. Two agents running different versions of the same skill will overwrite each other's work.
 
-*Counts on 19 October 2026: **58** tracked `.md` files — 2 entry points, 16 skills, 31 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*
+*Counts on 29 October 2026: **60** tracked `.md` files — 2 entry points, 16 skills, 33 skill reference/template/evaluation files, 3 ontology/standard documents and 6 maintainer documents. Every tracked file appears in exactly one section above. The agents, their workflow guide and the research documents moved to `geo-agents` in migration step 6; the migration's working notes were removed when it finished.*

@@ -3,13 +3,13 @@
 // The injector writes NOTHING on-chain; only the final publishOps() does.
 //
 // Run (Node, NOT Bun — Bun's fetch hits a bug on the geo API host):
-//   node --env-file=.env scripts/inject-publish-example.ts \
+//   node --env-file=.env .claude/skills/geo-publish/scripts/inject-publish-example.ts \
 //     "<url>" [inject-type] [inject-space] [publish-space-id] [--publish]
 //
 // Defaults: type=host-detected, inject-space=world-affairs, publish=DEMO_SPACE_ID.
 // Without --publish it stops after the decode: nothing is published.
-import { injectAndDecode, type InjectType } from '../lib/inject.ts';
-import { publishOps } from '../src/functions.ts';
+import { injectAndDecode, type InjectType } from './lib/inject.ts';
+import { publishOps } from './lib/functions.ts';
 
 const PUBLISH = process.argv.includes('--publish');
 const args = process.argv.slice(2).filter((a) => a !== '--publish');

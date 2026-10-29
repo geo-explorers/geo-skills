@@ -6,6 +6,8 @@ metadata:
   version: 0.2.1
 ---
 
+**Paths.** Commands run from the workspace root (the geo-agents folder), where this skill lives in `.claude/skills/geo-orchestrate/`. Never write into that folder. Generated scripts go in `scripts/` at the workspace root and import this skill's helpers as `../.claude/skills/geo-orchestrate/scripts/lib/<file>.ts`.
+
 # Geo Knowledge Graph — Orchestrator
 
 The skill non-technical editors invoke. It routes between `geo-query` (read) and `geo-publish` (write), and for non-trivial jobs it writes a runnable `.mjs` script in the user's project, dry-runs it, and shows the editor the plan before anything is published.
@@ -130,9 +132,9 @@ Wait for the editor to reply "go" (or to change something). Only then flip `DRY_
 
 ### Job — "Find duplicates of type X across all spaces and merge them"
 
-1. **Discover** (`geo-query`): `list_entities({ type: "X", compact: true, limit: 500 })` → group by lowercased name → for each group `get_related_entities({ direction: "incoming" })` to count backlinks → pick Main (most backlinks, then highest-priority space using the SPACES rank from `geo-skills/src/constants.ts`).
+1. **Discover** (`geo-query`): `list_entities({ type: "X", compact: true, limit: 500 })` → group by lowercased name → for each group `get_related_entities({ direction: "incoming" })` to count backlinks → pick Main (most backlinks, then highest-priority space using the SPACES rank from `.claude/skills/geo-orchestrate/scripts/lib/constants.ts`).
 2. **Plan**: "Found N dup groups across M spaces. Will merge them into Mains. Skipping K Property groups due to data-type mismatch."
-3. **Generate**: script imports `mergeEntities` from `geo-skills/src/entity_ops.js`, batches ops with `OpsBatch`, prints op counts, dry-runs.
+3. **Generate**: script imports `mergeEntities` from `../.claude/skills/geo-orchestrate/scripts/lib/entity_ops.ts`, batches ops with `OpsBatch`, prints op counts, dry-runs.
 4. **Confirm + publish**: flip `DRY_RUN`, re-run, show transaction hashes per space.
 
 ### Job — "Assign Topics to Claims" (worked example)
@@ -154,13 +156,13 @@ Wait for the editor to reply "go" (or to change something). Only then flip `DRY_
 
 1. **Discover** (`geo-query`): Pattern C schema-discovery query for an existing `Episode` to learn property/relation IDs.
 2. **Plan**: standard `geo-publish` plan template (Space / Name / Type / Description).
-3. Write a tiny `.ts` in `scripts/` that imports `Graph` from `@geoprotocol/geo-sdk` and `publishOps` from `../src/functions.js`. Even single-entity publishes go through this path — there's no separate CLI shortcut.
+3. Write a tiny `.ts` in `scripts/` that imports `Graph` from `@geoprotocol/geo-sdk` and `publishOps` from `../.claude/skills/geo-orchestrate/scripts/lib/functions.ts`. Even single-entity publishes go through this path — there's no separate CLI shortcut.
 
 ### Job — "Delete a list of orphan entities"
 
 1. **Discover** (`geo-query`): for each candidate, `get_entity` + `get_related_entities({ direction: "incoming" })` to confirm zero backlinks.
 2. **Plan**: "Will delete N entities. Orphan cleanup ON / OFF?"
-3. **Generate**: script imports `deleteEntity` from `geo-skills/src/entity_ops.js`, uses `OpsBatch`, prints, dry-runs.
+3. **Generate**: script imports `deleteEntity` from `../.claude/skills/geo-orchestrate/scripts/lib/entity_ops.ts`, uses `OpsBatch`, prints, dry-runs.
 4. **Confirm + publish.**
 
 ## Script generation rules
@@ -171,11 +173,11 @@ When you write a script for the editor:
 - **One file, one job.** `scripts/2026-05-08-merge-bitcoin-duplicates.ts`. Date prefix so successful scripts become a pattern library.
 - **Top of file: comment block** restating the editor's intent and the discovered data (entity IDs, schema, source spaces). Future-you needs this.
 - **TypeScript `.ts`** so it runs with `bun run scripts/<file>.ts`. The repo is set up for Bun (see `bun.lock`); `bun install` once and TypeScript executes natively.
-- **`DRY_RUN` constant at top, default `true`.** Same convention as `geo-skills/03_merge_duplicates.ts`.
+- **`DRY_RUN` constant at top, default `true`.**
 - **Collect ALL ops in one array, publish ONCE.** This rule is in `geo-publish`; it bites just as hard from a generated script.
-- **Print before publishing.** Either `console.log(allOps.length)` plus a sample of the ops, or write to a `.txt` file via `printOps` (mirror `geo-skills/src/functions.ts`).
+- **Print before publishing.** Either `console.log(allOps.length)` plus a sample of the ops, or write to a `.txt` file via `printOps` (see this skill's `scripts/lib/functions.ts`).
 - **Idempotency where it matters.** For relation entities and image attachments, use deterministic IDs (`from.slice(0,16) + to.slice(0,16)`) so reruns don't create duplicates.
-- **Reuse, don't reimplement.** Import from `geo-publish`'s vendored SDK and from `geo-skills/src/` whenever the operation already exists. Don't rewrite `mergeEntities`.
+- **Reuse, don't reimplement.** Import from `geo-publish`'s vendored SDK and from this skill's `scripts/lib/` whenever the operation already exists. Don't rewrite `mergeEntities`.
 
 ## Confirmation template
 
@@ -211,13 +213,12 @@ Use ONE message for the plan, in this exact shape, then wait for the editor:
 ## Hand-offs
 
 - → `geo-query` for any read.
-- → `geo-publish` for the actual op build + transaction submission via `publishOps` from `src/functions.ts`.
+- → `geo-publish` for the actual op build + transaction submission via `publishOps` from `scripts/lib/functions.ts`.
 - ← when the editor's request is ambiguous, return to the editor with **one** clarifying question, then continue.
-- → manual fallback: if the job is too risky for automation (mass deletes, cross-space merges with unclear Mains), point the editor to the matching guide in `geo-skills/documentation/From Rush/`.
+- → manual fallback: if the job is too risky for automation (mass deletes, cross-space merges with unclear Mains), stop and hand the job to a maintainer.
 
 ## More
 
 - Building-block skills: `geo-query` (discovery/reads), `geo-publish` (the write path + safeguards).
-- Reusable repo logic to import instead of reimplementing: `../../../src/entity_ops.ts` (delete/merge/changeSpace), `../../../src/functions.ts` (`gql`, `publishOps`, `printOps`).
-- Worked dup-merge / delete walk-throughs: the editor guides in `../../../documentation/From Rush/`.
-- Real generated scripts to copy as patterns: `../../../scripts/` (dated `.ts` files).
+- Reusable logic to import instead of reimplementing, in this skill's `scripts/lib/`: `entity_ops.ts` (delete/merge/changeSpace), `functions.ts` (`gql`, `publishOps`, `printOps`). A generated script in `scripts/` imports them as `../.claude/skills/geo-orchestrate/scripts/lib/<file>.ts`.
+- Real generated scripts to copy as patterns: earlier dated `.ts` files in `scripts/` at the workspace root.

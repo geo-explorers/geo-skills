@@ -3,7 +3,7 @@
  * notion-read.mjs — read-only Notion helper for the Geo work mirror.
  *
  * Run with the token loaded from .env (never pass it on the command line):
- *   node --env-file=.env scripts/notion-read.mjs <command> [args]
+ *   node --env-file=.env .claude/skills/notion-operations/scripts/notion-read.mjs <command> [args]
  *
  * Commands
  *   whoami                       confirm the token works; print integration + workspace
@@ -22,7 +22,7 @@ const TOKEN = process.env.NOTION_TOKEN;
 if (!TOKEN) {
   console.error(
     "NOTION_TOKEN not found in the environment.\n" +
-      `Run with:  node --env-file=.env scripts/notion-read.mjs ${process.argv.slice(2).join(" ")}\n` +
+      `Run with:  node --env-file=.env .claude/skills/notion-operations/scripts/notion-read.mjs ${process.argv.slice(2).join(" ")}\n` +
       `(cwd: ${process.cwd()})`
   );
   process.exit(1);
@@ -274,7 +274,7 @@ switch (cmd) {
 
   default:
     console.log(
-      "usage: node --env-file=.env scripts/notion-read.mjs <command>\n\n" +
+      "usage: node --env-file=.env .claude/skills/notion-operations/scripts/notion-read.mjs <command>\n\n" +
         "  whoami\n  search <query> [--limit N]\n  inventory\n  page <id> [--depth N]\n" +
         "  props <id>\n  schema <db-id>\n  rows <db-id> [--limit N] [--props \"A,B\"]"
     );

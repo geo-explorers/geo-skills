@@ -12,5 +12,5 @@
     "rootDir": ".",
     "resolveJsonModule": true
   },
-  "include": ["*.ts", "src/**/*.ts"]
+  "include": ["skills/**/*.ts", "skill-dev/**/*.ts"]
 }

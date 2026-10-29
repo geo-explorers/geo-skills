@@ -13,7 +13,7 @@ Every tracked file sits in exactly one bucket. The rule for each bucket:
 | Bucket | Rule | Files |
 |---|---|---|
 | **A · Skill** | Inside a skill folder, or one of the three skill index files. Stays. | 88 |
-| **B · Shared code** | Outside a skill folder, and at least one skill calls it or points to it, or it maintains such a file. Stays for now. | 14 |
+| **B · Shared code** | Was outside a skill folder; moved into the skills on 29 October 2026 (see below). | 0 |
 | **C · Library tooling** | Needed to build, check or install the library itself. Stays. | 21 |
 | **D · Removed at cut-over** | Neither a skill nor called by one. Removed in migration step 6. | 49 |
 | **E · Temporary** | Migration working notes. Removed when the migration finished, 15 October 2026. | 62 |
@@ -45,28 +45,21 @@ The migration plan names three buckets: skill, shared code, neither. Bucket C is
 
 Fifteen skills, 85 files, plus three index files.
 
-### B · Shared code a skill calls — stays for now (14 files)
+### B · Shared code — now inside the skills
 
-Each row names the skills that depend on the file. A file leaves this bucket only when no skill depends on it.
+Since 29 October 2026 every skill folder is self-contained, so geo-agents can run each skill with nothing else from this repository. The code that used to sit at the root moved:
 
-| Path | Used by |
+| Was | Now |
 |---|---|
-| `src/functions.ts` | geo-publish, geo-clean, geo-claim-grouping, geo-claim-grouping-notion, geo-mirror, geo-orchestrate, geo-query |
-| `src/constants.ts` | geo-clean, geo-claim-grouping, geo-orchestrate, geo-query |
-| `src/entity_ops.ts` | geo-clean, geo-orchestrate |
-| `src/select_canonical.ts` | geo-clean |
-| `src/xlsx-to-csv.cjs` | geo-publish |
-| `lib/gql.mjs` | geo-query, geo-claim-grouping-notion |
-| `lib/gql-cli.mjs` | geo-query |
-| `lib/inject.ts` | geo-publish (inject mode) |
-| `validate_migration.ts` | geo-clean |
-| `scripts/notion-read.mjs` | notion-operations |
-| `scripts/press-review-coverage-map.ts` | geo-press-review |
-| `scripts/inject-publish-example.ts` | geo-publish (named as the inject-mode example) |
-| `scripts/check-space-list.ts` | No skill. Read-only check that the space list in `src/constants.ts` still matches Geo; kept as upkeep for that file |
-| `knowledge-graph-ontology.md` | geo-publish, geo-query (reference document) |
+| `src/functions.ts`, `src/constants.ts`, `src/entity_ops.ts`, `knowledge-graph-ontology.md` | Single source in `skill-dev/shared/`, copied into each skill that uses it (`scripts/lib/` or `references/`). `skill-dev/shared/targets.json` lists which skill gets which file |
+| `src/select_canonical.ts`, `validate_migration.ts` | geo-clean `scripts/` |
+| `src/xlsx-to-csv.cjs`, `lib/inject.ts`, `scripts/inject-publish-example.ts` | geo-publish `scripts/` |
+| `lib/gql.mjs`, `lib/gql-cli.mjs` | geo-query `scripts/` |
+| `scripts/press-review-coverage-map.ts` | geo-press-review `scripts/` |
+| `scripts/notion-read.mjs` | notion-operations `scripts/` |
+| `scripts/check-space-list.ts` | `skill-dev/check-space-list.ts`, upkeep for the shared `constants.ts` |
 
-None of these files imports anything from bucket D.
+**Changing a shared file:** edit it in `skill-dev/shared/`, never a copy in a skill, then run `python3 skill-dev/sync_shared.py` to update every copy. The required `verify` check runs it with `--check` and fails if any copy differs. Each skill whose copy changed gets its own version bump.
 
 ### C · Library tooling and repository files — stay (21 files)
 
@@ -121,6 +114,7 @@ Every change under `skills/` or `skill-dev/` goes through a pull request. Nothin
    python3 skill-dev/skill-quality-check/scripts/check_skill.py skills/<tier>/<skill> --format table
    ```
 3. **Add a row to `MD-FILES.md`** for any new Markdown file.
+   If you changed a file in `skill-dev/shared/`, run `python3 skill-dev/sync_shared.py` before you push.
 4. **Open the pull request.** If the change is more than a fix, add a label: `bump:minor` for a new capability, `bump:major` for a breaking change to how the skill is used. No label means patch.
 5. **The bot bumps the version.** The required `verify` check runs `skill-dev/bump_skills.py` first and pushes one commit, "Bump skill versions (<level>)", that:
    - sets each changed skill's `version` to its version on `main` bumped by the level, unless the `SKILL.md` already has a higher one (it never lowers a version);
@@ -133,7 +127,7 @@ Every change under `skills/` or `skill-dev/` goes through a pull request. Nothin
 
 Changing a label after the bot ran re-runs it. Removing a label never lowers a version the bot already set; lower it by hand if needed. Pull requests from forks can't be pushed to, so `verify` fails on them until their authors bump `version`, add the changelog entry, update `MD-FILES.md` and run `python3 skill-dev/skill_versions.py generate` by hand.
 
-What the `verify` check proves: every skill folder matches the content fingerprint recorded for it in `skills/SKILL-VERSIONS.json`, and every Markdown file is listed in the manifest. The fingerprint covers the skill folders only, not the shared code in `src/`, `lib/` and `scripts/`.
+What the `verify` check proves: every skill folder matches the content fingerprint recorded for it in `skills/SKILL-VERSIONS.json`, and every Markdown file is listed in the manifest. The fingerprint covers the skill folders, which now hold all the code the skills run, including their copies of the shared helpers.
 
 ### Adding a skill
 

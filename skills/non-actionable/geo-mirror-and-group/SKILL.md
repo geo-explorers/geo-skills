@@ -65,7 +65,7 @@ the adjudication is never a sample that reads as a pass.
 
 ```bash
 cd <your geo-skills clone>
-R="node --env-file=.env skills/non-actionable/geo-mirror-and-group/scripts/run-pipeline.mjs"
+R="node --env-file=.env .claude/skills/geo-mirror-and-group/scripts/run-pipeline.mjs"
 C=<a campaign dir in your scratchpad>
 
 # 1 — measure before deciding anything
@@ -125,7 +125,7 @@ Then hand the editor the exact `--publish` command and stop.
 ## What this does not do
 
 - Adjudicate. Discovery proposes; judgement is the model's, against
-  [`../../actionable/geo-claim-grouping/references/adjudication-rubric.md`](../../actionable/geo-claim-grouping/references/adjudication-rubric.md).
+  [`../geo-claim-grouping/references/adjudication-rubric.md`](../geo-claim-grouping/references/adjudication-rubric.md).
 - Merge duplicates. A `Proposed exact duplicates` entry is a link. Merging is `geo-clean`,
   behind its orphan check and human confirmation.
 - Publish anything, to Geo or to Notion.

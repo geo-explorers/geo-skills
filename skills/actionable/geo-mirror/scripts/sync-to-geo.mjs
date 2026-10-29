@@ -4,11 +4,11 @@
 // editor reviews the diff (the geo-publish two-phase gate: dry-run → confirm).
 //
 // Run (Node, NOT Bun — Bun's fetch hits a bug on the geo API host):
-//   node --env-file=.env scripts/sync-to-geo.mjs <plan.json>              # dry-run
-//   node --env-file=.env scripts/sync-to-geo.mjs <plan.json> --publish    # write
+//   node --env-file=.env .claude/skills/geo-mirror/scripts/sync-to-geo.mjs <plan.json>              # dry-run
+//   node --env-file=.env .claude/skills/geo-mirror/scripts/sync-to-geo.mjs <plan.json> --publish    # write
 import { readFileSync } from 'node:fs';
 import { Graph } from '@geoprotocol/geo-sdk';
-import { publishOps } from '../../../../src/functions.ts';
+import { publishOps } from './lib/functions.ts';
 
 const args = process.argv.slice(2);
 const planFile = args[0];

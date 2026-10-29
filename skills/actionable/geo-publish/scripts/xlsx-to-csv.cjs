@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // §4.1 converter: normalize an .xlsx/.xls into the canonical CSV the publish path reads.
-// Headers verbatim, values as-is. Usage: node src/xlsx-to-csv.cjs <in.xlsx> [out.csv] [sheet]
+// Headers verbatim, values as-is. Usage: node .claude/skills/geo-publish/scripts/xlsx-to-csv.cjs <in.xlsx> [out.csv] [sheet]
 const XLSX = require('xlsx');
 const fs = require('fs');
 const [inFile, outFile, sheetName] = process.argv.slice(2);
-if (!inFile) { console.error('usage: node src/xlsx-to-csv.cjs <in.xlsx> [out.csv] [sheet]'); process.exit(2); }
+if (!inFile) { console.error('usage: node .claude/skills/geo-publish/scripts/xlsx-to-csv.cjs <in.xlsx> [out.csv] [sheet]'); process.exit(2); }
 const wb = XLSX.readFile(inFile);
 const sheet = sheetName || wb.SheetNames[0];
 const ws = wb.Sheets[sheet];

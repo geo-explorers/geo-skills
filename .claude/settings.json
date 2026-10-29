@@ -13,7 +13,9 @@
       "Bash(curl *)",
       "Bash(bun run --env-file=.env scripts/*)",
       "Bash(bun run --env-file=.env skills/actionable/*/scripts/*)",
-      "Bash(node lib/gql-cli.mjs *)",
+      "Bash(node skills/non-actionable/geo-query/scripts/gql-cli.mjs *)",
+      "Bash(bun skills/non-actionable/geo-query/scripts/gql-cli.mjs *)",
+      "Bash(python3 skill-dev/sync_shared.py*)",
       "Bash(python3 skill-dev/suggest_release.py*)"
     ],
     "ask": [

@@ -52,7 +52,7 @@ class BumpSkills(unittest.TestCase):
         gitconfig.write_text("[user]\n\tname = Test\n\temail = test@example.invalid\n[init]\n\tdefaultBranch = main\n[commit]\n\tgpgsign = false\n")
         self.env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": str(gitconfig), "HOME": str(self.dir)}
         self.repo = self.dir / "repo"
-        shutil.copytree(HERE, self.repo / "skill-dev", ignore=shutil.ignore_patterns("__pycache__", "skill-quality-check"))
+        shutil.copytree(HERE, self.repo / "skill-dev", ignore=shutil.ignore_patterns("__pycache__", "skill-quality-check", "shared"))
         self.write("skills/non-actionable/alpha/SKILL.md", skill_md("alpha", "0.1.0"))
         self.write("skills/actionable/beta/SKILL.md", skill_md("beta", "1.2.0"))
         self.write("skills/actionable/beta/references/notes.md", "notes\n")

@@ -113,11 +113,11 @@
     },
     {
       "id": 11,
-      "prompt": "Find duplicate Person entities in the Crypto space. (The local repo still pins @geoprotocol/geo-sdk 0.19.x and src/functions.ts points at testnet-api.geobrowser.io.)",
+      "prompt": "Find duplicate Person entities in the Crypto space. (The local repo still pins @geoprotocol/geo-sdk 0.19.x and scripts/lib/functions.ts points at testnet-api.geobrowser.io.)",
       "expected_output": "Prerequisite 4 fails: the repo targets the decommissioned pre-2026-07 infrastructure. The skill STOPs and asks the editor to migrate the repo (SDK >= 0.20.0, new endpoints) instead of working around it.",
       "files": [],
       "assertions": [
-        "Runs the migration prerequisite check (SDK pin >= 0.20.0, GeoTestnetConfig-derived endpoints in src/functions.ts) before any discovery",
+        "Runs the migration prerequisite check (SDK pin >= 0.20.0, GeoTestnetConfig-derived endpoints in scripts/lib/functions.ts) before any discovery",
         "STOPs on an unmigrated repo — does not hardcode new endpoints into a generated script and does not proceed against the old endpoints",
         "Explains the risk: the old endpoints still respond during the grace window but edits published there are not carried over"
       ]

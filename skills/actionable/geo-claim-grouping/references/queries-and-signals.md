@@ -1,6 +1,6 @@
 # Queries, signals, and scoring — verified shapes (2026-08-04, v2 API)
 
-Everything here was verified live against the post-2026-07-migration index. The endpoint is always `${NETWORK.apiOrigin}/graphql` via `src/functions.ts` `gql()` (config-derived — never hardcode a host).
+Everything here was verified live against the post-2026-07-migration index. The endpoint is always `${NETWORK.apiOrigin}/graphql` via `scripts/lib/functions.ts` `gql()` (config-derived — never hardcode a host).
 
 ## Contents
 - Well-known IDs

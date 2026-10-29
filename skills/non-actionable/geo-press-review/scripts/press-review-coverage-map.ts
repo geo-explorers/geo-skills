@@ -11,9 +11,9 @@
  * It WRITES NOTHING to Geo. Pure read. Safe to run anytime, no .env, no wallet.
  *
  * Usage:
- *   bun run scripts/press-review-coverage-map.ts --space AI --from 2026-05-01 --to 2026-05-08
- *   bun run scripts/press-review-coverage-map.ts --space 41e851610e13a19441c4d980f2f2ce6b --days 7
- *   bun run scripts/press-review-coverage-map.ts --space AI --from 2026-05-01 --to 2026-05-08 --json out.json
+ *   bun run .claude/skills/geo-press-review/scripts/press-review-coverage-map.ts --space AI --from 2026-05-01 --to 2026-05-08
+ *   bun run .claude/skills/geo-press-review/scripts/press-review-coverage-map.ts --space 41e851610e13a19441c4d980f2f2ce6b --days 7
+ *   bun run .claude/skills/geo-press-review/scripts/press-review-coverage-map.ts --space AI --from 2026-05-01 --to 2026-05-08 --json out.json
  *
  * Flags:
  *   --space   Space name (fuzzy) or space ID. Required.
@@ -45,7 +45,7 @@ const PUBLISH_DATE_PROP = '94e43fe8faf241009eb887ab4f999723';
 // per-space, it won't be defined there.
 const NEWS_STORY_TYPE_ID = 'e550fe517e904b2c8fffdf13408f5634';
 
-// Spaces (name → id). Mirror of geo-skills/src/constants.ts plus the
+// Spaces (name → id). Mirror of the SPACES list in the shared constants.ts plus the
 // AI space the brief referenced.
 const SPACES: Record<string, string> = {
   geo:              'a19c345ab9866679b001d7d2138d88a1',

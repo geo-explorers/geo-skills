@@ -12,7 +12,7 @@
 // Pure file transform: no network, no env, no writes anywhere but --out.
 //
 // Usage:
-//   node skills/non-actionable/geo-claim-grouping-notion/scripts/scope-candidates.mjs \
+//   node .claude/skills/geo-claim-grouping-notion/scripts/scope-candidates.mjs \
 //     --candidates scripts/<campaign>/candidates.json --roster scripts/<campaign>/roster.json \
 //     [--top 80] [--out scripts/<campaign>/candidates.scoped.json]
 //
@@ -20,7 +20,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-const USAGE = `usage: node skills/non-actionable/geo-claim-grouping-notion/scripts/scope-candidates.mjs \\
+const USAGE = `usage: node .claude/skills/geo-claim-grouping-notion/scripts/scope-candidates.mjs \\
   --candidates <campaign>/candidates.json --roster <campaign>/roster.json [--top 80] [--out <campaign>/candidates.scoped.json]
 
   --candidates  discovery output from geo-claim-grouping/scripts/discover_candidates.ts

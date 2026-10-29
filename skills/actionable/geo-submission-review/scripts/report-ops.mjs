@@ -63,8 +63,8 @@ export function buildReportOps(draft,plan,Graph){
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const [draftFile,planFile,outFile]=process.argv.slice(2);if(!outFile)throw Error('Usage: report-ops.mjs DRAFT_JSON DELIVERY_PLAN_JSON OUT_JSON');
-  const cm=process.env.GEO_CM_DIR;if(!cm)throw Error('GEO_CM_DIR is required for the geo-publish SDK');
-  const require=createRequire(path.join(cm,'package.json'));const {Graph}=await import(require.resolve('@geoprotocol/geo-sdk'));
+  let sdk;try{sdk=await import('@geoprotocol/geo-sdk');}catch{const cm=process.env.GEO_CM_DIR;if(!cm)throw Error('Cannot find @geoprotocol/geo-sdk. Run `bun install` in the workspace root, or set GEO_CM_DIR to a folder that has it installed.');const require=createRequire(path.join(cm,'package.json'));sdk=await import(require.resolve('@geoprotocol/geo-sdk'));}
+  const {Graph}=sdk;
   const result=buildReportOps(JSON.parse(fs.readFileSync(draftFile)),JSON.parse(fs.readFileSync(planFile)),Graph);atomicJson(outFile,result);
   console.log(JSON.stringify({status:result.status,created:result.created,opCount:result.opCount,pageId:result.pageId,targetSpaceId:result.targetSpaceId,schemaPlan:result.schemaPlan}));
 }

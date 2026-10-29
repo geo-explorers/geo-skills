@@ -12,7 +12,7 @@ export const ROOT_GEO_SPACE_ID = ROOT_SPACE_ID;
 
 // ─── Deterministic topic selection ──────────────────────────────────────────
 // Constants for choosing which duplicate topic is canonical. See
-// skills/actionable/geo-clean/SKILL.md (Main-selection cascade) for the full
+// geo-clean SKILL.md (Main-selection cascade) for the full
 // priority order; ported from geo-explorers/geo-merge-topics (SELECTION_RULES.md).
 
 /**

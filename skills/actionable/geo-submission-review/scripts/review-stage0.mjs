@@ -28,12 +28,12 @@ import { requireList, feedCoverage, entityLookup, validateInputs } from "./revie
 const here = path.dirname(new URL(import.meta.url).pathname);
 async function loadGrc20() {
   try { return await import("@geoprotocol/grc-20"); } catch {}
-  const candidates = [process.cwd(), here, path.resolve(here, ".."), process.env.GEO_CM_DIR, path.resolve(here, "../../content-management"), path.resolve(here, "../../../content-management")].filter(Boolean);
+  const candidates = [process.cwd(), here, path.resolve(here, ".."), process.env.GEO_CM_DIR].filter(Boolean);
   for (const c of candidates) {
     const f = path.join(c, "node_modules/@geoprotocol/grc-20/dist/index.js");
     if (fs.existsSync(f)) { try { return await import(pathToFileURL(f).href); } catch {} }
   }
-  throw new Error("Cannot find @geoprotocol/grc-20. Run from a folder with it installed (content-management) or set GEO_CM_DIR.");
+  throw new Error("Cannot find @geoprotocol/grc-20. Run `bun install` in the workspace root and run from there, or set GEO_CM_DIR to a folder that has it installed.");
 }
 
 

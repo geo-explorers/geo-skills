@@ -10,29 +10,29 @@ Deep detail split out of `SKILL.md`. Read this before generating any cleanup scr
 - **`DRY_RUN` constant at the top, defaults `true`.**
 - **Collect ALL ops in one `OpsBatch`, publish ONCE per space at the end.** Never `await publishOps` inside a per-entity loop.
 - **Exports go to `.json`** (`scripts/<date>-*.json`) — `*.csv` and `*.txt` are gitignored in this repo, and HARD RULE 7 requires the script to read the list file at runtime anyway.
-- **Import battle-tested helpers** from `src/` — don't reimplement these:
-  - `mergeEntities`, `deleteEntity`, `changeEntityId`, `moveEntity` (move/copy), `OpsBatch` — `src/entity_ops.ts`
-  - `fetchCandidateMeta`, `buildScoringContext`, `selectCanonicalTopic`, `managedSpaces`, `survivingSpaces` — `src/select_canonical.ts`
-  - `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds`, `getSpaceOwnerInfo`, `getAnchoredEntityIds`, `geo` (SDK client), `NETWORK`, `getWalletClient`, `getWalletAddress` — `src/functions.ts`
-  - `DATASET_SPACE_IDS`, `CANONICAL_SPACE_IDS`, `EXCLUDED_VALUE_PROPERTY_IDS`, `EXCLUDED_RELATION_TYPE_IDS`, `ANCHORED_IMAGE_RELATION_TYPE_IDS` — `src/constants.ts`
-  - `validate_migration.ts` (repo root) — post-merge verification CLI.
-- **No hardcoded endpoints, chain ids, or contract addresses.** Every network touch goes through `gql` / `publishOps` / the `src/` helpers; contract addresses resolve from the SDK's network config (next section). A pasted URL or address in a script is a latent break, not a convenience.
+- **Import battle-tested helpers** from this skill's `scripts/lib/` (from a generated script in `scripts/`: `../.claude/skills/geo-clean/scripts/lib/<file>.ts`) — don't reimplement these:
+  - `mergeEntities`, `deleteEntity`, `changeEntityId`, `moveEntity` (move/copy), `OpsBatch` — `scripts/lib/entity_ops.ts`
+  - `fetchCandidateMeta`, `buildScoringContext`, `selectCanonicalTopic`, `managedSpaces`, `survivingSpaces` — `scripts/lib/select_canonical.ts`
+  - `gql`, `publishOps`, `printOps`, `getPublishableSpaceIds`, `getSpaceOwnerInfo`, `getAnchoredEntityIds`, `geo` (SDK client), `NETWORK`, `getWalletClient`, `getWalletAddress` — `scripts/lib/functions.ts`
+  - `DATASET_SPACE_IDS`, `CANONICAL_SPACE_IDS`, `EXCLUDED_VALUE_PROPERTY_IDS`, `EXCLUDED_RELATION_TYPE_IDS`, `ANCHORED_IMAGE_RELATION_TYPE_IDS` — `scripts/lib/constants.ts`
+  - `scripts/validate_migration.ts` — post-merge verification CLI.
+- **No hardcoded endpoints, chain ids, or contract addresses.** Every network touch goes through `gql` / `publishOps` / the `scripts/lib/` helpers; contract addresses resolve from the SDK's network config (next section). A pasted URL or address in a script is a latent break, not a convenience.
 
 ## Infrastructure & SDK (2026-07 migration)
 
 The 2026-07 infrastructure migration replaced every endpoint and shipped a breaking SDK (v0.19.x → v0.20.0; repo migrated on `0.20.0-beta.8`). SKILL.md prerequisite 4 gates on the repo being migrated. How it works now:
 
-- **All endpoints + contract addresses derive from `GeoTestnetConfig`** (`src/functions.ts` exports it as `NETWORK`); nothing is hardcoded. Live-verified values on beta.8 (2026-07-28): GraphQL origin `https://testnet-api-v2.geobrowser.io` (the announced `https://api-testnet.geobrowser.io/graphql` serves the same data), RPC `https://rpc-geo-testnet-irdc0cgb0w.t.conduit.xyz` (chain id **55516**), gas sponsorship `rpc.zerodev.app`. The announced vanity RPC `rpc-testnet.geobrowser.io` was NOT live as of 2026-07-28 — trust the config, not the announcement.
-- **Wallet**: `getSmartAccountWalletClient` no longer exists in the SDK. `src/functions.ts` wraps the replacement: `getWalletClient()` (lazy `createGeoWalletClient({ signer, network })` — EIP-7702 smart account, gas-sponsored) and `getWalletAddress()`. Verified: the wallet address resolves to the editor's personal space on the new indexer.
-- **Client**: `src/functions.ts` exports `geo = createGeoClient({ network: NETWORK })`. String network ids (`network: "TESTNET"`) no longer exist anywhere in the API. Publish entry points hang off the client — `geo.personalSpaces.publishEdit({ … })`, `geo.daoSpaces.proposeEdit({ … })` — and still return `{ to, calldata }` for the wallet to send. Proposal methods are flattened: `geo.daoSpaces.voteProposal(…)` / `geo.daoSpaces.executeProposal(…)` — the `proposals.*` nesting is gone.
-- **`Graph.*` op builders are deprecated but still work** (the SDK steers toward `Ops.*` + client workflows). `src/entity_ops.ts` and generated scripts keep using `Graph.*`; a wholesale `Graph`→`Ops` port is future repo work — don't mix styles inside one script.
+- **All endpoints + contract addresses derive from `GeoTestnetConfig`** (`scripts/lib/functions.ts` exports it as `NETWORK`); nothing is hardcoded. Live-verified values on beta.8 (2026-07-28): GraphQL origin `https://testnet-api-v2.geobrowser.io` (the announced `https://api-testnet.geobrowser.io/graphql` serves the same data), RPC `https://rpc-geo-testnet-irdc0cgb0w.t.conduit.xyz` (chain id **55516**), gas sponsorship `rpc.zerodev.app`. The announced vanity RPC `rpc-testnet.geobrowser.io` was NOT live as of 2026-07-28 — trust the config, not the announcement.
+- **Wallet**: `getSmartAccountWalletClient` no longer exists in the SDK. `scripts/lib/functions.ts` wraps the replacement: `getWalletClient()` (lazy `createGeoWalletClient({ signer, network })` — EIP-7702 smart account, gas-sponsored) and `getWalletAddress()`. Verified: the wallet address resolves to the editor's personal space on the new indexer.
+- **Client**: `scripts/lib/functions.ts` exports `geo = createGeoClient({ network: NETWORK })`. String network ids (`network: "TESTNET"`) no longer exist anywhere in the API. Publish entry points hang off the client — `geo.personalSpaces.publishEdit({ … })`, `geo.daoSpaces.proposeEdit({ … })` — and still return `{ to, calldata }` for the wallet to send. Proposal methods are flattened: `geo.daoSpaces.voteProposal(…)` / `geo.daoSpaces.executeProposal(…)` — the `proposals.*` nesting is gone.
+- **`Graph.*` op builders are deprecated but still work** (the SDK steers toward `Ops.*` + client workflows). `scripts/lib/entity_ops.ts` and generated scripts keep using `Graph.*`; a wholesale `Graph`→`Ops` port is future repo work — don't mix styles inside one script.
 - **DAO voting settings** renamed + expanded: `slowPathPercentageThreshold` → `partialPercentageSupportThreshold`, `fastPathFlatThreshold` → `flatSupportThreshold`, plus three new required fields (`universalPercentageSupportThreshold`, `disableFastPathAccessForNewMembers`, `executionGracePeriodInDays`). geo-clean never writes governance settings — this matters only when reading them during discovery.
 
 ## Canonical selection — helper contract
 
 ```typescript
-import { fetchCandidateMeta, buildScoringContext, selectCanonicalTopic, survivingSpaces } from '../src/select_canonical.js';
-import { DATASET_SPACE_IDS } from '../src/constants.js';
+import { fetchCandidateMeta, buildScoringContext, selectCanonicalTopic, survivingSpaces } from '../.claude/skills/geo-clean/scripts/lib/select_canonical.ts';
+import { DATASET_SPACE_IDS } from '../.claude/skills/geo-clean/scripts/lib/constants.ts';
 
 const metaMap = await fetchCandidateMeta(allCandidateIds);          // 1 gql call per id (concurrent)
 const allSpaceIds = new Set([...metaMap.values()].flatMap(m => m.spaceIds));
@@ -52,7 +52,7 @@ const sel = selectCanonicalTopic(group.ids, ctx, metaMap, forcedCanonicalId /* o
 ## `mergeEntities` helper contract
 
 ```typescript
-import { mergeEntities, type OpsBatch } from '../src/entity_ops.js';
+import { mergeEntities, type OpsBatch } from '../.claude/skills/geo-clean/scripts/lib/entity_ops.ts';
 
 const opsBatch: OpsBatch = new Map();          // spaceId → Op[]
 const out: { canonicalId?: string; canonicalName?: string } = {};
@@ -89,7 +89,7 @@ for (const [spaceId, ops] of opsBatch) {
 **Publishing the batch** (only when `DRY_RUN = false`):
 
 ```typescript
-import { publishOps, printOps, getPublishableSpaceIds, getSpaceOwnerInfo } from '../src/functions.js';
+import { publishOps, printOps, getPublishableSpaceIds, getSpaceOwnerInfo } from '../.claude/skills/geo-clean/scripts/lib/functions.ts';
 
 const publishable = await getPublishableSpaceIds([...opsBatch.keys()]);
 for (const [spaceId, ops] of opsBatch) {
@@ -110,7 +110,7 @@ for (const [spaceId, ops] of opsBatch) {
 The helpers exclude voting data at op-generation time; scripts add a final scrub before publishing in case a future code path slips:
 
 ```typescript
-import { EXCLUDED_VALUE_PROPERTY_IDS, EXCLUDED_RELATION_TYPE_IDS } from '../src/constants.js';
+import { EXCLUDED_VALUE_PROPERTY_IDS, EXCLUDED_RELATION_TYPE_IDS } from '../.claude/skills/geo-clean/scripts/lib/constants.ts';
 const hex = (b: any) => typeof b === 'string' ? b.replace(/-/g, '') :
   Array.from(b as Uint8Array).map(n => n.toString(16).padStart(2, '0')).join('');
 for (const [spaceId, ops] of opsBatch) {
@@ -134,7 +134,7 @@ Log what was dropped; a non-zero count means a helper bug — report it.
 For any op that DELETES (space wipe, bulk orphan delete), resolve the space's identity entities and drop them from the delete set unless the editor gave the `delete anchored too` override (SKILL HARD RULE 9):
 
 ```typescript
-import { getAnchoredEntityIds } from '../src/functions.js';
+import { getAnchoredEntityIds } from '../.claude/skills/geo-clean/scripts/lib/functions.ts';
 const anchored = await getAnchoredEntityIds(spaceId); // {page + avatar + cover} entity IDs
 const kept: string[] = [];
 for (const [spaceId, ops] of opsBatch) {
@@ -170,9 +170,9 @@ The merge leaves the source a husk, so validating AFTER publish needs a pre-merg
 
 ```bash
 # during the dry-run, per secondary:
-bun run validate_migration.ts <secondaryId> <canonicalId> --save-snapshot scripts/<date>-snap-<secondaryId>.json
+bun run .claude/skills/geo-clean/scripts/validate_migration.ts <secondaryId> <canonicalId> --save-snapshot scripts/<date>-snap-<secondaryId>.json
 # after publish:
-bun run validate_migration.ts <secondaryId> <canonicalId> --snapshot scripts/<date>-snap-<secondaryId>.json
+bun run .claude/skills/geo-clean/scripts/validate_migration.ts <secondaryId> <canonicalId> --snapshot scripts/<date>-snap-<secondaryId>.json
 ```
 
 Run it live (no snapshot) BEFORE a merge as a pre-flight: it lists exactly what the merge must migrate (expected to FAIL pre-merge). Flags: `--source-space` / `--target-space` (scope to one space), `--match-space` (values must match in the same space), `--ignore-properties <id,…>` (skip system values), `--json` (machine-readable; exit 0 = all pass).

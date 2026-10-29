@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 // gql-cli.mjs — run a GraphQL query against the Geo testnet API from the shell.
 // Usage:
-//   bun lib/gql-cli.mjs '<query>' ['<json variables>']
-//   bun lib/gql-cli.mjs '{ entities(typeId: "7ed45f2bc48b419e8e4664d5ff680b0d", first: 3) { id name } }'
-//   bun lib/gql-cli.mjs 'query($id: UUID!) { entity(id: $id) { name spaceIds } }' '{"id":"..."}'
+//   bun .claude/skills/geo-query/scripts/gql-cli.mjs '<query>' ['<json variables>']
+//   bun .claude/skills/geo-query/scripts/gql-cli.mjs '{ entities(typeId: "7ed45f2bc48b419e8e4664d5ff680b0d", first: 3) { id name } }'
+//   bun .claude/skills/geo-query/scripts/gql-cli.mjs 'query($id: UUID!) { entity(id: $id) { name spaceIds } }' '{"id":"..."}'
 import { query } from "./gql.mjs";
 
 const [q, varsJson] = process.argv.slice(2);
